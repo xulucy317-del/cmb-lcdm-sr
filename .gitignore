@@ -3,7 +3,8 @@ __pycache__/
 *.py[cod]
 *.egg-info/
 .pytest_cache/
-.venv/
+# no trailing slash: .venv here is a symlink (-> ../cmbvae/.venv)
+.venv
 
 # Generated outputs (SR runs, pooled tables, figures)
 results/*

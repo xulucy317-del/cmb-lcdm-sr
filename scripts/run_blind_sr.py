@@ -81,6 +81,10 @@ def main() -> None:
     p.add_argument("--unary-operators", nargs="*", default=["exp", "log", "neg", "square"])
     p.add_argument("--binary-operators", nargs="*", default=["+", "*", "-", "/"])
     p.add_argument("--turbo", action="store_true", help="PySR SIMD inner loops.")
+    p.add_argument("--pysr-extra", default="{}",
+                   help="JSON object of additional PySRRegressor kwargs, e.g. "
+                        "'{\"population_size\": 50, \"parsimony\": 0.001}'. "
+                        "Cannot override kwargs managed by dedicated flags.")
     p.add_argument("--out-dir", default=None,
                    help="Defaults to results/<run-name>/symbolic_regression_gmm_mi_seed<seed>.")
     p.add_argument("--tag", default="", help="Optional suffix on the default out-dir.")
@@ -166,6 +170,13 @@ def main() -> None:
         sr_kwargs["turbo"] = True
     if args.parallelism == "serial":
         sr_kwargs["deterministic"] = True
+    pysr_extra = json.loads(args.pysr_extra)
+    if not isinstance(pysr_extra, dict):
+        raise SystemExit("--pysr-extra must be a JSON object")
+    clash = sorted(set(pysr_extra) & set(sr_kwargs))
+    if clash:
+        raise SystemExit(f"--pysr-extra may not override managed kwargs: {clash}")
+    sr_kwargs.update(pysr_extra)
     print(f"[pysr] inner_loss={INNER_LOSS_NAME}  selection_metric=mi")
     print(f"[pysr] kwargs={ {k: v for k, v in sr_kwargs.items() if k not in ('binary_operators', 'unary_operators', 'loss_function')} }")
 
@@ -281,6 +292,7 @@ def main() -> None:
             "random_state": args.seed,
             "loss_kind": LOSS_KIND_LABEL,
             "pysr_version": __import__("pysr").__version__,
+            **pysr_extra,
         },
         "ols_baseline": {
             "coefs": beta_ols.tolist(),

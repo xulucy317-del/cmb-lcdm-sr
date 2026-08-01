@@ -14,6 +14,11 @@ stored trained models it targets. The alternative inner losses explored in the
 parent study (mse / r2 / spearman / dcor / hsic / ksg) are deliberately not
 included; see `docs/method.md` §"Why GMM-MI" for the ablation summary.
 
+On top of the reference study the repo now carries two fully-blind
+extensions — the **all-params experiment** (all 6 parameters → every latent)
+and an automated **PySR hyperparameter sweep** — plus their consolidated
+results; see *Where the project stands* below.
+
 ## The result being reproduced
 
 Two regimes, one combination (5 PySR seeds each, 200 iterations, 5000 samples):
@@ -31,6 +36,75 @@ form — never for matching the encoder's calibration. The −2 shows up in the
 discovered forms themselves: the first-order Taylor direction `A_s·(τ−c)`
 with c ≈ τ̄ + ½, and (TT+EE) the literal `A_s·e⁻²ᵗ`. Full protocol,
 per-seed tables, and the negative control: [`docs/method.md`](docs/method.md).
+
+## Where the project stands (2026-08-01)
+
+Three layers, protocol-identical throughout (gmm_mi pure-Julia inner loss,
+5000 samples, post-hoc held-out GMM-MI ranking), each consolidated into
+`experiments/`:
+
+**1. Reference study — reproduced.** Inputs `(A_s, τ)` only, amplitude latent
+only (table above): `A_s·(τ−c)` in every seed, literal `A_s·e⁻²ᵗ` in the
+degeneracy-broken regime. See [`docs/method.md`](docs/method.md).
+
+**2. All-params blind SR — done.** All 6 raw parameters in, **every** latent
+targeted — no input or latent pre-selection left (5 seeds × 5+6 latents;
+`experiments/allparams_blind_sr_*.md`). Every latent is a multi-parameter
+composite: top forms use ≥5 of the 6 parameters, cross-seed top MI spans
+2.3–3.8 nat (TT) / 1.8–3.8 nat (TT+EE) — far above the 2-input ceilings
+(0.822 / 1.196 nat), because with all inputs exposed nothing is marginalised
+out and the deterministic encoder map keeps yielding MI. The −2 reionization
+exponent survives full blindness, read via the derivative ratio
+r = (∂f/∂τ)/(∂f/∂ln A_s): **−1.974 ± 0.018** (TT) / **−1.993 ± 0.008**
+(TT+EE) over all top forms. Shuffled-target controls stay null (≤ 0.06 nat,
+no textbook structure on any control front).
+
+**3. Hyperparameter sweep (`hp_v1`) — done.** Star design around the protocol
+baseline, 12 configs × 3 seeds per model on the amplitude latents
+(`experiments/hpsweep_hp_v1_*.md`). Findings:
+
+* **Top val MI is a capacity dial, not a discovery meter**: maxsize alone
+  swings it 1.6 → 4.05 nat; every capacity knob raises it; the winning forms
+  are complexity-20 composites that differ structurally seed to seed.
+* **The budget-matched readout MI@c≤10 is flat across every knob**
+  (~1.89 TT / ~2.02 EE): the leading-order discovery is already saturated at
+  the protocol settings — no tuning gain exists on the aim-aligned metric.
+* **The physics is hyperparameter-robust**: r ≈ −1.97…−2.00 in every config,
+  textbook building blocks on the fronts throughout.
+* **Search big, then slice**: the maxsize-10 search's own front is *worse* at
+  c≤10 than the sliced maxsize-20 front (1.60 vs 1.89 / 1.69 vs 2.02) —
+  parsimony is a report-time slice, not a search-time budget cut.
+* **Cost**: `ncycles_per_iteration 190` matches baseline quality at ~60%
+  runtime; `population_size 108` is past diminishing returns (~4× cost).
+
+## Remaining gaps — from "maximise MI" to "what does each latent represent"
+
+The aim is representation discovery; with all inputs exposed, argmax-MI
+drifts away from it (deterministic encoder means → MI rises without bound,
+toward "reconstruct the encoder"). What carries the aim today is the r-ratio
+and textbook scan — amplitude sector only. Open gaps, in order:
+
+1. **Knee/sufficiency readout (no new runs needed).** Replace argmax-MI with
+   a saturation rule on each Pareto front: the smallest form capturing ≥X% of
+   the plateau MI, plus that sufficiency fraction — yielding a
+   "z_k ≈ f(…), capturing N% of ceiling MI at complexity c" table for all 11
+   latents. The data already sits in `results/*/allparams*/*/report.json`
+   (every front equation has a val MI); the maxsize-30 sweep runs provide the
+   ceiling proxy. Pure consolidation-layer change.
+2. **Seed recurrence as the selection criterion.** A representation claim
+   should be the canonical form that *recurs across seeds*
+   (machinery: `scripts/pool_sr_runs.py`). Top-MI forms do not recur; the
+   c≤10 building block `A_s·(τ−c)` does.
+3. **Blind variable selection.** Rerun SR restricted to the inputs the knee
+   form selects (instead of hand-picking `A_s, τ`) — closes the last human
+   choice in the loop while restoring the marginalisation ceiling that made
+   the 2-input MI numbers interpretable.
+4. **Answer-agnostic interpretation.** The r-diagnostic and textbook regexes
+   were designed knowing the answer: the *search* is blind, the
+   *interpretation step* is not. Gaps 1–2 are its answer-agnostic
+   replacement. The shape latents (z0–z4 per model) currently have no
+   validated "what it represents" statement at all — only the audit's
+   leading-order labels.
 
 ## What's here
 
@@ -53,13 +127,17 @@ cmb-lcdm-sr/
 │   ├── scaler.py, dataset.py    stored normalisation stats + test-split streaming
 │   └── encoder.py               encoder pass → encoder_means_test.npy
 ├── scripts/
-│   ├── run_blind_sr.py          ★ one blind-SR run (one regime × one seed)
+│   ├── run_blind_sr.py          ★ one blind-SR run (one config × latent × seed)
 │   ├── run_shuffled_control.py  shuffled-target negative control
 │   ├── encode_latents.py        cache test-split posterior means (needs shards)
 │   ├── pool_sr_runs.py          cross-seed pooling by canonical form
-│   └── consolidate_blind_sr.py  summary tables + textbook-form scan + summary.md
-├── hpc/                         SLURM wrappers (CSD3/icelake, 16 CPU, JULIA_NUM_THREADS=16)
-├── tests/                       pytest — model shapes, checkpoint loads, MI
+│   ├── consolidate_blind_sr.py  reference-study summary (tables + textbook scan)
+│   ├── consolidate_allparams.py all-params summary (per-latent tables, r-ratio, control)
+│   ├── sweep_blind_sr.py        hyperparameter-sweep planner/status (spec → manifest → sbatch)
+│   └── consolidate_hp_sweep.py  sweep comparison (top MI / MI@c≤10 / one-factor effects)
+├── hpc/                         SLURM wrappers (CSD3/icelake, 16 CPU); sweeps/ = sweep specs
+├── experiments/                 consolidated deliverables (one .md + .json per experiment)
+├── tests/                       pytest — model shapes, checkpoint loads, MI, sweep planner
 └── docs/method.md               distilled protocol + results + controls
 ```
 
@@ -146,6 +224,45 @@ for N in 0 1 2 3 4; do sbatch hpc/slurm_blind_sr.sh models/lcdm_tt_ee_lowl  5 "A
 sbatch hpc/slurm_shuffled_control.sh models/lcdm_tt_beta3e-4 2
 sbatch hpc/slurm_shuffled_control.sh models/lcdm_tt_ee_lowl 5
 ```
+
+## Hyperparameter sweeps (all-params blind SR)
+
+On top of the all-params experiment (`hpc/slurm_allparams_sr.sh`, all 6 raw
+parameters → every latent) there is an automated PySR hyperparameter-tuning
+pipeline. A sweep spec (`hpc/sweeps/*.json`) declares the protocol baseline
+(`niterations 200, populations 15, maxsize 20`) plus axes of alternatives —
+either the dedicated flags or any other `PySRRegressor` kwarg
+(`population_size`, `ncycles_per_iteration`, `parsimony`, …), routed through
+`run_blind_sr.py --pysr-extra`. `mode: "star"` varies one factor at a time
+around the baseline (cheap, directly interpretable); `mode: "grid"` takes the
+full cartesian product.
+
+```bash
+# 1. expand the spec → results/<run>/hpsweep_<name>/{manifest.json,tasks.tsv},
+#    printed per-config runtime estimates + the sbatch line
+python scripts/sweep_blind_sr.py plan --spec hpc/sweeps/allparams_hp_v1_tt.json
+
+# 2. submit: one array task = one (config × latent × seed) run, skip-if-done
+sbatch --array=0-35%16 hpc/slurm_hpsweep_sr.sh results/lcdm_tt_beta3e-4/hpsweep_hp_v1
+
+# 3. progress + resubmit line for any missing runs (idempotent)
+python scripts/sweep_blind_sr.py status --spec hpc/sweeps/allparams_hp_v1_tt.json
+
+# 4. comparison tables → experiments/hpsweep_hp_v1_lcdm_tt_beta3e-4.{md,json}
+python scripts/consolidate_hp_sweep.py --sweep-dir results/lcdm_tt_beta3e-4/hpsweep_hp_v1
+```
+
+The same sweep for the TT+EE-lowl model (amplitude latent z5) is
+`hpc/sweeps/allparams_hp_v1_ee.json` → `results/lcdm_tt_ee_lowl/hpsweep_hp_v1`.
+
+The consolidated summary reports, per config (cross-seed mean ± std): the
+headline **top val MI** (which grows with any capacity knob — it measures
+search power), the budget-matched **MI @ complexity ≤ 10** (comparable across
+different `maxsize`), the parsimonious-form complexity, fit seconds, and — for
+the amplitude latent — the implied τ exponent r(top) (textbook −2) and the
+textbook-form scan. Star-mode sweeps get a one-factor-effect table per axis.
+The default specs (`allparams_hp_v1_{tt,ee}`) tune the amplitude latent of
+each model (z2 / z5): 12 configs × 3 seeds ≈ 77 core-hours per model.
 
 ## The GMM-MI inner loss in one paragraph
 

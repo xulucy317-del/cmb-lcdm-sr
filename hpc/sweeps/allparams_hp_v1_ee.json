@@ -1,0 +1,22 @@
+{
+  "name": "hp_v1",
+  "run_dir": "models/lcdm_tt_ee_lowl",
+  "inputs": ["omega_b", "omega_cdm", "H0", "tau", "A_s", "n_s"],
+  "latents": [5],
+  "seeds": [0, 1, 2],
+  "n_samples": 5000,
+  "mode": "star",
+  "baseline": {
+    "niterations": 200,
+    "populations": 15,
+    "maxsize": 20,
+    "extra": {}
+  },
+  "axes": {
+    "niterations": [100, 400],
+    "populations": [8, 31],
+    "maxsize": [10, 15, 30],
+    "population_size": [54, 108],
+    "ncycles_per_iteration": [190, 760]
+  }
+}
