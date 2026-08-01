@@ -1,0 +1,56 @@
+{
+  "run_name": "lcdm_tt_ee_lowl",
+  "seed": 42,
+  "device": "auto",
+  "data": {
+    "channels": [
+      "tt",
+      "ee"
+    ],
+    "dataset_dir": "/rds/user/zx332/hpc-work/cmbvae/data",
+    "shard_dirs": {
+      "tt": "/rds/user/zx332/hpc-work/cmbvae/data/shards_global_lhs",
+      "ee": "/rds/user/zx332/hpc-work/cmbvae/data/shards_global_lhs_ee_lowl"
+    },
+    "refs": {
+      "tt": "/rds/user/zx332/hpc-work/cmbvae/data/dl_ref.npy",
+      "ee": "/rds/user/zx332/hpc-work/cmbvae/data/dl_ref_ee_lowl.npy"
+    },
+    "n_shards": 100,
+    "expected_n": 500000
+  },
+  "model": {
+    "architecture": "dual",
+    "latent_dim": 6,
+    "input_dims": {
+      "tt": 2471,
+      "ee": 2499
+    }
+  },
+  "train": {
+    "out_dir": "/rds/user/zx332/hpc-work/cmbvae/results/lcdm_tt_ee_lowl",
+    "beta": 0.0003,
+    "recon_reduction": "mean",
+    "batch_size": 1024,
+    "epochs": 750,
+    "lr": 0.001,
+    "min_lr": 1e-05,
+    "lr_factor": 0.1,
+    "lr_patience": 50,
+    "num_workers": 4,
+    "snapshot_every": 50,
+    "log_every": 1
+  },
+  "analysis": {
+    "out_dir": "/rds/user/zx332/hpc-work/cmbvae/results/lcdm_tt_ee_lowl/analysis",
+    "active_var_threshold": 0.01,
+    "mi_method": "gmm",
+    "mi_max_samples": 5000,
+    "planck": {
+      "planck_lite_dir": "/rds/user/zx332/hpc-work/cmbvae/external/planck-lite-py",
+      "year": 2018,
+      "with_ee": true
+    }
+  },
+  "_config_path": "/rds/user/zx332/hpc-work/cmbvae/configs/lcdm_tt_ee_lowl.yaml"
+}

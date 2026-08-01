@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+
+# Generated outputs (SR runs, pooled tables, figures)
+results/*
+!results/.gitkeep
+
+# Encoder-pass caches (regenerable from models/ + shards)
+models/*/analysis/
+
+# Logs / OS noise
+logs/
+.DS_Store
+
+# Large external inputs are never vendored here (see README: data provenance).
+# theta.npy + splits_v1.npz in data/ ARE tracked; spectra shards are not.
+data/shards_*

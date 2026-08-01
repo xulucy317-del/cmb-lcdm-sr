@@ -1,0 +1,12 @@
+# Everything needed to run the blind-SR pipeline end to end.
+# PySR downloads its own Julia (via juliaup) on first import — first run is slow.
+numpy
+scipy
+torch                       # encoder pass over stored checkpoints (CPU is fine)
+sympy                       # expression simplification / canonical forms
+pandas                      # PySR equation tables
+matplotlib
+scikit-learn<1.6            # gmm-mi uses sklearn._validate_data; removed in 1.6+
+gmm-mi                      # post-hoc GMM-MI estimator (Piras+2023)
+pysr>=1.5                   # study ran on PySR 1.5.10 / Julia 1.11.9
+pytest

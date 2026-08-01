@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cmb-lcdm-sr"
+version = "0.1.0"
+description = "Blind symbolic regression of beta-VAE CMB amplitude latents with a pure-Julia GMM-MI inner loss (distilled from the cmbvae reproducibility study)."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "MPhil dissertation project" }]
+dependencies = [
+    "numpy",
+    "scipy",
+    "torch",
+    "sympy",
+    "pandas",
+    "matplotlib",
+    "scikit-learn<1.6",   # gmm-mi uses sklearn._validate_data; removed in 1.6+
+    "gmm-mi",             # post-hoc MI estimator (Piras+2023)
+    "pysr>=1.5",          # study ran on PySR 1.5.10 / Julia 1.11.9
+]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
