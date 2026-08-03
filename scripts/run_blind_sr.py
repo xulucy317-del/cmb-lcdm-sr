@@ -32,6 +32,14 @@ Requires <run-dir>/analysis/encoder_means_test.npy. If it is missing, generate
 it first (needs the spectra shards):
 
     python scripts/encode_latents.py --run-dir <run-dir> --shards-root <dir>
+
+Instead of a latent column, --target-npy regresses an arbitrary cached 1-D
+vector row-aligned with the 50k test split (Phase-6 residual targets of
+docs/discovery_roadmap.md), e.g.:
+
+    python scripts/run_blind_sr.py --run-dir <run-dir> \
+        --target-npy <run-dir>/analysis/residual_z2_v1.npy \
+        --inputs omega_b omega_cdm H0 tau A_s n_s --seed 0
 """
 import argparse
 import json
@@ -59,6 +67,32 @@ def default_out_dir(run_dir: Path, seed: int, tag: str) -> Path:
     return Path("results") / run_dir.name / name
 
 
+def resolve_target(run_dir: Path, latent_index, target_npy, target_label,
+                   dataset_dir="data"):
+    """(y_full, label) — a latent column of the encoder-means cache, or an
+    arbitrary cached vector (--target-npy), both row-aligned with the test
+    split. Exactly one of latent_index / target_npy must be given; truncation
+    to --n-samples happens at the call site."""
+    if (latent_index is None) == (target_npy is None):
+        raise SystemExit("exactly one of --latent-index / --target-npy is required")
+    if target_npy is not None:
+        y = np.squeeze(np.asarray(np.load(target_npy)))
+        if y.ndim != 1:
+            raise SystemExit(f"--target-npy must hold a 1-D vector, got shape {y.shape}")
+        return y.astype(np.float64), (target_label or Path(target_npy).stem)
+    means_path = run_dir / "analysis" / "encoder_means_test.npy"
+    if not means_path.exists():
+        raise FileNotFoundError(
+            f"{means_path} not found. Generate it with:\n"
+            f"    python scripts/encode_latents.py --run-dir {run_dir} "
+            f"--dataset-dir {dataset_dir} --shards-root <dir-with-spectra-shards>"
+        )
+    means = np.load(means_path)
+    if latent_index < 0 or latent_index >= means.shape[1]:
+        raise IndexError(f"latent-index {latent_index} out of range for L={means.shape[1]}")
+    return means[:, latent_index].astype(np.float64), f"z{latent_index}"
+
+
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -66,8 +100,15 @@ def main() -> None:
                    help="Stored run dir (models/<run>) holding analysis/encoder_means_test.npy.")
     p.add_argument("--dataset-dir", default="data",
                    help="Holds theta.npy + splits_v1.npz (default: data/).")
-    p.add_argument("--latent-index", type=int, required=True,
-                   help="Which latent column to regress (numpy 0-indexed).")
+    p.add_argument("--latent-index", type=int, default=None,
+                   help="Which latent column to regress (numpy 0-indexed). "
+                        "Exactly one of --latent-index / --target-npy.")
+    p.add_argument("--target-npy", default=None,
+                   help="Regress an arbitrary cached target instead of a latent "
+                        "column: path to a 1-D .npy vector row-aligned with the "
+                        "50k test split (e.g. analysis/residual_z2_v1.npy).")
+    p.add_argument("--target-label", default=None,
+                   help="Label for --target-npy outputs (default: file stem).")
     p.add_argument("--inputs", nargs="+", required=True,
                    help=f"Input names. One or more of: {list(INPUT_ALIASES)}")
     p.add_argument("--n-samples", type=int, default=5000)
@@ -91,38 +132,33 @@ def main() -> None:
     args = p.parse_args()
 
     run_dir = Path(args.run_dir)
-    means_path = run_dir / "analysis" / "encoder_means_test.npy"
     theta_path = Path(args.dataset_dir) / "theta.npy"
     splits_path = Path(args.dataset_dir) / "splits_v1.npz"
     for path in (theta_path, splits_path):
         if not path.exists():
             raise FileNotFoundError(path)
-    if not means_path.exists():
-        raise FileNotFoundError(
-            f"{means_path} not found. Generate it with:\n"
-            f"    python scripts/encode_latents.py --run-dir {run_dir} "
-            f"--dataset-dir {args.dataset_dir} --shards-root <dir-with-spectra-shards>"
-        )
+    y_full, target_label = resolve_target(run_dir, args.latent_index,
+                                          args.target_npy, args.target_label,
+                                          dataset_dir=args.dataset_dir)
 
-    out_dir = Path(args.out_dir) if args.out_dir else default_out_dir(run_dir, args.seed, args.tag)
+    tag = args.tag or (target_label if args.target_npy else "")
+    out_dir = Path(args.out_dir) if args.out_dir else default_out_dir(run_dir, args.seed, tag)
     out_dir.mkdir(parents=True, exist_ok=True)
-    print(f"[setup] out_dir={out_dir}")
+    print(f"[setup] out_dir={out_dir}  target={target_label}")
 
     # --- Load + assemble (X, y) ---------------------------------------------
     print(f"[load] theta={theta_path}")
     theta = np.load(theta_path)
     splits = np.load(splits_path)
     test_idx = np.where(splits["split_id"] == 2)[0]
+    if len(y_full) != len(test_idx):
+        raise SystemExit(f"target has {len(y_full)} rows, test split has "
+                         f"{len(test_idx)} — must be row-aligned")
     n = min(args.n_samples, len(test_idx))
     test_idx = test_idx[:n]
     print(f"[load] using first {n} test indices")
 
-    print(f"[load] means={means_path}")
-    means = np.load(means_path)
-    if args.latent_index < 0 or args.latent_index >= means.shape[1]:
-        raise IndexError(f"latent-index {args.latent_index} out of range for L={means.shape[1]}")
-    y_raw = means[:n, args.latent_index].astype(np.float64)
-    target_label = f"z{args.latent_index}"
+    y_raw = y_full[:n]
     X_raw, input_labels = build_inputs(theta[test_idx], args.inputs)
     print(f"[load] X shape={X_raw.shape}, input_labels={input_labels}, "
           f"y mean={y_raw.mean():.3f}, std={y_raw.std():.3f}")
@@ -273,6 +309,7 @@ def main() -> None:
         "run_dir": str(run_dir),
         "regime": run_dir.name,
         "latent_index": args.latent_index,
+        "target_npy": args.target_npy,
         "target_label": target_label,
         "input_labels": input_labels,
         "n_samples": n,

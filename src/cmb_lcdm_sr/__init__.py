@@ -15,6 +15,9 @@ Modules:
     encoder  — checkpoint loading and the encoder pass over the test split
     mi       — post-hoc GMM-MI estimator (gmm-mi package, Piras+2023)
     sr       — the Julia GMM-MI inner loss and SR input construction
+    tiers    — T0/T1/T2 evaluation slices + prior-box geometry (roadmap §0.4)
+    semantics— form evaluation, equivalence clustering, Sobol (roadmap M3)
+    calibrate— cross-fitted calibration h + residual diagnostics (roadmap M4)
 """
 
 __version__ = "0.1.0"

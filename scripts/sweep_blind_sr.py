@@ -11,6 +11,17 @@ run_blind_sr.py flags (niterations, populations, maxsize) or any other
 PySRRegressor kwarg (population_size, ncycles_per_iteration, parsimony, ...),
 which are routed through ``--pysr-extra``.
 
+``mode: subsets`` instead varies the SR *inputs*: one config per subset of a
+declared variable pool at the fixed baseline PySR config —
+
+    "mode": "subsets",
+    "subsets": {"pool": ["omega_b", "omega_cdm", "H0", "tau", "A_s", "n_s"],
+                "min_size": 1}
+
+— the Phase-4 blind variable-subset screen of docs/discovery_roadmap.md
+(2^6−1 = 63 configs). Each config carries its own inputs column in tasks.tsv;
+the SLURM wrapper needs no change.
+
     # 1. expand the spec into a manifest + task table, print the sbatch line
     python scripts/sweep_blind_sr.py plan --spec hpc/sweeps/allparams_hp_v1.json
 
@@ -53,6 +64,14 @@ ABBREV = {
     "tournament_selection_n": "tsn", "fraction_replaced": "fr",
     "weight_optimize": "wopt", "topn": "topn",
 }
+
+# Short input-variable labels for subset-mode config ids.
+INPUT_ABBREV = {"omega_b": "ob", "omega_cdm": "oc", "H0": "H0", "tau": "tau",
+                "tau_reio": "tau", "A_s": "As", "ln10As": "lnAs", "n_s": "ns"}
+
+
+def _subset_label(inputs: list) -> str:
+    return "S-" + "-".join(INPUT_ABBREV.get(v, v) for v in inputs)
 
 TSV_COLS = ["idx", "config_id", "latent", "seed", "niterations", "populations",
             "maxsize", "extra_json", "run_dir", "inputs", "n_samples", "out_dir"]
@@ -105,8 +124,25 @@ def expand_configs(spec: dict) -> list:
     elif mode == "grid":
         for combo in itertools.product(*axes.values()):
             raw.append(_apply(baseline, dict(zip(axes, combo))))
+    elif mode == "subsets":
+        if axes:
+            raise SystemExit("subsets mode does not combine with axes")
+        sub = spec.get("subsets") or {}
+        pool = list(sub.get("pool") or spec.get("inputs") or [])
+        if not pool:
+            raise SystemExit("subsets mode needs subsets.pool (or top-level inputs)")
+        lo = int(sub.get("min_size", 1))
+        hi = int(sub.get("max_size") or len(pool))
+        if not 1 <= lo <= hi <= len(pool):
+            raise SystemExit(f"bad subset sizes min_size={lo} max_size={hi} "
+                             f"for a pool of {len(pool)}")
+        for size in range(lo, hi + 1):
+            for combo in itertools.combinations(pool, size):
+                cfg = _apply(baseline, {})
+                cfg["inputs"] = list(combo)
+                raw.append(cfg)
     else:
-        raise SystemExit(f"unknown mode '{mode}' (star|grid)")
+        raise SystemExit(f"unknown mode '{mode}' (star|grid|subsets)")
 
     configs, seen = [], set()
     for cfg in raw:
@@ -114,7 +150,8 @@ def expand_configs(spec: dict) -> list:
         if key in seen:
             continue  # e.g. a star axis value equal to the baseline
         seen.add(key)
-        label = _label(cfg, baseline, axis_order)
+        label = (_subset_label(cfg["inputs"]) if "inputs" in cfg
+                 else _label(cfg, baseline, axis_order))
         safe = "".join(ch if (ch.isalnum() or ch in "_.-") else "-" for ch in label)
         configs.append({"config_id": f"c{len(configs):02d}_{safe}", "label": label, **cfg})
     return configs
@@ -151,9 +188,14 @@ def sweep_dir_of(spec: dict) -> Path:
 
 def load_spec(path: str) -> dict:
     spec = json.loads(Path(path).read_text())
-    for field in ("name", "run_dir", "latents", "seeds", "inputs", "baseline"):
+    for field in ("name", "run_dir", "latents", "seeds", "baseline"):
         if field not in spec:
             raise SystemExit(f"spec {path} missing required field '{field}'")
+    if spec.get("mode", "star") == "subsets":
+        if not ((spec.get("subsets") or {}).get("pool") or spec.get("inputs")):
+            raise SystemExit(f"spec {path}: subsets mode needs subsets.pool or inputs")
+    elif "inputs" not in spec:
+        raise SystemExit(f"spec {path} missing required field 'inputs'")
     return spec
 
 
@@ -173,7 +215,7 @@ def write_tsv(spec: dict, tasks: list, configs: list, path: Path) -> None:
         lines.append("\t".join(str(x) for x in (
             t["idx"], t["config_id"], t["latent"], t["seed"],
             cfg["niterations"], cfg["populations"], cfg["maxsize"], extra_json,
-            spec["run_dir"], " ".join(spec["inputs"]),
+            spec["run_dir"], " ".join(cfg.get("inputs") or spec.get("inputs") or []),
             spec.get("n_samples", 5000), t["out_dir"])))
     path.write_text("\n".join(lines) + "\n")
 

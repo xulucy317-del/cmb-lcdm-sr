@@ -102,6 +102,55 @@ def test_compact_ranges():
     assert compact_ranges([]) == ""
 
 
+# --- subsets mode (Phase-4 blind variable screen; docs/discovery_roadmap.md) --
+
+def subsets_spec(**over):
+    spec = mini_spec(mode="subsets",
+                     subsets={"pool": ["tau", "A_s", "n_s"], "min_size": 1})
+    del spec["axes"], spec["inputs"]
+    spec.update(over)
+    return spec
+
+
+def test_subsets_expansion_counts_labels_inputs():
+    cfgs = expand_configs(subsets_spec())
+    assert len(cfgs) == 7                     # 2^3 - 1, sizes ascending
+    assert [c["label"] for c in cfgs] == [
+        "S-tau", "S-As", "S-ns",
+        "S-tau-As", "S-tau-ns", "S-As-ns", "S-tau-As-ns"]
+    assert cfgs[0]["config_id"] == "c00_S-tau"
+    assert cfgs[3]["inputs"] == ["tau", "A_s"]
+    # PySR config pinned at the baseline throughout
+    assert all(c["maxsize"] == 10 and c["niterations"] == 10 and c["extra"] == {}
+               for c in cfgs)
+
+
+def test_subsets_min_size_filters_singletons():
+    cfgs = expand_configs(
+        subsets_spec(subsets={"pool": ["tau", "A_s", "n_s"], "min_size": 2}))
+    assert [c["label"] for c in cfgs] == \
+        ["S-tau-As", "S-tau-ns", "S-As-ns", "S-tau-As-ns"]
+
+
+def test_subsets_rejects_axes():
+    with pytest.raises(SystemExit, match="does not combine"):
+        expand_configs(subsets_spec(axes={"maxsize": [12]}))
+
+
+def test_subsets_tsv_carries_per_config_inputs(tmp_path):
+    spec = subsets_spec()
+    sweep_dir = tmp_path / "hpsweep_subsets"
+    man = build_manifest(spec, sweep_dir)
+    assert man["n_configs"] == 7 and man["n_tasks"] == 14   # x 1 latent x 2 seeds
+    sweep_dir.mkdir()
+    write_tsv(spec, man["tasks"], man["configs"], sweep_dir / "tasks.tsv")
+    lines = (sweep_dir / "tasks.tsv").read_text().splitlines()
+    rows = [dict(zip(TSV_COLS, line.split("\t"))) for line in lines[1:]]
+    inputs_by_cfg = {r["config_id"]: r["inputs"] for r in rows}
+    assert inputs_by_cfg["c00_S-tau"] == "tau"
+    assert inputs_by_cfg["c06_S-tau-As-ns"] == "tau A_s n_s"
+
+
 # --- consolidation -----------------------------------------------------------
 
 def fake_report(cfg, seed, mi_by_complexity):
