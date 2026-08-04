@@ -10,9 +10,13 @@ if str(REPO / "scripts") not in sys.path:
     sys.path.insert(0, str(REPO / "scripts"))
 
 from consolidate_subsets import (  # noqa: E402
+    annotate_minimality,
     consolidate_latent,
     emit_finalists,
+    gate_g2,
     load_screen,
+    pick_s_star,
+    screen_recurrence,
     select_finalists,
     subset_stats,
 )
@@ -132,8 +136,148 @@ def test_main_end_to_end(tmp_path, monkeypatch):
         .read_text())
     assert payload["latents"]["z0"]["n_finalists"] == 4
     assert payload["latents"]["z1"] is None     # screen has no z1 fronts
+    assert payload["finals"] is None            # no finalist reports yet
     md = (tmp_path /
           "experiments/subset_selection_lcdm_tt_beta3e-4.md").read_text()
     assert "frontier" in md and "1-SE keep" in md
     assert (tmp_path / "results/lcdm_tt_beta3e-4/hpsweep_subsets_v1_finals"
             / "tasks.tsv").exists()
+
+
+# ---- 4b: minimality, screen recurrence, gate G2 -----------------------------
+
+def _entry(cid, inputs, mi, se, size=None, c_star=5, per_seed=None):
+    e = {"config_id": cid, "inputs": inputs, "size": size or len(inputs),
+         "mi": mi, "se": se, "c_star": c_star, "eta": mi, "eta_se": se}
+    if per_seed is not None:
+        e["per_seed_max"] = {str(s): v for s, v in per_seed.items()}
+    return e
+
+
+def test_minimality_and_s_star():
+    e2 = _entry("c18", ["tau", "A_s"], 0.99, 0.01)
+    e1 = _entry("c04", ["A_s"], 0.35, 0.01)
+    e4 = _entry("c44", ["omega_b", "omega_cdm", "tau", "A_s"], 1.00, 0.01)
+    e6 = _entry("c62", POOL, 1.000, 0.01)   # gap -0.01 vs tol 0.0141
+    entries = [e1, e2, e4, e6]
+    annotate_minimality(entries)
+    # {A_s} is far below its supersets -> not minimal
+    assert not e1["minimal"]
+    # {tau,A_s} within hypot(0.01,0.01) of every superset -> minimal
+    assert e2["minimal"] and e4["minimal"] and e6["minimal"]
+    assert e2["worst_superset"]["config_id"] in ("c44", "c62")
+    s = pick_s_star(entries)
+    assert s["config_id"] == "c18"
+    # if the 2-input subset falls > 1 SE behind, the 4-input one wins
+    e2b = _entry("c18", ["tau", "A_s"], 0.90, 0.01)
+    entries = [e1, e2b, e4, e6]
+    annotate_minimality(entries)
+    assert not e2b["minimal"]
+    assert pick_s_star(entries)["config_id"] == "c44"
+
+
+def test_screen_recurrence_per_seed():
+    scr = [
+        _entry("c18", ["tau", "A_s"], 0.97, 0.01,
+               per_seed={0: 0.96, 1: 0.98}),
+        _entry("c62", POOL, 0.975, 0.01, per_seed={0: 0.965, 1: 0.985}),
+    ]
+    rec = screen_recurrence(scr, ["tau", "A_s"])
+    # both seeds: within hypot(0.01, 0.01) of the all-6 superset
+    assert rec["seed_minimal"] == {"0": True, "1": True}
+    assert rec["recurrent"] and rec["same_pick_all_seeds"]
+    assert rec["seed_s_star"]["0"] == ["tau", "A_s"]
+    # push seed 0's all-6 far above -> seed 0 no longer minimal
+    scr[1]["per_seed_max"]["0"] = 1.10
+    rec = screen_recurrence(scr, ["tau", "A_s"])
+    assert rec["seed_minimal"] == {"0": False, "1": True}
+    assert not rec["recurrent"]
+
+
+def _fin(s_star, entries, recurrent):
+    return {"s_star": s_star, "entries": entries,
+            "screen_recurrence": {"recurrent": recurrent},
+            "ref": {"mi": 1.0, "se": 0.01}, "staircase": {}}
+
+
+def test_gate_g2_verdicts():
+    two = _entry("c18", ["tau", "A_s"], 0.99, 0.01)
+    sup = _entry("c50", ["omega_b", "tau", "A_s"], 1.10, 0.01)
+    # amplitude PASS: S* = {A_s, tau}, recurrent
+    g = gate_g2(2, {"z2": _fin(two, [two, sup], True)})
+    assert g["per_latent"]["z2"]["verdict"] == "PASS"
+    assert g["overall"] == "PASS"
+    # amplitude, right subset but not screen-recurrent -> FAIL
+    g = gate_g2(2, {"z2": _fin(two, [two, sup], False)})
+    assert g["per_latent"]["z2"]["verdict"].startswith("FAIL")
+    # superset finding: S* strictly above {A_s,tau} and beats it by > 1 SE
+    g = gate_g2(2, {"z2": _fin(sup, [two, sup], True)})
+    assert g["per_latent"]["z2"]["verdict"] == "PASS (superset finding)"
+    assert g["per_latent"]["z2"]["beats_2input_by_gt1se"]
+    # shape latent: recurrence alone decides
+    g = gate_g2(2, {"z0": _fin(two, [two], True),
+                    "z2": _fin(two, [two, sup], True)})
+    assert g["per_latent"]["z0"]["verdict"] == "PASS"
+    g = gate_g2(2, {"z0": _fin(two, [two], False),
+                    "z2": _fin(two, [two, sup], True)})
+    assert g["per_latent"]["z0"]["verdict"].startswith("ATTENTION")
+    assert g["overall"].startswith("PARTIAL")
+
+
+def _write_family_reports(root, cid_or_none, latent, seed_rows):
+    for s, rows in seed_rows.items():
+        d = (root / cid_or_none if cid_or_none else root) / \
+            f"z{latent}_seed{s}"
+        d.mkdir(parents=True, exist_ok=True)
+        eqs = [{"complexity": c, "mi_val": mi, "mi_val_err": 0.01,
+                "expression_simplified": f"g_{c}", "index": i}
+               for i, (c, mi) in enumerate(rows)]
+        (d / "report.json").write_text(json.dumps({"all_equations": eqs}))
+
+
+def test_main_finals_fold_in(tmp_path, monkeypatch):
+    import consolidate_subsets
+
+    build_tree(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(sys, "argv", ["consolidate_subsets.py",
+                                      "--run", "lcdm_tt_beta3e-4",
+                                      "--emit-finalists"])
+    assert consolidate_subsets.main() == 0   # emits the finals tasks.tsv
+
+    run_dir = tmp_path / "results/lcdm_tt_beta3e-4"
+    finals = run_dir / "hpsweep_subsets_v1_finals"
+    # full-protocol all-6 reference (5 seeds)
+    _write_family_reports(run_dir / "allparams", None, 0,
+                          {s: [(8, 1.00 + 0.005 * s)] for s in range(5)})
+    # finalist reruns: 2-input within 1 SE of everything, 1-input far below,
+    # 4-input equal to the reference
+    _write_family_reports(finals, "c18_S-tau-As", 0,
+                          {s: [(5, 1.00 + 0.004 * s)] for s in range(5)})
+    _write_family_reports(finals, "c04_S-As", 0,
+                          {s: [(1, 0.34 + 0.004 * s)] for s in range(5)})
+    _write_family_reports(finals, "c44_S-ob-oc-tau-As", 0,
+                          {s: [(7, 1.00 + 0.004 * s)] for s in range(5)})
+
+    monkeypatch.setattr(sys, "argv", ["consolidate_subsets.py",
+                                      "--run", "lcdm_tt_beta3e-4"])
+    assert consolidate_subsets.main() == 0
+    payload = json.loads(
+        (tmp_path / "experiments/subset_selection_lcdm_tt_beta3e-4.json")
+        .read_text())
+    fin = payload["finals"]
+    assert fin["coverage"]["n_reports"] == 15
+    z0 = fin["latents"]["z0"]
+    assert z0["s_star"]["inputs"] == ["tau", "A_s"]
+    by = {e["config_id"]: e for e in z0["entries"]}
+    assert not by["c04_S-As"]["minimal"]
+    assert by["c18_S-tau-As"]["minimal"] and by["allparams"]["minimal"]
+    # z0 is a shape latent for this run (amp_idx=2); screen fixture has the
+    # 2-input subset > 1 SE below all-6 per seed -> not screen-recurrent
+    assert not z0["screen_recurrence"]["recurrent"]
+    assert fin["gate_G2"]["per_latent"]["z0"]["verdict"].startswith(
+        "ATTENTION")
+    assert fin["clusters"]["skipped"]           # no knee JSON in tmp tree
+    md = (tmp_path /
+          "experiments/subset_selection_lcdm_tt_beta3e-4.md").read_text()
+    assert "# 4b finals" in md and "# Gate G2" in md and "S\\*" in md

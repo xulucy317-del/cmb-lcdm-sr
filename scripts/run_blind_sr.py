@@ -43,6 +43,7 @@ docs/discovery_roadmap.md), e.g.:
 """
 import argparse
 import json
+import signal
 import time
 from pathlib import Path
 
@@ -57,6 +58,22 @@ from cmb_lcdm_sr.sr import (
     LOSS_KIND_LABEL,
     build_inputs,
 )
+
+
+def _with_timeout(seconds, fn, *args, **kwargs):
+    """Run fn under a SIGALRM deadline. Degenerate Pareto-front members can
+    make sympy simplify/lambdify (and, through them, predict) hang for hours
+    (seen: 25+ min on nested exp/exp float towers), which turns a 5-min task
+    into a walltime kill. Main-thread only."""
+    def _raise(signum, frame):
+        raise TimeoutError(f"timed out after {seconds}s")
+    old = signal.signal(signal.SIGALRM, _raise)
+    signal.alarm(seconds)
+    try:
+        return fn(*args, **kwargs)
+    finally:
+        signal.alarm(0)
+        signal.signal(signal.SIGALRM, old)
 
 
 def default_out_dir(run_dir: Path, seed: int, tag: str) -> Path:
@@ -232,24 +249,33 @@ def main() -> None:
 
     rows = []
     for i in range(len(eqs)):
-        yhat_val_s = model.predict(X_val, index=i)
-        mse_val = float(np.mean((yhat_val_s - y_val_s) ** 2))
-        rows.append(
-            {
-                "index": int(i),
-                "complexity": int(eqs.iloc[i]["complexity"]),
-                "loss_train": float(eqs.iloc[i]["loss"]),
-                "expression_raw": str(eqs.iloc[i]["equation"]),
-                "mse_val": mse_val,
-            }
-        )
+        # Degenerate front members (e.g. sub-expressions that simplify to 1/0
+        # -> ComplexInfinity) can fail sympy lambdification inside predict;
+        # keep the row with mse_val=None so downstream MI selection skips it.
+        try:
+            yhat_val_s = _with_timeout(120, model.predict, X_val, index=i)
+            mse_val = float(np.mean((yhat_val_s - y_val_s) ** 2))
+            eval_error = None
+        except Exception as exc:                                     # noqa: BLE001
+            mse_val = None
+            eval_error = str(exc)
+        row = {
+            "index": int(i),
+            "complexity": int(eqs.iloc[i]["complexity"]),
+            "loss_train": float(eqs.iloc[i]["loss"]),
+            "expression_raw": str(eqs.iloc[i]["equation"]),
+            "mse_val": mse_val,
+        }
+        if eval_error is not None:
+            row["eval_error"] = eval_error
+        rows.append(row)
 
     import sympy
 
     def _simplify(i):
         try:
-            expr = model.sympy(index=i)
-            return str(sympy.simplify(expr))
+            expr = _with_timeout(60, model.sympy, index=i)
+            return str(_with_timeout(60, sympy.simplify, expr))
         except Exception as exc:                                     # noqa: BLE001
             return f"<sympy failed: {exc}>"
 
@@ -258,9 +284,10 @@ def main() -> None:
 
     print(f"[selection=mi] computing GMM-MI for all {len(rows)} equations...")
     for r in rows:
-        yhat_val = model.predict(X_val, index=r["index"])
         try:
-            mi, err = mutual_information_gmm(
+            yhat_val = _with_timeout(120, model.predict, X_val, index=r["index"])
+            mi, err = _with_timeout(
+                300, mutual_information_gmm,
                 y_val_s.reshape(-1, 1), yhat_val.reshape(-1, 1),
                 return_uncertainty=True, max_samples=n_val, seed=0,
             )
@@ -351,7 +378,8 @@ def main() -> None:
     for r in top_k:
         mi_str = (f"{r['mi_val']:.3f}±{r['mi_val_err']:.3f}"
                   if r.get("mi_val") is not None else "n/a")
-        print(f"  c={r['complexity']:>2}  mse_val={r['mse_val']:.4f}  "
+        mse_str = (f"{r['mse_val']:.4f}" if r.get("mse_val") is not None else "n/a")
+        print(f"  c={r['complexity']:>2}  mse_val={mse_str}  "
               f"mi_val={mi_str}  expr={r['expression_simplified']}")
 
 
