@@ -20,6 +20,15 @@ Usage (one regime × one shuffle seed):
         --run-dir models/lcdm_tt_beta3e-4 --target-index 2 \
         --shuffle-seed 0 --pysr-seed 0 --inputs A_s tau \
         --n-samples 5000 --niterations 200
+
+Phase-6 variant (shuffled-RESIDUAL control): the target may instead be any
+cached test-aligned vector via --target-npy/--target-label — the same M1
+interface as run_blind_sr.py — e.g. the Phase-3 residual caches:
+    python scripts/run_shuffled_control.py \
+        --run-dir models/lcdm_tt_beta3e-4 \
+        --target-npy models/lcdm_tt_beta3e-4/analysis/residual_z2_v1.npy \
+        --target-label res_z2 --shuffle-seed 0 \
+        --inputs omega_b omega_cdm H0 tau A_s n_s --niterations 200
 """
 import argparse
 import json
@@ -29,6 +38,8 @@ from pathlib import Path
 import _bootstrap  # noqa: F401
 
 import numpy as np
+
+from run_blind_sr import resolve_target
 
 # Reuse the EXACT blind-SR machinery so this is the same configuration.
 from cmb_lcdm_sr.sr import (
@@ -44,8 +55,14 @@ def main() -> None:
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--run-dir", required=True)
     p.add_argument("--dataset-dir", default="data")
-    p.add_argument("--target-index", type=int, required=True,
-                   help="Latent column (0-indexed) of the amplitude latent to shuffle.")
+    p.add_argument("--target-index", type=int, default=None,
+                   help="Latent column (0-indexed) of the latent to shuffle.")
+    p.add_argument("--target-npy", default=None,
+                   help="Shuffle an arbitrary test-aligned cached vector "
+                        "instead of a latent column (mutually exclusive "
+                        "with --target-index).")
+    p.add_argument("--target-label", default=None,
+                   help="Label for --target-npy targets (default: file stem).")
     p.add_argument("--inputs", nargs="+", default=["A_s", "tau"])
     p.add_argument("--n-samples", type=int, default=5000)
     p.add_argument("--val-frac", type=float, default=0.2)
@@ -64,34 +81,37 @@ def main() -> None:
     args = p.parse_args()
 
     run_dir = Path(args.run_dir)
-    means_path = run_dir / "analysis" / "encoder_means_test.npy"
-    if not means_path.exists():
-        raise FileNotFoundError(
-            f"{means_path} not found. Generate it with scripts/encode_latents.py first."
-        )
+    y_full, target_label = resolve_target(run_dir, args.target_index,
+                                          args.target_npy, args.target_label,
+                                          dataset_dir=args.dataset_dir)
     theta = np.load(Path(args.dataset_dir) / "theta.npy")
     splits = np.load(Path(args.dataset_dir) / "splits_v1.npz")
     test_idx = np.where(splits["split_id"] == 2)[0]
+    if len(y_full) != len(test_idx):
+        raise SystemExit(f"target has {len(y_full)} rows, test split has "
+                         f"{len(test_idx)} — must be row-aligned")
     n = min(args.n_samples, len(test_idx))
     test_idx = test_idx[:n]
+    y_true = y_full[:n]
 
-    means = np.load(means_path)
-    if not (0 <= args.target_index < means.shape[1]):
-        raise IndexError(f"target-index {args.target_index} out of range L={means.shape[1]}")
-    y_true = means[:n, args.target_index].astype(np.float64)
-
-    # Inputs (raw A_s, tau) — UNCHANGED.
+    # Inputs — UNCHANGED (only the target is permuted).
     X_raw, input_labels = build_inputs(theta[test_idx], args.inputs)
 
-    # Permute ONLY the target latent across rows (preserves marginal, kills relation).
+    # Permute ONLY the target across rows (preserves marginal, kills relation).
     perm = np.random.default_rng(args.shuffle_seed).permutation(n)
     y_shuf = y_true[perm]
 
-    out_dir = (Path(args.out_dir) if args.out_dir
-               else Path("results") / run_dir.name / f"symbolic_regression_shuffled_seed{args.shuffle_seed}")
+    if args.out_dir:
+        out_dir = Path(args.out_dir)
+    elif args.target_npy is not None:
+        out_dir = (Path("results") / run_dir.name / "residual_sr"
+                   / f"shuffled_{target_label}_s{args.shuffle_seed}")
+    else:
+        out_dir = (Path("results") / run_dir.name
+                   / f"symbolic_regression_shuffled_seed{args.shuffle_seed}")
     out_dir.mkdir(parents=True, exist_ok=True)
     print(f"[setup] out_dir={out_dir}")
-    print(f"[setup] run={run_dir.name} target=z{args.target_index} "
+    print(f"[setup] run={run_dir.name} target={target_label} "
           f"shuffle_seed={args.shuffle_seed} pysr_seed={args.pysr_seed} n={n}")
 
     # Train/val split (deterministic prefix split, matching the real SR script).
@@ -178,6 +198,7 @@ def main() -> None:
         "run_dir": str(run_dir),
         "regime": run_dir.name,
         "target_index": args.target_index,
+        "target_label": target_label,
         "inputs_exposed": input_labels,
         "inner_loss": INNER_LOSS_NAME,
         "control": "shuffled_target",
