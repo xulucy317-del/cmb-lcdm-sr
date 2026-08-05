@@ -39,7 +39,8 @@ Writes: experiments/residual_sr_<run>.{md,json}
 import argparse
 import json
 import os
-from concurrent.futures import ProcessPoolExecutor
+import time
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 
 os.environ.setdefault("TQDM_DISABLE", "1")
@@ -92,9 +93,17 @@ def latent_worker(k: int) -> dict:
         return _latent_worker(k)
 
 
+def _tick(k: int, stage: str, t0: float) -> float:
+    """Stage-boundary progress print (streamed to the job log)."""
+    t1 = time.time()
+    print(f"[z{k}] {stage}: {t1 - t0:.0f}s", flush=True)
+    return t1
+
+
 def _latent_worker(k: int) -> dict:
     run = _G["run"]
     out = {"latent": k, "audit_expected": AUDIT_EXPECTED[run].get(k)}
+    t = time.time()
 
     seed_dirs = sorted(Path(_G["results_root"], run, "residual_sr")
                        .glob(f"z{k}_seed*/report.json"))
@@ -123,6 +132,7 @@ def _latent_worker(k: int) -> dict:
                           "r_sr": c["r_sr"].get("residual_sr")}
                        for c in rec["clusters"][:8]]
     out["canonical_cluster"] = rec["canonical_cluster"]
+    t = _tick(k, "recurrence", t)
     if rec["canonical_cluster"] is None:
         out["f2"] = None
         return out
@@ -145,6 +155,7 @@ def _latent_worker(k: int) -> dict:
         "shape_sector": bool(set(canon["rep_support"]) <= SHAPE_SECTOR),
     }
     out["f2"] = f2
+    t = _tick(k, "signature+sobol", t)
 
     # 3: hierarchical account on T1
     t1, t2 = tiers.T1, tiers.T2
@@ -200,13 +211,15 @@ def _latent_worker(k: int) -> dict:
         "eta_post_hat_f1": p5["canonical_eta_post_hat"],
     })
     out["hierarchy"] = hier
+    t = _tick(k, "hierarchy MIs", t)
 
     # 4: stage-2 residual audit (frozen rule)
     diag2 = calibrate.residual_diagnostics(
         cal2["residual"], theta_t1, n_folds=5, seed=k,
         n_perm_r2=_G["n_perm_r2"], compute_mi=True,
         n_perm_mi=_G["n_perm_mi"], max_samples_mi=_G["max_samples_mi"],
-        gbm_max_iter=100)
+        gbm_max_iter=100, mi_jobs=_G.get("mi_jobs", 1))
+    t = _tick(k, "stage2 audit", t)
     p975 = (np.quantile(diag2["mi_null"], 0.975, axis=0)
             if diag2["mi_null"] is not None else None)
     p975_max = (float(np.quantile(diag2["mi_null"].max(axis=1), 0.975))
@@ -331,6 +344,10 @@ def main() -> int:
     p.add_argument("--dataset-dir", default="data")
     p.add_argument("--latents", nargs="*", type=int, default=None)
     p.add_argument("--jobs", type=int, default=6)
+    p.add_argument("--mi-jobs", type=int, default=1,
+                   help="Inner process pool for the stage-2 permutation-null "
+                        "MI calls (bit-identical to serial; see "
+                        "calibrate.residual_diagnostics).")
     p.add_argument("--eta-floor", type=float, default=0.25)
     p.add_argument("--n-perm-mi", type=int, default=39)
     p.add_argument("--n-perm-r2", type=int, default=10)
@@ -369,20 +386,14 @@ def main() -> int:
         "mid": mid, "half": half,
         "eta_floor": args.eta_floor,
         "n_perm_mi": args.n_perm_mi, "n_perm_r2": args.n_perm_r2,
-        "max_samples_mi": args.max_samples_mi,
+        "max_samples_mi": args.max_samples_mi, "mi_jobs": args.mi_jobs,
     })
 
-    ks = args.latents if args.latents is not None else list(range(n_latents))
-    if args.jobs > 1 and len(ks) > 1:
-        with ProcessPoolExecutor(max_workers=min(args.jobs, len(ks))) as ex:
-            latents_out = list(ex.map(latent_worker, ks))
-    else:
-        latents_out = [latent_worker(k) for k in ks]
-
-    for L in latents_out:
+    def _summary(L: dict) -> None:
         if L.get("error") or L.get("f2") is None:
-            print(f"  z{L['latent']}: {L.get('error', 'no canonical cluster')}")
-            continue
+            print(f"  z{L['latent']}: {L.get('error', 'no canonical cluster')}",
+                  flush=True)
+            return
         f2, h, s2 = L["f2"], L["hierarchy"], L["stage2_residual"]
         print(f"  z{L['latent']}: f2=`{f2['expr'][:40]}` "
               f"S={{{','.join(f2['support'])}}} shape={f2['shape_sector']} "
@@ -391,7 +402,23 @@ def main() -> int:
               f"eta_hat {fmt(h['eta_post_hat_f1'])}->"
               f"{fmt(h['eta_post_hat_comb'])} "
               f"st2res={'PASS' if s2['residual_pass'] else 'FAIL'}"
-              f"({','.join(s2['loadings']) or '-'})")
+              f"({','.join(s2['loadings']) or '-'})", flush=True)
+
+    ks = args.latents if args.latents is not None else list(range(n_latents))
+    latents_out = []
+    if args.jobs > 1 and len(ks) > 1:
+        with ProcessPoolExecutor(max_workers=min(args.jobs, len(ks))) as ex:
+            futures = {ex.submit(latent_worker, k): k for k in ks}
+            for fut in as_completed(futures):
+                L = fut.result()
+                _summary(L)
+                latents_out.append(L)
+        latents_out.sort(key=lambda L: L["latent"])
+    else:
+        for k in ks:
+            L = latent_worker(k)
+            _summary(L)
+            latents_out.append(L)
 
     controls = []
     for path in sorted(Path(args.results_root, run, "residual_sr")

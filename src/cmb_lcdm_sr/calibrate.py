@@ -139,17 +139,33 @@ def _crossval_r2(e: np.ndarray, theta: np.ndarray, n_folds: int, seed: int,
     return float(scores.mean())
 
 
+def _perm_mi_call(args):
+    """Module-level worker for the permutation-null MI pool (picklable)."""
+    e_perm, th, max_samples_mi, call_seed = args
+    from .mi import mutual_information_gmm
+
+    return mutual_information_gmm(
+        e_perm.reshape(-1, 1), th, return_uncertainty=False,
+        max_samples=max_samples_mi, seed=call_seed,
+    )[0]
+
+
 def residual_diagnostics(residual: np.ndarray, theta: np.ndarray,
                          n_folds: int = 5, seed: int = 0, n_perm_r2: int = 10,
                          compute_mi: bool = True, n_perm_mi: int = 0,
                          max_samples_mi: Optional[int] = 5000,
-                         gbm_max_iter: int = 100) -> dict:
+                         gbm_max_iter: int = 100, mi_jobs: int = 1) -> dict:
     """Is the residual still predictable from θ?
 
     Returns ``{"r2_res", "r2_null", "r2_null_p975", "n_rows",
     "mi" (6,), "mi_err" (6,), "mi_null" (n_perm_mi, 6), "mi_null_p975" (6,)}``
     (MI keys None when disabled). Null distributions come from re-running the
     identical pipeline on row-permuted residuals.
+
+    ``mi_jobs > 1`` evaluates the permutation-null MI calls in a process
+    pool. The permutations themselves are always drawn sequentially from the
+    same rng stream and each call keeps its own deterministic seed, so the
+    result is bit-identical to the serial path.
     """
     residual = np.asarray(residual, dtype=np.float64)
     theta = np.asarray(theta, dtype=np.float64)
@@ -178,14 +194,16 @@ def residual_diagnostics(residual: np.ndarray, theta: np.ndarray,
         )
         out["mi"], out["mi_err"] = mi[0], err[0]
         if n_perm_mi > 0:
-            null = np.stack([
-                mutual_information_gmm(
-                    rng.permutation(e).reshape(-1, 1), th,
-                    return_uncertainty=False, max_samples=max_samples_mi,
-                    seed=seed + 1 + p,
-                )[0]
-                for p in range(n_perm_mi)
-            ])
+            tasks = [(rng.permutation(e), th, max_samples_mi, seed + 1 + p)
+                     for p in range(n_perm_mi)]
+            if mi_jobs > 1:
+                from concurrent.futures import ProcessPoolExecutor
+
+                with ProcessPoolExecutor(max_workers=mi_jobs) as ex:
+                    rows = list(ex.map(_perm_mi_call, tasks))
+            else:
+                rows = [_perm_mi_call(t) for t in tasks]
+            null = np.stack(rows)
             out["mi_null"] = null
             out["mi_null_p975"] = np.quantile(null, 0.975, axis=0)
     return out

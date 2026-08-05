@@ -80,3 +80,18 @@ def test_degenerate_and_masked_inputs(setup):
     assert np.isnan(cal["yhat"][:100]).all()
     assert np.isfinite(cal["yhat"][100:]).all()
     assert cal["finite_frac"] == pytest.approx(2900 / 3000)
+
+
+def test_mi_jobs_parallel_matches_serial(setup):
+    theta, f, rng = setup
+    y = np.tanh(f) + 0.3 * rng.normal(size=len(f))
+    cal = calibrate.crossfit_calibration(f, y, monotone=True, seed=0)
+    kw = dict(n_folds=3, n_perm_r2=2, compute_mi=True, n_perm_mi=3,
+              max_samples_mi=400, gbm_max_iter=25, seed=0)
+    serial = calibrate.residual_diagnostics(cal["residual"], theta[:, [3, 5]],
+                                            mi_jobs=1, **kw)
+    par = calibrate.residual_diagnostics(cal["residual"], theta[:, [3, 5]],
+                                         mi_jobs=2, **kw)
+    np.testing.assert_array_equal(serial["mi_null"], par["mi_null"])
+    np.testing.assert_array_equal(serial["mi"], par["mi"])
+    assert serial["r2_res"] == par["r2_res"]
