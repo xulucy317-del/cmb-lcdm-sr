@@ -1,0 +1,1287 @@
+{
+  "run": "lcdm_tt_beta3e-4",
+  "amp_idx": 2,
+  "cards": [
+    {
+      "latent": 0,
+      "role": "omega_b",
+      "posthoc_label": null,
+      "f1": {
+        "expr": "n_s/omega_b",
+        "complexity": 3,
+        "support": [
+          "omega_b",
+          "n_s"
+        ],
+        "cluster": 0,
+        "r_sr": 1.0,
+        "cohesion": 0.965
+      },
+      "knee": {
+        "c_star": 26,
+        "mi_plat": 3.5703439773701007,
+        "mi_plat_se": 0.059119455353963256,
+        "family": "allparams_ms30",
+        "mi_at_c10": 2.560712683166588,
+        "classification": "no knee (diffuse)"
+      },
+      "s_star": {
+        "inputs": [
+          "omega_b",
+          "omega_cdm",
+          "H0",
+          "A_s",
+          "n_s"
+        ],
+        "size": 5,
+        "eta": 1.0028612801524621,
+        "eta_se": 0.020201078137282454,
+        "screen_recurrent": false,
+        "gate_G2_verdict": "ATTENTION (not screen-recurrent)"
+      },
+      "sufficiency": {
+        "eta_s": 1.0028612801524621,
+        "eta_plat": 0.3255893792197002,
+        "eta_post": 0.5454217241532651,
+        "eta_post_se": 0.005201503651298042,
+        "eta_post_hat": 0.5309737522645525,
+        "eta_post_hat_se": 0.005830905226044016,
+        "eta_plat_comb": 0.6883612783008695,
+        "eta_post_comb": 0.9273117983081125,
+        "eta_post_hat_comb": 0.9027477331073243
+      },
+      "ceiling": {
+        "I": 1.9839185645528286,
+        "se": 0.00223514257983112,
+        "snr": 55.350792945548896
+      },
+      "signature": {
+        "g_j": [
+          0.6628027387187811,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.33719726128121896
+        ],
+        "sobol_ST": [
+          0.79304077741721,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.20760507183579893
+        ],
+        "ratio_pairs": [],
+        "decoder_cos_g": 0.9477385537127108
+      },
+      "residual_stage1": {
+        "r2_cal": 0.9037567353936109,
+        "r2_res": 0.9920278090291437,
+        "residual_pass": false,
+        "loadings": [
+          "omega_b",
+          "omega_cdm",
+          "H0",
+          "tau",
+          "ln10As",
+          "n_s"
+        ]
+      },
+      "f2": {
+        "expr": "n_s*(H0 + 1325.0747*omega_cdm)",
+        "support": [
+          "omega_cdm",
+          "H0",
+          "n_s"
+        ],
+        "shape_sector": true,
+        "r_sr": 0.8,
+        "mi_vs_e1": 1.1055546971404466,
+        "r2_stage2": 0.886604869042568,
+        "combined_r2_vs_mu": 0.9890864921151807,
+        "stage2_residual_pass": false,
+        "stage2_loadings": [
+          "omega_b",
+          "omega_cdm",
+          "H0",
+          "tau",
+          "ln10As",
+          "n_s"
+        ]
+      },
+      "levelset": {
+        "f1_e_inv": 0.20450758934020996,
+        "f1_e_inv_se": 0.002984149001215905,
+        "f1_band": [
+          0.0962432646063891,
+          0.1924865292127782
+        ],
+        "f1_response_r2": 0.9057380653500445,
+        "f1_response_r2_t2": 0.9066478888009508,
+        "f1_pass": false,
+        "joint_e_inv": 0.022493161261081696,
+        "joint_band": [
+          0.010913507884819262,
+          0.021827015769638525
+        ],
+        "joint_response_r2": 0.9926246594499233,
+        "joint_response_r2_t2": 0.993057038209338,
+        "joint_pass": true,
+        "joint_union": [
+          "omega_b",
+          "omega_cdm",
+          "H0",
+          "n_s"
+        ],
+        "joint_complement": [
+          "tau",
+          "ln10As"
+        ]
+      },
+      "decoder": {
+        "a": [
+          -0.5169622788131352,
+          -0.1465360689030531,
+          -0.0491095894615638,
+          0.04996413176359858,
+          0.011912064993366882,
+          0.17304253479424178
+        ],
+        "r2_W": 0.9995209019499146,
+        "amp_mass": 0.06530285510588113,
+        "frac_brk": 0.40595743353943176,
+        "r_dec": null
+      },
+      "subspace": {
+        "a_star": [
+          0,
+          2,
+          3,
+          4
+        ],
+        "axis_aligned": false,
+        "r2_own": 0.8839145807269946,
+        "r2_full": 0.9846963961234272,
+        "r2_t2": 0.983924199828539,
+        "top_pair": [
+          0,
+          3
+        ],
+        "redundancy_2_given_1": -11.30829081215146
+      },
+      "legs": {
+        "minimal_stable": false,
+        "r_sr": 1.0,
+        "eta_s": 1.0028612801524621,
+        "residual1_pass": false,
+        "eta_post": 0.5454217241532651,
+        "eta_post_hat": 0.5309737522645525,
+        "ls_strict": false,
+        "ls_joint": true,
+        "ls_evidence": true,
+        "response_ok": true,
+        "subspace_small": false,
+        "subspace_r2": 0.9846963961234272
+      },
+      "status": "primarily interpreted",
+      "status_reason": "eta_S + R_SR + level-set evidence green; stage-1 residual structured (f2 documented)",
+      "deviations": [
+        {
+          "id": "D-LS",
+          "phase": "7a/10",
+          "text": "level-set leg via joint (f1,f2) audit"
+        },
+        {
+          "id": "N-G2",
+          "phase": 4,
+          "text": "S* not recurrent across the two screen seeds (ATTENTION (not screen-recurrent))"
+        }
+      ]
+    },
+    {
+      "latent": 1,
+      "role": "omega_cdm",
+      "posthoc_label": null,
+      "f1": {
+        "expr": "H0**2*n_s**2*omega_b/(A_s*omega_cdm**2)",
+        "complexity": 10,
+        "support": [
+          "omega_b",
+          "omega_cdm",
+          "H0",
+          "ln10As",
+          "n_s"
+        ],
+        "cluster": 0,
+        "r_sr": 0.8,
+        "cohesion": 0.665
+      },
+      "knee": {
+        "c_star": 29,
+        "mi_plat": 2.5151466859880025,
+        "mi_plat_se": 0.013482779919562154,
+        "family": "allparams_ms30",
+        "mi_at_c10": 1.2107358162012556,
+        "classification": "no knee (diffuse)"
+      },
+      "s_star": {
+        "inputs": [
+          "omega_b",
+          "omega_cdm",
+          "H0",
+          "tau",
+          "A_s",
+          "n_s"
+        ],
+        "size": 6,
+        "eta": 1.0,
+        "eta_se": 0.0,
+        "screen_recurrent": true,
+        "gate_G2_verdict": "PASS"
+      },
+      "sufficiency": {
+        "eta_s": 1.0,
+        "eta_plat": 0.474521076338077,
+        "eta_post": 0.7609336141864157,
+        "eta_post_se": 0.013524952778538345,
+        "eta_post_hat": 0.7695422729062039,
+        "eta_post_hat_se": 0.01788347502723488,
+        "eta_plat_comb": 0.824132679684556,
+        "eta_post_comb": 0.9467090992171385,
+        "eta_post_hat_comb": 0.9574194889149208
+      },
+      "ceiling": {
+        "I": 0.9192076450759161,
+        "se": 0.0027504910339242474,
+        "snr": 5.0771997559778805
+      },
+      "signature": {
+        "g_j": [
+          0.10819577290385284,
+          0.3158217088201827,
+          0.299079307313723,
+          0.0,
+          0.16628713800411013,
+          0.11061607295813114
+        ],
+        "sobol_ST": [
+          0.050485270161103026,
+          0.41408046293743384,
+          0.38126328930152137,
+          0.0,
+          0.11884336428138499,
+          0.053004529938801795
+        ],
+        "ratio_pairs": [
+          {
+            "i": 0,
+            "j": 4,
+            "pair": [
+              "omega_b",
+              "ln10As"
+            ],
+            "ratio_u": -0.6522086888457586,
+            "cv": 0.04697893479682284,
+            "frac_valid": 1.0,
+            "r_raw": -45.65460821920314
+          },
+          {
+            "i": 4,
+            "j": 5,
+            "pair": [
+              "ln10As",
+              "n_s"
+            ],
+            "ratio_u": -1.5022652429903895,
+            "cv": 0.024501598044394425,
+            "frac_valid": 1.0,
+            "r_raw": -0.4828709709611961
+          }
+        ],
+        "decoder_cos_g": 0.9363455458203175
+      },
+      "residual_stage1": {
+        "r2_cal": 0.9055834174879912,
+        "r2_res": 0.9811856046880078,
+        "residual_pass": false,
+        "loadings": [
+          "omega_b",
+          "omega_cdm",
+          "H0",
+          "tau",
+          "ln10As",
+          "n_s"
+        ]
+      },
+      "f2": {
+        "expr": "n_s/log(-H0/(tau - 0.44653893)) + omega_b",
+        "support": [
+          "omega_b",
+          "H0",
+          "tau",
+          "n_s"
+        ],
+        "shape_sector": false,
+        "r_sr": 0.8,
+        "mi_vs_e1": 0.8878714935055576,
+        "r2_stage2": 0.8019636549843753,
+        "combined_r2_vs_mu": 0.9813021298045127,
+        "stage2_residual_pass": false,
+        "stage2_loadings": [
+          "omega_b",
+          "H0",
+          "tau",
+          "ln10As",
+          "n_s"
+        ]
+      },
+      "levelset": {
+        "f1_e_inv": 0.12591849267482758,
+        "f1_e_inv_se": 0.0022792664790939783,
+        "f1_band": [
+          0.0944165825120088,
+          0.1888331650240176
+        ],
+        "f1_response_r2": 0.9052044177764195,
+        "f1_response_r2_t2": 0.9060921084128185,
+        "f1_pass": false,
+        "joint_e_inv": null,
+        "joint_band": [
+          0.0186978701954873,
+          0.0373957403909746
+        ],
+        "joint_response_r2": 0.9810019293054122,
+        "joint_response_r2_t2": 0.980793336684017,
+        "joint_pass": null,
+        "joint_union": [
+          "omega_b",
+          "omega_cdm",
+          "H0",
+          "tau",
+          "ln10As",
+          "n_s"
+        ],
+        "joint_complement": []
+      },
+      "decoder": {
+        "a": [
+          0.11926550680972582,
+          -0.28906403166144595,
+          0.2197409270069346,
+          -0.12804266933999175,
+          -0.185521897448333,
+          0.19012639169414308
+        ],
+        "r2_W": 0.9965285107685931,
+        "amp_mass": 0.27705889258092264,
+        "frac_brk": 0.15103151019349034,
+        "r_dec": 1.6104095126732196
+      },
+      "subspace": {
+        "a_star": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "axis_aligned": false,
+        "r2_own": 0.9047352977153867,
+        "r2_full": 0.9826738113748347,
+        "r2_t2": 0.9815542809992152,
+        "top_pair": [
+          1,
+          2
+        ],
+        "redundancy_2_given_1": -9.07435812785013
+      },
+      "legs": {
+        "minimal_stable": true,
+        "r_sr": 0.8,
+        "eta_s": 1.0,
+        "residual1_pass": false,
+        "eta_post": 0.7609336141864157,
+        "eta_post_hat": 0.7695422729062039,
+        "ls_strict": false,
+        "ls_joint": null,
+        "ls_evidence": true,
+        "response_ok": true,
+        "subspace_small": false,
+        "subspace_r2": 0.9826738113748347
+      },
+      "status": "primarily interpreted",
+      "status_reason": "eta_S + R_SR + level-set evidence green; stage-1 residual structured (f2 documented)",
+      "deviations": [
+        {
+          "id": "D-LS",
+          "phase": "7a/10",
+          "text": "level-set leg via response-only (joint union support = all 6)"
+        }
+      ]
+    },
+    {
+      "latent": 2,
+      "role": "amplitude (A_s, tau)",
+      "posthoc_label": null,
+      "f1": {
+        "expr": "A_s/log(H0*(omega_cdm + tau))",
+        "complexity": 8,
+        "support": [
+          "omega_cdm",
+          "H0",
+          "tau",
+          "ln10As"
+        ],
+        "cluster": 0,
+        "r_sr": 1.0,
+        "cohesion": 0.995
+      },
+      "knee": {
+        "c_star": 24,
+        "mi_plat": 4.17532051559316,
+        "mi_plat_se": 0.04275581791128614,
+        "family": "allparams_ms30",
+        "mi_at_c10": 1.890576607743311,
+        "classification": "no knee (diffuse)"
+      },
+      "s_star": {
+        "inputs": [
+          "omega_b",
+          "omega_cdm",
+          "H0",
+          "tau",
+          "A_s",
+          "n_s"
+        ],
+        "size": 6,
+        "eta": 1.0,
+        "eta_se": 0.0,
+        "screen_recurrent": true,
+        "gate_G2_verdict": "PASS (superset finding)"
+      },
+      "sufficiency": {
+        "eta_s": 1.0,
+        "eta_plat": 0.3521263947745391,
+        "eta_post": 0.34716161353043246,
+        "eta_post_se": 0.003111645566338649,
+        "eta_post_hat": 0.3470487452838639,
+        "eta_post_hat_se": 0.0033125231409416624,
+        "eta_plat_comb": 0.6286098300786135,
+        "eta_post_comb": 0.6013323097977105,
+        "eta_post_hat_comb": 0.6011368062605491
+      },
+      "ceiling": {
+        "I": 4.303570007600048,
+        "se": 0.0029791202117115277,
+        "snr": 5490.786714681061
+      },
+      "signature": {
+        "g_j": [
+          0.0,
+          0.09544511515795649,
+          0.13946378074961943,
+          0.38178046063182597,
+          0.38331064346059807,
+          0.0
+        ],
+        "sobol_ST": [
+          0.0,
+          0.03259312238250907,
+          0.0633159199045755,
+          0.4408046141223093,
+          0.4709862876481517,
+          0.0
+        ],
+        "ratio_pairs": [
+          {
+            "i": 1,
+            "j": 3,
+            "pair": [
+              "omega_cdm",
+              "tau"
+            ],
+            "ratio_u": 0.25,
+            "cv": 1.3386843258928565e-16,
+            "frac_valid": 1.0,
+            "r_raw": 1.0000000000000002
+          }
+        ],
+        "decoder_cos_g": 0.8123156401309414
+      },
+      "residual_stage1": {
+        "r2_cal": 0.9471477682251528,
+        "r2_res": 0.9852766710585696,
+        "residual_pass": false,
+        "loadings": [
+          "omega_b",
+          "omega_cdm",
+          "H0",
+          "tau",
+          "ln10As",
+          "n_s"
+        ]
+      },
+      "f2": {
+        "expr": "n_s**2*omega_b*tau/(omega_cdm*tau + 0.00031008976)",
+        "support": [
+          "omega_b",
+          "omega_cdm",
+          "tau",
+          "n_s"
+        ],
+        "shape_sector": false,
+        "r_sr": 0.8,
+        "mi_vs_e1": 1.0578585154552875,
+        "r2_stage2": 0.8638838220820179,
+        "combined_r2_vs_mu": 0.9928059722452361,
+        "stage2_residual_pass": false,
+        "stage2_loadings": [
+          "omega_cdm",
+          "H0",
+          "tau",
+          "ln10As",
+          "n_s"
+        ]
+      },
+      "levelset": {
+        "f1_e_inv": 0.09808681905269623,
+        "f1_e_inv_se": 0.001612388954802058,
+        "f1_band": [
+          0.052852231774847214,
+          0.10570446354969443
+        ],
+        "f1_response_r2": 0.9465285501392551,
+        "f1_response_r2_t2": 0.9479915213779173,
+        "f1_pass": false,
+        "joint_e_inv": null,
+        "joint_band": [
+          0.007194027754763854,
+          0.014388055509527709
+        ],
+        "joint_response_r2": 0.9933079917583645,
+        "joint_response_r2_t2": 0.9931683361525269,
+        "joint_pass": null,
+        "joint_union": [
+          "omega_b",
+          "omega_cdm",
+          "H0",
+          "tau",
+          "ln10As",
+          "n_s"
+        ],
+        "joint_complement": []
+      },
+      "decoder": {
+        "a": [
+          0.052881476548494004,
+          -0.19491035594581052,
+          -0.1610214914341766,
+          0.1158011348639645,
+          0.7707251533561148,
+          0.09785707881592975
+        ],
+        "r2_W": 0.9998231729872081,
+        "amp_mass": 0.6363252898672547,
+        "frac_brk": 0.2967749245208406,
+        "r_dec": 0.35058236628105716
+      },
+      "subspace": {
+        "a_star": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "axis_aligned": false,
+        "r2_own": 0.9460373136077903,
+        "r2_full": 0.9826449265206996,
+        "r2_t2": 0.9823877198517261,
+        "top_pair": [
+          2,
+          4
+        ],
+        "redundancy_2_given_1": -8.790983990458423
+      },
+      "legs": {
+        "minimal_stable": true,
+        "r_sr": 1.0,
+        "eta_s": 1.0,
+        "residual1_pass": false,
+        "eta_post": 0.34716161353043246,
+        "eta_post_hat": 0.3470487452838639,
+        "ls_strict": false,
+        "ls_joint": null,
+        "ls_evidence": true,
+        "response_ok": true,
+        "subspace_small": false,
+        "subspace_r2": 0.9826449265206996
+      },
+      "status": "primarily interpreted",
+      "status_reason": "eta_S + R_SR + level-set evidence green; stage-1 residual structured (f2 documented)",
+      "deviations": [
+        {
+          "id": "D-DoD-z2",
+          "phase": 6,
+          "text": "Phase-6 amplitude DoD NOT MET, and substantively: f2 keeps tau (tau-clamping costs 0.20 nat of MI vs e1, Spearman 0.92 < 0.98, d_grad 0.127 > 0.05 vs the shape-only approximant) \u2014 the additive h(f1)+g(f2) hierarchy cannot absorb the multiplicative amplitude x shape interaction of the knee forms. Commit a38e6c8."
+        },
+        {
+          "id": "D-LS",
+          "phase": "7a/10",
+          "text": "level-set leg via response-only (joint union support = all 6)"
+        }
+      ]
+    },
+    {
+      "latent": 3,
+      "role": "n_s",
+      "posthoc_label": null,
+      "f1": {
+        "expr": "n_s + omega_cdm",
+        "complexity": 3,
+        "support": [
+          "omega_cdm",
+          "n_s"
+        ],
+        "cluster": 0,
+        "r_sr": 1.0,
+        "cohesion": 1.0
+      },
+      "knee": {
+        "c_star": 27,
+        "mi_plat": 3.146561398305682,
+        "mi_plat_se": 0.030492274437917338,
+        "family": "allparams_ms30",
+        "mi_at_c10": 2.2793436617102047,
+        "classification": "no knee (diffuse)"
+      },
+      "s_star": {
+        "inputs": [
+          "omega_b",
+          "omega_cdm",
+          "H0",
+          "tau",
+          "n_s"
+        ],
+        "size": 5,
+        "eta": 0.9967692851038382,
+        "eta_se": 0.005197332745823726,
+        "screen_recurrent": true,
+        "gate_G2_verdict": "PASS"
+      },
+      "sufficiency": {
+        "eta_s": 0.9967692851038382,
+        "eta_plat": 0.37941878034646076,
+        "eta_post": 0.4492251059192261,
+        "eta_post_se": 0.0038237196530969816,
+        "eta_post_hat": 0.44709072410320155,
+        "eta_post_hat_se": 0.004165500245914924,
+        "eta_plat_comb": 0.8161361692780909,
+        "eta_post_comb": 0.8420236315247621,
+        "eta_post_hat_comb": 0.8380229648119971
+      },
+      "ceiling": {
+        "I": 2.646231553499977,
+        "se": 0.0025157226728822492,
+        "snr": 204.70737278165356
+      },
+      "signature": {
+        "g_j": [
+          0.0,
+          0.249999999999999,
+          0.0,
+          0.0,
+          0.0,
+          0.750000000000001
+        ],
+        "sobol_ST": [
+          0.0,
+          0.10000001600943485,
+          0.0,
+          0.0,
+          0.0,
+          0.8999999831523723
+        ],
+        "ratio_pairs": [
+          {
+            "i": 1,
+            "j": 5,
+            "pair": [
+              "omega_cdm",
+              "n_s"
+            ],
+            "ratio_u": 0.33333333333333337,
+            "cv": 1.6653345369377346e-16,
+            "frac_valid": 1.0,
+            "r_raw": 0.9999999999999998
+          }
+        ],
+        "decoder_cos_g": 0.8954418621845074
+      },
+      "residual_stage1": {
+        "r2_cal": 0.9162441505553652,
+        "r2_res": 0.9928094163640109,
+        "residual_pass": false,
+        "loadings": [
+          "omega_b",
+          "omega_cdm",
+          "H0",
+          "tau",
+          "ln10As",
+          "n_s"
+        ]
+      },
+      "f2": {
+        "expr": "H0/(omega_b**2*omega_cdm**2)",
+        "support": [
+          "omega_b",
+          "omega_cdm",
+          "H0"
+        ],
+        "shape_sector": true,
+        "r_sr": 0.8,
+        "mi_vs_e1": 1.0872832428469763,
+        "r2_stage2": 0.8634184978392265,
+        "combined_r2_vs_mu": 0.9885605010378783,
+        "stage2_residual_pass": false,
+        "stage2_loadings": [
+          "omega_b",
+          "omega_cdm",
+          "tau",
+          "ln10As",
+          "n_s"
+        ]
+      },
+      "levelset": {
+        "f1_e_inv": 0.1220940425992012,
+        "f1_e_inv_se": 0.002153024544010772,
+        "f1_band": [
+          0.08375584944463477,
+          0.16751169888926953
+        ],
+        "f1_response_r2": 0.9155073994717035,
+        "f1_response_r2_t2": 0.9168622204117377,
+        "f1_pass": false,
+        "joint_e_inv": 0.012734920717775822,
+        "joint_band": [
+          0.011439498962121708,
+          0.022878997924243416
+        ],
+        "joint_response_r2": 0.9935230852541365,
+        "joint_response_r2_t2": 0.9934274712515249,
+        "joint_pass": true,
+        "joint_union": [
+          "omega_b",
+          "omega_cdm",
+          "H0",
+          "n_s"
+        ],
+        "joint_complement": [
+          "tau",
+          "ln10As"
+        ]
+      },
+      "decoder": {
+        "a": [
+          0.0860085243161493,
+          0.2865453919022357,
+          -0.044432733214714075,
+          -0.014792495075303749,
+          0.0,
+          0.48714086006469853
+        ],
+        "r2_W": 0.9994576031989493,
+        "amp_mass": 0.23265359052046525,
+        "frac_brk": 0.06207266740690368,
+        "r_dec": 3.1880323218223126
+      },
+      "subspace": {
+        "a_star": [
+          0,
+          1,
+          3
+        ],
+        "axis_aligned": false,
+        "r2_own": 0.9096167630176671,
+        "r2_full": 0.973963467976579,
+        "r2_t2": 0.9737356561966856,
+        "top_pair": [
+          3,
+          1
+        ],
+        "redundancy_2_given_1": -6.27807953230085
+      },
+      "legs": {
+        "minimal_stable": true,
+        "r_sr": 1.0,
+        "eta_s": 0.9967692851038382,
+        "residual1_pass": false,
+        "eta_post": 0.4492251059192261,
+        "eta_post_hat": 0.44709072410320155,
+        "ls_strict": false,
+        "ls_joint": true,
+        "ls_evidence": true,
+        "response_ok": true,
+        "subspace_small": true,
+        "subspace_r2": 0.973963467976579
+      },
+      "status": "primarily interpreted",
+      "status_reason": "eta_S + R_SR + level-set evidence green; stage-1 residual structured (f2 documented)",
+      "deviations": [
+        {
+          "id": "D-LS",
+          "phase": "7a/10",
+          "text": "level-set leg via joint (f1,f2) audit"
+        }
+      ]
+    },
+    {
+      "latent": 4,
+      "role": "H0",
+      "posthoc_label": null,
+      "f1": {
+        "expr": "A_s*H0**2*omega_cdm*exp(-2*tau)",
+        "complexity": 9,
+        "support": [
+          "omega_cdm",
+          "H0",
+          "tau",
+          "ln10As"
+        ],
+        "cluster": 0,
+        "r_sr": 0.8,
+        "cohesion": 0.96
+      },
+      "knee": {
+        "c_star": 24,
+        "mi_plat": 4.313082719257235,
+        "mi_plat_se": 0.11971914309083156,
+        "family": "allparams_ms30",
+        "mi_at_c10": 1.3182473905006185,
+        "classification": "no knee (diffuse)"
+      },
+      "s_star": {
+        "inputs": [
+          "omega_b",
+          "omega_cdm",
+          "H0",
+          "tau",
+          "A_s",
+          "n_s"
+        ],
+        "size": 6,
+        "eta": 1.0,
+        "eta_se": 0.0,
+        "screen_recurrent": true,
+        "gate_G2_verdict": "PASS"
+      },
+      "sufficiency": {
+        "eta_s": 1.0,
+        "eta_plat": 0.3007019892986333,
+        "eta_post": 0.36995109228438244,
+        "eta_post_se": 0.0037488992076264403,
+        "eta_post_hat": 0.3706206019591116,
+        "eta_post_hat_se": 0.004153883454463822,
+        "eta_plat_comb": 0.6364159966117799,
+        "eta_post_comb": 0.7564934325847782,
+        "eta_post_hat_comb": 0.7578624775276034
+      },
+      "ceiling": {
+        "I": 3.4413355872856597,
+        "se": 0.0028781988282655614,
+        "snr": 986.5344930778925
+      },
+      "signature": {
+        "g_j": [
+          0.0,
+          0.20334234163036188,
+          0.3921957022012747,
+          0.18667474900078318,
+          0.21778720716758032,
+          0.0
+        ],
+        "sobol_ST": [
+          0.0,
+          0.15133338336476665,
+          0.5579935158108974,
+          0.1281347755762706,
+          0.1742536504143829,
+          0.0
+        ],
+        "ratio_pairs": [
+          {
+            "i": 3,
+            "j": 4,
+            "pair": [
+              "tau",
+              "ln10As"
+            ],
+            "ratio_u": -0.8571428571428563,
+            "cv": 1.6840111482181982e-16,
+            "frac_valid": 1.0,
+            "r_raw": -1.9999999999999998
+          }
+        ],
+        "decoder_cos_g": 0.7749248345784931
+      },
+      "residual_stage1": {
+        "r2_cal": 0.9212886855895596,
+        "r2_res": 0.9894102582709234,
+        "residual_pass": false,
+        "loadings": [
+          "omega_b",
+          "omega_cdm",
+          "H0",
+          "tau",
+          "ln10As",
+          "n_s"
+        ]
+      },
+      "f2": {
+        "expr": "log(H0)/(n_s*omega_b)",
+        "support": [
+          "omega_b",
+          "H0",
+          "n_s"
+        ],
+        "shape_sector": true,
+        "r_sr": 0.8,
+        "mi_vs_e1": 1.1856422550629175,
+        "r2_stage2": 0.9078570620876851,
+        "combined_r2_vs_mu": 0.9927473207382501,
+        "stage2_residual_pass": false,
+        "stage2_loadings": [
+          "tau",
+          "ln10As"
+        ]
+      },
+      "levelset": {
+        "f1_e_inv": 0.20770537853240967,
+        "f1_e_inv_se": 0.00259473145831929,
+        "f1_band": [
+          0.07871131441044044,
+          0.15742262882088087
+        ],
+        "f1_response_r2": 0.9198284625779731,
+        "f1_response_r2_t2": 0.923064267764555,
+        "f1_pass": false,
+        "joint_e_inv": null,
+        "joint_band": [
+          0.007252679261749884,
+          0.014505358523499767
+        ],
+        "joint_response_r2": 0.9942198908983599,
+        "joint_response_r2_t2": 0.9941449406919155,
+        "joint_pass": null,
+        "joint_union": [
+          "omega_b",
+          "omega_cdm",
+          "H0",
+          "tau",
+          "ln10As",
+          "n_s"
+        ],
+        "joint_complement": []
+      },
+      "decoder": {
+        "a": [
+          0.10477529541472516,
+          -0.14715427405721007,
+          -0.48347032207220897,
+          0.34527821161425615,
+          0.0,
+          0.05320729322182779
+        ],
+        "r2_W": 0.9960991317597998,
+        "amp_mass": 0.6369768551734907,
+        "frac_brk": 0.17388094192688724,
+        "r_dec": 4.3231295414709
+      },
+      "subspace": {
+        "a_star": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "axis_aligned": false,
+        "r2_own": 0.9183817167326376,
+        "r2_full": 0.9964277460030215,
+        "r2_t2": 0.9963406154231758,
+        "top_pair": [
+          4,
+          0
+        ],
+        "redundancy_2_given_1": -10.920356050556956
+      },
+      "legs": {
+        "minimal_stable": true,
+        "r_sr": 0.8,
+        "eta_s": 1.0,
+        "residual1_pass": false,
+        "eta_post": 0.36995109228438244,
+        "eta_post_hat": 0.3706206019591116,
+        "ls_strict": false,
+        "ls_joint": null,
+        "ls_evidence": true,
+        "response_ok": true,
+        "subspace_small": false,
+        "subspace_r2": 0.9964277460030215
+      },
+      "status": "primarily interpreted",
+      "status_reason": "eta_S + R_SR + level-set evidence green; stage-1 residual structured (f2 documented)",
+      "deviations": [
+        {
+          "id": "D-LS",
+          "phase": "7a/10",
+          "text": "level-set leg via response-only (joint union support = all 6)"
+        }
+      ]
+    }
+  ],
+  "gates": {
+    "G1": {
+      "verdict": "PASS",
+      "source": "sufficiency_audit_lcdm_tt_beta3e-4.md (amplitude positive control; both models 2026-08-03)"
+    },
+    "G2": {
+      "per_latent": {
+        "z0": {
+          "role": "shape",
+          "s_star": [
+            "A_s",
+            "H0",
+            "n_s",
+            "omega_b",
+            "omega_cdm"
+          ],
+          "eta": 1.0028612801524621,
+          "recurrent_across_screen_seeds": false,
+          "verdict": "ATTENTION (not screen-recurrent)"
+        },
+        "z1": {
+          "role": "shape",
+          "s_star": [
+            "A_s",
+            "H0",
+            "n_s",
+            "omega_b",
+            "omega_cdm",
+            "tau"
+          ],
+          "eta": 1.0,
+          "recurrent_across_screen_seeds": true,
+          "verdict": "PASS"
+        },
+        "z2": {
+          "role": "amplitude",
+          "s_star": [
+            "A_s",
+            "H0",
+            "n_s",
+            "omega_b",
+            "omega_cdm",
+            "tau"
+          ],
+          "eta": 1.0,
+          "recurrent_across_screen_seeds": true,
+          "beats_2input_by_gt1se": true,
+          "verdict": "PASS (superset finding)"
+        },
+        "z3": {
+          "role": "shape",
+          "s_star": [
+            "H0",
+            "n_s",
+            "omega_b",
+            "omega_cdm",
+            "tau"
+          ],
+          "eta": 0.9967692851038382,
+          "recurrent_across_screen_seeds": true,
+          "verdict": "PASS"
+        },
+        "z4": {
+          "role": "shape",
+          "s_star": [
+            "A_s",
+            "H0",
+            "n_s",
+            "omega_b",
+            "omega_cdm",
+            "tau"
+          ],
+          "eta": 1.0,
+          "recurrent_across_screen_seeds": true,
+          "verdict": "PASS"
+        }
+      },
+      "overall": "PARTIAL (z0 flagged)"
+    },
+    "G3": {
+      "dpi_pass": true,
+      "dpi_violations": [],
+      "amplitude": {
+        "latent": 2,
+        "I": 4.303570007600048,
+        "I_se": 0.0029791202117115277,
+        "eta_post_canonical": 0.34716161353043246,
+        "eta_post_canonical_se": 0.003111645566338649,
+        "eta_post_hat_canonical": 0.3470487452838639,
+        "eta_post_hat_canonical_se": 0.0033125231409416624,
+        "eta_post_s_star": 0.8571617166391573,
+        "eta_post_hat_s_star": 0.8568830385358991,
+        "verdict": "residual is genuinely stored information (eta_post_hat < 0.95) \u2014 Phase 6 matters"
+      },
+      "pass": true
+    },
+    "G4a_f1_only": {
+      "latent": 2,
+      "e_inv_t1": 0.09808681905269623,
+      "r2_response_t1": 0.9465285501392551,
+      "e_inv_t2": 0.10370253026485443,
+      "r2_response_t2": 0.9479915213779173,
+      "pass_e_inv": false,
+      "pass_response": true,
+      "pass_t2_confirm": false,
+      "controls_sane": true,
+      "pass": false
+    },
+    "G4a_joint": {
+      "latent": 2,
+      "e_inv_defined": false,
+      "e_inv_t1": null,
+      "r2_response_t1": 0.9933079917583645,
+      "e_inv_t2": null,
+      "r2_response_t2": 0.9931683361525269,
+      "pass_e_inv": null,
+      "pass_response": true,
+      "pass_t2_confirm": true,
+      "controls_sane": true,
+      "pass": null
+    },
+    "G4b": {
+      "latent": 2,
+      "amp_mass": 0.6363252898672547,
+      "r_dec": 0.35058236628105716,
+      "r2_W": 0.9998231729872081,
+      "pass_mass": false,
+      "pass_ratio": false,
+      "pass_r2": true,
+      "pass": false
+    }
+  },
+  "controls": {
+    "stage1_permutation": [
+      {
+        "latent": 0,
+        "r2_null_p975": -0.0022390064898167236,
+        "mi_res_p975_max": 0.0010607964357192052
+      },
+      {
+        "latent": 1,
+        "r2_null_p975": -0.0024085555926554396,
+        "mi_res_p975_max": 0.0009301903537478093
+      },
+      {
+        "latent": 2,
+        "r2_null_p975": -0.0023448852494417603,
+        "mi_res_p975_max": 0.0006956996843594826
+      },
+      {
+        "latent": 3,
+        "r2_null_p975": -0.0017795980863766245,
+        "mi_res_p975_max": 0.0008017887936876311
+      },
+      {
+        "latent": 4,
+        "r2_null_p975": -0.0020507961898197516,
+        "mi_res_p975_max": 0.0007167792021645341
+      }
+    ],
+    "residual_shuffled": [
+      {
+        "target_label": "res_z2",
+        "shuffle_seed": 0,
+        "best_mi_unshuffled": 0.07364389475040728
+      },
+      {
+        "target_label": "res_z2",
+        "shuffle_seed": 1,
+        "best_mi_unshuffled": 0.06597967164868267
+      }
+    ],
+    "levelset_controls": {
+      "shuffled": [
+        {
+          "shuffle_seed": 0,
+          "expr": "-tau**2/(omega_b - 2.046*tau)",
+          "e_inv": 1.7287646532058716,
+          "r2_response": 0.27841075976302043
+        },
+        {
+          "shuffle_seed": 1,
+          "expr": "A_s*omega_b/(H0*log(log(-log(tau) - 0.8179436))**4) + 0.52972734*omega_b/(H0*tau)",
+          "e_inv": 0.8106855750083923,
+          "r2_response": 0.390172172964804
+        },
+        {
+          "shuffle_seed": 2,
+          "expr": "-0.193282131152702*H0**4*(omega_cdm - 0.118795045)**4/(H0*(omega_cdm - 0.118795045) - 0.0315323285859776)**4",
+          "e_inv": 2.1964356899261475,
+          "r2_response": 0.07025874897364404
+        }
+      ],
+      "wrong_latent": [
+        {
+          "latent": 0,
+          "e_inv": 2.7854015827178955,
+          "r2_response": -0.00457295562402682
+        },
+        {
+          "latent": 1,
+          "e_inv": 1.542359709739685,
+          "r2_response": 0.012912508026255431
+        },
+        {
+          "latent": 3,
+          "e_inv": 2.3631131649017334,
+          "r2_response": -0.0035650676332574793
+        },
+        {
+          "latent": 4,
+          "e_inv": 1.0632100105285645,
+          "r2_response": 0.03426984786552978
+        }
+      ]
+    },
+    "levelset_joint_wrong_latent": [],
+    "subspace_shuffled_probe_max": -0.0002856330003609076
+  },
+  "deviations_global": [
+    {
+      "id": "D-P2a",
+      "phase": 2,
+      "text": "R_SR seed-level tolerance = one cross-seed SD, not SE-of-mean (the literal \u00a70.3 rule caps R_SR ~0.7 by seed scatter alone even for perfectly stable coordinates). semantic_recurrence md."
+    },
+    {
+      "id": "D-P2b",
+      "phase": 2,
+      "text": "cluster representatives must be directly equivalent to a majority of sampled members (anti-chaining guard on union-find; cohesion reported per cluster). semantic_recurrence md."
+    },
+    {
+      "id": "R-P5",
+      "phase": 5,
+      "text": "registered refinement (decided on the synthetic positive control before real data): eta_post_hat = MI(Z;f)/MI(Z;mu) drives the 0.95 demotion rule; analytic eta_post = MI/I stays the headline. posterior_ceiling md."
+    },
+    {
+      "id": "D-LS",
+      "phase": "7a/10",
+      "text": "level-set status leg evaluated on the joint (f1,f2) audit (and response-only where the joint union support is all 6); the f1-only E_inv failure is the Phase-3 structured residual identically. Frozen thresholds unchanged; a joint FAIL still blocks. levelset_audit_joint md + this docstring."
+    }
+  ],
+  "subspace_pending": false,
+  "generated_by": "scripts/build_latent_cards.py"
+}

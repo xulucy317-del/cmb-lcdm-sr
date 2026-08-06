@@ -1,3 +1,10 @@
+> **STATUS (2026-08-06): superseded.** This programme was made executable
+> as [`docs/discovery_roadmap.md`](discovery_roadmap.md) (phases 0-10 with
+> budgets and pre-registered gates) and has been carried out; results live
+> in `experiments/` (final synthesis: `latent_cards_<run>.{md,json}`).
+> Kept for the original motivation and derivations; section references
+> (§2.1, §3, ...) in the roadmap point here.
+
 ## Core diagnosis
 
 The remaining bottleneck is **not PySR search capacity**. The current results already show that increasing capacity mostly lets symbolic regression reconstruct more of the deterministic encoder map, while the low-complexity front is essentially saturated across hyperparameters. The amplitude direction is robust, but the shape latents still lack validated representation statements. Therefore, the next stage should move from

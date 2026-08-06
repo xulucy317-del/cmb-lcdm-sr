@@ -37,9 +37,9 @@ discovered forms themselves: the first-order Taylor direction `A_s·(τ−c)`
 with c ≈ τ̄ + ½, and (TT+EE) the literal `A_s·e⁻²ᵗ`. Full protocol,
 per-seed tables, and the negative control: [`docs/method.md`](docs/method.md).
 
-## Where the project stands (2026-08-01)
+## Where the project stands (2026-08-06)
 
-Three layers, protocol-identical throughout (gmm_mi pure-Julia inner loss,
+Five layers, protocol-identical throughout (gmm_mi pure-Julia inner loss,
 5000 samples, post-hoc held-out GMM-MI ranking), each consolidated into
 `experiments/`:
 
@@ -77,34 +77,71 @@ baseline, 12 configs × 3 seeds per model on the amplitude latents
 * **Cost**: `ncycles_per_iteration 190` matches baseline quality at ~60%
   runtime; `population_size 108` is past diminishing returns (~4× cost).
 
-## Remaining gaps — from "maximise MI" to "what does each latent represent"
+**4. Discovery study (roadmap phases 0–8) — done.** The executable programme
+in [`docs/discovery_roadmap.md`](docs/discovery_roadmap.md): every
+instrument frozen (§0.3) and validated on the amplitude sector before any
+shape-latent unblinding (gates G1–G4 in the experiment mds):
 
-The aim is representation discovery; with all inputs exposed, argmax-MI
-drifts away from it (deterministic encoder means → MI rises without bound,
-toward "reconstruct the encoder"). What carries the aim today is the r-ratio
-and textbook scan — amplitude sector only. Open gaps, in order:
+* **Phases 1–3** — plateau/knee readout, semantic clustering (one dominant
+  cluster per latent, R_SR ≥ 0.8, 9/11 at 1.0), calibrated sufficiency:
+  η_S ≈ 1.0 for all 11 latents; every stage-1 residual *structured*
+  (R²_res 0.98–0.99) — the honest verdict gate G1 requires.
+* **Phase 4** — the blind 63-subset screen closes the last human choice:
+  S\* per latent at full protocol, no hand-picked inputs anywhere.
+* **Phase 5** — the intrinsic ceiling I(Z_k;θ) from the stochastic latent;
+  η̂_post = MI(Z;f)/MI(Z;μ) (registered refinement) is the demotion metric;
+  canonical forms store 0.29–0.84 of what each latent knows.
+* **Phase 6** — residual SR gives every latent a recurrent second
+  coordinate f₂ (R_SR 0.80, shuffled-residual nulls ≤ 0.07 nat vs 0.4–1.8
+  real); the combined h(f₁)+g(f₂) reaches R²(μ) 0.955–0.998 and lifts
+  η̂_post to 0.59–0.96. Amplitude DoD MET on EE (f₂ pure shape-sector),
+  NOT MET on TT — substantively: the TT knee forms are A_s·(τ−c) × shape,
+  and an additive hierarchy cannot absorb the multiplicative interaction
+  (deviation D-DoD-z2 on the card).
+* **Phase 7** — level sets: f₁-only E_inv fails exactly as the structured
+  residual predicts (E_inv ∈ [1−R², 2(1−R²)] for all 11 latents); joint
+  (f₁,f₂) level sets restore invariance — 7/8 auditable latents pass, EE
+  amplitude 0.226 → 0.029, **gate G4a-joint PASS**. Decoder: d_k(ℓ) ≈
+  Σ a_j t_j at R²_W ≈ 1.0, cos(a\*, g_j) 0.77–1.00; the EE reionization
+  bump identifies the amplitude pair and returns **r_dec = −1.87** — a
+  third, observable-domain readout of the −2 (TT's ℓ≥30 pair is collinear:
+  G4b FAIL by mechanism, documented).
+* **Phase 8** — sparse probes + slab-conditional MI: every canonical
+  coordinate is linearly decodable from its own latent (rank-normal
+  R² 0.88–0.95) with the remainder genuinely distributed; **no redundant
+  latent pair exists in either model** (all top-2 conditionals are
+  synergistic). The EE amplitude sector is *split*, not duplicated: z4's
+  τ-direction is carried by z4 essentially alone (A\* = {z2, z4}), and
+  knowing z5 raises z1's information about `A_s·e⁻²ᵗ` from 0.013 to
+  0.473 nat.
 
-1. **Knee/sufficiency readout (no new runs needed).** Replace argmax-MI with
-   a saturation rule on each Pareto front: the smallest form capturing ≥X% of
-   the plateau MI, plus that sufficiency fraction — yielding a
-   "z_k ≈ f(…), capturing N% of ceiling MI at complexity c" table for all 11
-   latents. The data already sits in `results/*/allparams*/*/report.json`
-   (every front equation has a val MI); the maxsize-30 sweep runs provide the
-   ceiling proxy. Pure consolidation-layer change.
-2. **Seed recurrence as the selection criterion.** A representation claim
-   should be the canonical form that *recurs across seeds*
-   (machinery: `scripts/pool_sr_runs.py`). Top-MI forms do not recur; the
-   c≤10 building block `A_s·(τ−c)` does.
-3. **Blind variable selection.** Rerun SR restricted to the inputs the knee
-   form selects (instead of hand-picking `A_s, τ`) — closes the last human
-   choice in the loop while restoring the marginalisation ceiling that made
-   the 2-input MI numbers interpretable.
-4. **Answer-agnostic interpretation.** The r-diagnostic and textbook regexes
-   were designed knowing the answer: the *search* is blind, the
-   *interpretation step* is not. Gaps 1–2 are its answer-agnostic
-   replacement. The shape latents (z0–z4 per model) currently have no
-   validated "what it represents" statement at all — only the audit's
-   leading-order labels.
+**5. Latent cards (phase 10) — the deliverable.**
+`experiments/latent_cards_<run>.{md,json}`: one card per latent (canonical
+cluster, S\*, η_S/η_plat/η_post, knee, R_SR, signature + constant-ratio
+pairs, residual audits, E_inv, decoder decomposition, subspace probe,
+status, deviations), plus a gates table, controls appendix, and deviation
+register. Under the frozen predicates: **10/11 latents are "primarily
+interpreted"** — a validated 1-D primary coordinate plus a documented
+structured residual with a discovered f₂ — and **EE z0 is "unresolved"**
+(weakest stage-2 account, R² 0.41; joint E_inv 0.060 > 0.05, inside its
+expected band). No latent reaches full "interpreted": the stage-2
+residuals remain structured — the encoder hierarchy does not terminate at
+two symbolic levels.
+
+## Remaining gaps
+
+1. **R_model (roadmap Phase 9).** Search-stability (5 PySR seeds) is
+   established; architecture-stability needs 3 retrained VAE seeds per
+   regime (parent `cmbvae` repo, GPU) plus the alignment/rerun machinery.
+   Until then every card claim is per-checkpoint.
+2. **The hierarchy does not terminate.** Stage-2 residuals still fail the
+   frozen audit for all 11 latents; a third stage is possible but the
+   returns are shrinking (combined R²(μ) already 0.955–0.998). Recorded on
+   the cards rather than pursued.
+3. **EE z0.** The one unresolved card: its stage-2 account explains only
+   R² 0.41 of the residual and its joint level sets stay at E_inv 0.060.
+   A better f₂ family (or a 3-coordinate account) is the concrete next
+   experiment if this latent matters downstream.
 
 ## What's here
 

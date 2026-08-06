@@ -359,3 +359,79 @@ textbook reference at any point. The agreement of the two regimes shows the
 −2 reionization-suppression exponent is an intrinsic feature of the CMB
 amplitude direction, recovered blindly whether the degeneracy is present or
 lifted.
+
+---
+
+## 9. From amplitude rediscovery to representation cards — the full study
+
+Sections 1–8 established the blind protocol on one latent per model whose
+ground truth was known. The discovery study
+([`docs/discovery_roadmap.md`](discovery_roadmap.md), phases 0–10;
+deliverables in `experiments/`, final synthesis
+`latent_cards_<run>.{md,json}`) extends the claim to **all 11 latents** of
+the two checkpoints, with the amplitude sector as registered positive
+control (gate G1) and every instrument frozen (§0.3 thresholds) before any
+shape-latent unblinding. What the phases added:
+
+* **Saturation, not argmax (phases 1–2).** Cumulative Pareto envelopes give
+  each latent a plateau and a one-SE knee; semantic clustering (algebraic
+  identity ∨ |Spearman| ≥ 0.98 ∨ gradient distance ≤ 0.05) replaces string
+  pooling. Every latent has one dominant cluster with R_SR ≥ 0.8 (9/11 at
+  1.0); the amplitude clusters contain the textbook family with R_SR 1.0
+  (the EE representative is literally `A_s*exp(-2*tau)`).
+* **Calibrated sufficiency + blind subsets (phases 3–4).** After an
+  arbitrary 1-D recalibration, every canonical coordinate saturates its
+  support-restricted ceiling (η_S ≈ 1.0; S* from a blind 63-subset screen);
+  every stage-1 residual is *structured* (R²_res 0.98–0.99) — the frozen
+  machinery reports "primary coordinate + structured residual" everywhere
+  rather than fabricating sufficiency, exactly the direction G1 demands.
+* **The intrinsic ceiling (phase 5).** I(Z_k;θ) from the stochastic latent
+  turns MI fractions into physical statements: the deterministic mean map
+  carries detail the sampled latent cannot transmit (res_var/noise up to
+  382), and η̂_post = MI(Z;f)/MI(Z;μ) (registered refinement R-P5) is the
+  demotion metric. Canonical forms store 0.29–0.84 of what each latent
+  knows; S*-forms 0.84–0.99.
+* **Hierarchical closure (phase 6).** Second-stage blind SR on the residual
+  caches gives every latent a recurrent f₂ (R_SR 0.80; shuffled-residual
+  nulls ≤ 0.07 nat vs 0.4–1.8 real). The combined account h(f₁)+g(f₂)
+  reaches R²(μ) 0.955–0.998 and lifts η̂_post to 0.59–0.96. The
+  pre-registered amplitude DoD (f₂ pure shape-sector) is MET on EE
+  (f₂ = H0·ω_cdm/n_s) and NOT MET on TT — substantively: the TT knee forms
+  are A_s·(τ−c) × shape, and an additive hierarchy cannot absorb the
+  multiplicative interaction (τ-clamping f₂ costs 0.20 nat; deviation
+  D-DoD-z2). A consistency bonus: the EE H0-latent's residual coordinate
+  is literally `A_s*exp(-2*tau)/omega_b**2` with (τ, lnAs) ratio −2.0000.
+* **Interventional validation (phase 7).** Level sets of f₁ alone are NOT
+  invariant — E_inv lands inside [1−R²_cal, 2(1−R²_cal)] for all 11
+  latents, i.e. the within-level-set movement IS the structured residual
+  (honest G4a FAIL). Jointly conditioning on (f₁, f₂) restores invariance:
+  7 of 8 auditable latents pass the frozen 0.05 rule (EE amplitude
+  0.226 → 0.029, **gate G4a-joint PASS**, T2-confirmed, wrong-latent
+  controls 0.2–2.3); the three TT latents whose union support is all 6
+  parameters have no nuisance direction left to test (deviation D-LS).
+  Decoder-side (7b): d_k(ℓ) decomposes onto data-driven parameter
+  templates at R²_W ≈ 1.0 with cos(a*, g_j) 0.77–1.00; the EE reionization
+  bump identifies the amplitude pair and returns **r_dec = −1.87** — a
+  third, observable-domain readout of the −2 (TT's ℓ≥30 spectra leave the
+  pair collinear: G4b FAIL by mechanism, documented).
+* **Subspace & redundancy (phase 8).** Sparse probes show each canonical
+  coordinate is linearly decodable from its own latent at rank-normal
+  R² 0.88–0.95, with the remainder genuinely distributed across the code
+  (the own latent is always in the 1-SE carrier set). Slab-conditional MI
+  finds **no redundant pair in either model** — every top-2 carrier
+  conditional is synergistic — and answers the flagged question: the EE
+  amplitude sector is *split*, not duplicated (z4's τ-direction is carried
+  by z4 essentially alone, A* = {z2, z4}; conditioning on z5 raises z1's
+  information about `A_s·e⁻²ᵗ` from 0.013 to 0.473 nat). Residual
+  coordinates are distributed (own-latent R² 0.01–0.58). Controls null
+  throughout (shuffled-probe R² ≈ 0.000, shuffled-f floors ≈ 0.001 nat).
+* **Statuses (phase 10).** Under the frozen predicates, **10 of 11 latents
+  are "primarily interpreted"** — a validated 1-D primary coordinate plus
+  a documented structured residual, now with a discovered second
+  coordinate — and EE z0 is **unresolved** (weakest stage-2 account,
+  R² 0.41; joint E_inv 0.060 vs 0.05, inside its expected band). No latent
+  reaches full "interpreted": the stage-2 residuals are still structured —
+  the encoder hierarchy does not terminate at two symbolic levels. That is
+  an honest limit of the representation, not of the instruments. R_model
+  (phase 9, cross-VAE-seed recurrence) remains the one open axis; it needs
+  retrained checkpoints from the parent repo.
