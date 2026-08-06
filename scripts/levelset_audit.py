@@ -68,24 +68,30 @@ def _f(v):
 
 # ---- pair construction -------------------------------------------------------
 
+def quantile_bins(fvals: np.ndarray, n_bins: int) -> np.ndarray:
+    """Equal-count bin ids on one coordinate (constant f ⇒ one bin)."""
+    edges = np.unique(np.quantile(fvals, np.linspace(0.0, 1.0, n_bins + 1)))
+    if len(edges) < 2:
+        return np.zeros(len(fvals), dtype=int)
+    return np.clip(np.searchsorted(edges, fvals, side="right") - 1,
+                   0, len(edges) - 2)
+
+
 def pair_within_bins(fvals: np.ndarray, u_comp: np.ndarray, n_bins: int = 200,
                      pairs_per_bin: int = 25, bin_cap: int = 400,
-                     min_bin: int = 4, rng: np.random.Generator | None = None):
+                     min_bin: int = 4, rng: np.random.Generator | None = None,
+                     bins: np.ndarray | None = None):
     """Disjoint within-bin pairs maximising ||u_comp_i − u_comp_j||.
 
     Rows are quantile-binned on fvals (equal-count, delta ~ 1/n_bins); within
     each bin a greedy max-distance matching draws up to pairs_per_bin disjoint
     pairs. Oversized bins (degenerate f) are subsampled to bin_cap first.
+    Precomputed ``bins`` ids (e.g. joint 2-D cells) override the 1-D binning.
     Returns (idx_i, idx_j, dist) index arrays into fvals' rows.
     """
     rng = rng or np.random.default_rng(0)
-    n = len(fvals)
-    edges = np.unique(np.quantile(fvals, np.linspace(0.0, 1.0, n_bins + 1)))
-    if len(edges) < 2:                                   # constant f
-        bins = np.zeros(n, dtype=int)
-    else:
-        bins = np.clip(np.searchsorted(edges, fvals, side="right") - 1,
-                       0, len(edges) - 2)
+    if bins is None:
+        bins = quantile_bins(fvals, n_bins)
     ii, jj, dd = [], [], []
     for b in np.unique(bins):
         rows = np.where(bins == b)[0]
