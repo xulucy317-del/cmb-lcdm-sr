@@ -133,7 +133,10 @@ two symbolic levels.
 1. **R_model (roadmap Phase 9).** Search-stability (5 PySR seeds) is
    established; architecture-stability needs 3 retrained VAE seeds per
    regime (parent `cmbvae` repo, GPU) plus the alignment/rerun machinery.
-   Until then every card claim is per-checkpoint.
+   The roadmap was **closed 2026-08-09 without this phase** (Closure
+   section of `docs/discovery_roadmap.md`): every card claim is
+   per-checkpoint, and Phase 9 remains executable later without touching
+   the frozen thresholds or any existing card number.
 2. **The hierarchy does not terminate.** Stage-2 residuals still fail the
    frozen audit for all 11 latents; a third stage is possible but the
    returns are shrinking (combined R²(μ) already 0.955–0.998). Recorded on

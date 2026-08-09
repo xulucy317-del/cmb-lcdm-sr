@@ -518,8 +518,9 @@ def to_markdown(payload: dict) -> str:
                   f"max-MI p97.5 | {fmt(L['r2_null_p975'])} / "
                   f"{fmt(L['mi_res_p975_max'])} |")
     for c in (ctl.get("residual_shuffled") or []):
-        md.append(f"| shuffled-residual SR (seed {c.get('shuffle_seed')}) "
-                  f"best MI | {fmt(c.get('best_mi_vs_true'))} |")
+        md.append(f"| shuffled-residual SR ({c.get('target_label')}, seed "
+                  f"{c.get('shuffle_seed')}) best MI vs true residual | "
+                  f"{fmt(c.get('best_mi_unshuffled'))} |")
     lc = ctl.get("levelset_controls") or {}
     for c in (lc.get("shuffled") or []):
         md.append(f"| level-set shuffled form (seed {c['shuffle_seed']}) "

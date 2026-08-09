@@ -1,5 +1,14 @@
 # Discovery-study roadmap — from Pareto fronts to validated latent cards
 
+> **STATUS (2026-08-09): closed.** Phases 0–8 and 10 ran to completion under
+> the frozen §0.3 predicates; Phase 9 (R_model, needs parent-repo GPU
+> retraining) was **not run**, and the study is closed out without it — every
+> card claim is therefore per-checkpoint. Outcome against §0.1, the phase
+> ledger, and the disposition of Phase 9 are in the
+> [Closure section](#closure-2026-08-09--outcome-and-the-disposition-of-phase-9)
+> at the end. Deliverables: `experiments/latent_cards_<run>.{md,json}`;
+> narrative synthesis: [`docs/method.md`](method.md) §9.
+
 *Drafted 2026-08-03. Builds on the status in [`README.md`](../README.md)
 ("Where the project stands", 2026-08-01) and the methodological programme in
 [`docs/next_step.md`](next_step.md). This file is the executable version of
@@ -678,3 +687,97 @@ halves 4a if needed.
 Each ships with tests (`tests/`), follows the `_bootstrap` import pattern,
 and writes deliverables to `experiments/` in the `.md` + `.json` pair
 convention.
+
+---
+
+## Closure (2026-08-09) — outcome, and the disposition of Phase 9
+
+**The study is closed without Phase 9.** Phases 0–8 and 10 ran to completion
+under the frozen §0.3 predicates; every deliverable named in the phase map
+exists in `experiments/`, and the synthesis is
+`experiments/latent_cards_<run>.{md,json}` + [`docs/method.md`](method.md)
+§9. R_model needs retrained VAE seeds from the parent `cmbvae` repo (GPU,
+outside this repo's CPU budget) and was not run; the §0.1 card field was
+always "R_model where available", and it is absent everywhere.
+
+### Outcome against the §0.1 end state
+
+All 11 latents carry complete cards — canonical cluster f\*, S\*,
+η_S/η_plat/η_post (+ η̂_post), knee, R_SR, signature + constant-ratio pairs,
+two-stage residual audits, E_inv (f₁-only and joint), decoder decomposition
+a\*, subspace probe, status, deviations:
+
+| | interpreted | primarily interpreted | subspace/mixed | unresolved |
+|---|---:|---:|---:|---:|
+| TT (5 latents) | 0 | 5 | 0 | 0 |
+| TT+EE (6 latents) | 0 | 5 | 0 | 1 (z0) |
+
+The Phase-10 definition of done is met on all three legs:
+
+* every latent of both models has a status whose supporting numbers are
+  reproducible from `experiments/*.json`;
+* the amplitude cards read "primarily interpreted" with the η_post caveat
+  resolved explicitly: the G3 fork landed on the informative branch — the
+  amplitude posteriors are near-deterministic (SNR 5.5·10³ TT / 4.3·10³ EE),
+  so the structured residual is genuinely stored information, not sub-noise
+  detail; Phase 6 discovered and documented f₂, and the TT
+  additive-hierarchy limit is registered as D-DoD-z2 rather than absorbed;
+* no claim rests on an answer-aware instrument — every instrument was
+  validated on the amplitude positive control before any shape-latent
+  unblinding (G1 PASS, both models), thresholds were frozen in §0.3
+  beforehand, and every post-freeze judgement call is in the deviation
+  register (D-P2a/b, R-P5, D-LS, D-DoD-z2), with N-G2 attention flags on
+  the three non-screen-recurrent S\* picks (TT z0, EE z3, EE z4).
+
+No latent reaches full "interpreted": the stage-2 residuals are still
+structured everywhere — the encoder hierarchy does not terminate at two
+symbolic levels. That is a finding about the representation, not an
+instrument failure, and it is recorded on the cards rather than pursued.
+
+### Phase ledger
+
+| Phase | Ran | Gate / result |
+|---|---|---|
+| 0 | 2026-08-03 | G0 PASS |
+| 1 (+1b ms30) | 2026-08-03 | plateaus, knees, η-level forms for 11/11; amplitude rows reproduce the known picture |
+| 2 | 2026-08-03 | one dominant cluster per latent, R_SR ≥ 0.8 (9/11 at 1.0); amplitude family in one cluster (EE representative literally `A_s*exp(-2*tau)`) |
+| 3 | 2026-08-03 | **G1 PASS both models** — knee-slice support {τ, lnA_s}, amplitude direction r ≈ −1.98, η_S = 1.000 vs reference ceiling, residual fails in the expected structured direction |
+| 4a+4b | 2026-08-04 | G2: 8/11 PASS, 3 ATTENTION (not screen-recurrent); amplitude = PASS as a *superset finding* — all-6 beats {A_s, τ} by > 1 SE, reproducibly |
+| 5 | 2026-08-05 | G3 PASS (DPI holds everywhere); informative branch — residuals are real stored information |
+| 6 | 2026-08-06 | recurrent f₂ for all 11 (R_SR 0.80; nulls ≤ 0.074 nat vs 0.4–1.8 real); amplitude DoD MET on EE, NOT MET on TT (D-DoD-z2) |
+| 7a + joint | 2026-08-05/06 | G4a f₁-only FAIL = the structured residual, quantitatively (E_inv ∈ [1−R², 2(1−R²)] for 11/11); **G4a-joint PASS on EE**; TT gate UNDEFINED (z0, z3 pass; z1/z2/z4 union support = all 6, response leg green — D-LS) |
+| 7b | 2026-08-05 | decoder decomposition R²_W ≈ 1.0, cos(a\*, g) 0.77–1.00; **r_dec = −1.87** from the EE reionization bump; TT G4b FAIL by collinearity (mechanism documented) |
+| 8 | 2026-08-06 | every canonical coordinate linearly decodable from its own latent (R² 0.88–0.95); **no redundant pair in either model**; EE amplitude sector split, not duplicated |
+| 9 | **not run** | see below |
+| 10 | 2026-08-06 | cards + gates + controls appendix + deviation register; README and method.md §9 updated; next_step.md retired |
+
+### What closing without Phase 9 means
+
+* **Scope of every claim: per-checkpoint.** Five PySR seeds establish
+  *search* stability (R_SR); nothing here establishes stability across VAE
+  training seeds. "TT z3 encodes n_s + ω_cdm" is a claim about checkpoint
+  seed-42, not about the architecture.
+* **Partial cross-model evidence exists, but is not a substitute.** The two
+  checkpoints are different architectures on different data regimes
+  (PirasCVAE/TT vs DualEncoderCVAE/TT+EE), and the amplitude family recurs
+  across both, with the count fingerprint — one amplitude latent under the
+  degeneracy, two (split, not duplicated; Phase 8) when EE breaks it —
+  matching the physics, and the −2 exponent read three independent ways
+  (discovered forms, ratio field, decoder r_dec).
+* **Re-opening is additive.** If retrained seeds appear later, Phase 9 slots
+  in exactly as specified (align → finalist reruns → R_model column) without
+  touching any frozen threshold or existing card number.
+
+### Open items (recorded, not pursued)
+
+1. **EE z0** — the one unresolved card (stage-2 R² 0.41, joint E_inv 0.060
+   vs the 0.05 rule): a better f₂ family or a 3-coordinate account is the
+   concrete next experiment if this latent matters downstream.
+2. **Non-terminating hierarchy** — stage-2 residuals are structured for all
+   11 latents (combined R²(μ) already 0.955–0.998; returns shrinking).
+3. **Interaction-aware stage 2** — D-DoD-z2 shows the additive h(f₁)+g(f₂)
+   ansatz cannot absorb the multiplicative amplitude × shape structure of
+   the TT knee forms; a second stage with f₁ exposed as an input (or a
+   multiplicative composition rule) is the natural methods upgrade and would
+   plausibly also resolve EE z0.
+4. **R_model** — Phase 9 as specified.

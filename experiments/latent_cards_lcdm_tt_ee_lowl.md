@@ -127,8 +127,8 @@ One §0.1 card per latent, statuses from the frozen §0.3 predicates (deviation 
 | stage-1 perm null z3: R2 p97.5 / max-MI p97.5 | -0.002 / 0.001 |
 | stage-1 perm null z4: R2 p97.5 / max-MI p97.5 | -0.003 / 0.019 |
 | stage-1 perm null z5: R2 p97.5 / max-MI p97.5 | -0.002 / 0.001 |
-| shuffled-residual SR (seed 0) best MI | n/a |
-| shuffled-residual SR (seed 1) best MI | n/a |
+| shuffled-residual SR (res_z5, seed 0) best MI vs true residual | 0.009 |
+| shuffled-residual SR (res_z5, seed 1) best MI vs true residual | 0.060 |
 | level-set shuffled form (seed 0) E_inv | 1.69 |
 | level-set shuffled form (seed 1) E_inv | 1.59 |
 | level-set shuffled form (seed 2) E_inv | 1.81 |
