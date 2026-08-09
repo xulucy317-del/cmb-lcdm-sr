@@ -7,11 +7,13 @@
 #!
 #! Positional args:
 #!   1 RUN_NAME  (e.g. lcdm_tt_beta3e-4)
+#!   2 VARIANT   ("" = frozen Phase-6 additive; "ia" = interaction-aware
+#!               follow-up on results/<run>/residual_sr_ia)
 #!
 #!   sbatch hpc/slurm_residual_consolidate.sh lcdm_tt_beta3e-4
-#!   sbatch hpc/slurm_residual_consolidate.sh lcdm_tt_ee_lowl
+#!   sbatch hpc/slurm_residual_consolidate.sh lcdm_tt_ee_lowl  ia
 #!
-#! Output: experiments/residual_sr_<run>.{md,json}
+#! Output: experiments/residual_sr[_ia]_<run>.{md,json}
 #!
 #SBATCH --job-name=res_consol
 #SBATCH --output=logs/res_consol_%j.out
@@ -33,10 +35,11 @@ set -euo pipefail
 export PYTHONUNBUFFERED=1
 export OMP_NUM_THREADS=1
 
-RUN_NAME="${1:?usage: sbatch hpc/slurm_residual_consolidate.sh <run-name>}"
+RUN_NAME="${1:?usage: sbatch hpc/slurm_residual_consolidate.sh <run-name> [variant]}"
+VARIANT="${2:-}"
 
 cd "${PROJ}"; mkdir -p logs
 
-echo "[run] consolidate residual SR for ${RUN_NAME}"
+echo "[run] consolidate residual SR for ${RUN_NAME} variant='${VARIANT}'"
 python scripts/consolidate_residual_sr.py --run "${RUN_NAME}" \
-    --jobs 6 --mi-jobs 5
+    --variant "${VARIANT}" --jobs 6 --mi-jobs 5

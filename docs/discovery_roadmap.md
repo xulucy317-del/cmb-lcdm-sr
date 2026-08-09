@@ -768,16 +768,43 @@ instrument failure, and it is recorded on the cards rather than pursued.
   in exactly as specified (align → finalist reruns → R_model column) without
   touching any frozen threshold or existing card number.
 
-### Open items (recorded, not pursued)
+### Open items (statuses as of 2026-08-09; item 3 pursued same day)
 
-1. **EE z0** — the one unresolved card (stage-2 R² 0.41, joint E_inv 0.060
-   vs the 0.05 rule): a better f₂ family or a 3-coordinate account is the
-   concrete next experiment if this latent matters downstream.
-2. **Non-terminating hierarchy** — stage-2 residuals are structured for all
-   11 latents (combined R²(μ) already 0.955–0.998; returns shrinking).
-3. **Interaction-aware stage 2** — D-DoD-z2 shows the additive h(f₁)+g(f₂)
-   ansatz cannot absorb the multiplicative amplitude × shape structure of
-   the TT knee forms; a second stage with f₁ exposed as an input (or a
-   multiplicative composition rule) is the natural methods upgrade and would
-   plausibly also resolve EE z0.
+1. **EE z0** — pursued with item 3: the interaction-aware search finds a
+   *unanimous* secondary coordinate `−A_s·H0²·(f1hat − 10.87)` (R_SR 1.00
+   vs 0.80 additive; MI vs e₁ 0.40 → 0.50 nat) — an amplitude ×
+   own-coordinate interaction the additive ansatz could not express — yet
+   the joint level sets stay at E_inv 0.062 ± 0.002 (T2 0.067) against the
+   frozen 0.05 rule, inside the expected band [0.046, 0.093]. **The card
+   stays unresolved**, with the blocker now localised: the stage-2 residual
+   (R² 0.39) holds more than one coordinate's worth of structure — a
+   3-coordinate account is the concrete next experiment.
+2. **Non-terminating hierarchy** — reinforced by the follow-up: stage-2
+   residuals fail the frozen audit for all 11 latents under the
+   interaction-aware ansatz too (combined R²(μ) 0.954–0.997).
+3. **Interaction-aware stage 2** — **pursued 2026-08-09** (55 protocol runs
+   + 6 shuffled controls, ≈ 98 core-h): the Phase-6 residual SR rerun with
+   the stage-1 prediction f1hat = h(f₁) exposed as a 7th input. Outcomes:
+   * **D-DoD-z2 sharpened into a finding**: with the interaction channel
+     available, TT z2's recurrent knee coordinate is the *same* τ-bearing
+     form as the additive run (f1hat unused; DoD-ia NOT MET) — the
+     τ-coupling of the TT amplitude residual is genuine structure, not an
+     artifact of the additive ansatz.
+   * **The additive account is confirmed where it was good**: 8 of 11
+     latents return the same canonical f₂ under the enriched space; the EE
+     amplitude DoD stays MET (f₂ = `H0·ω_cdm/n_s` again; EE z1's residual
+     again literally `A_s·exp(−2τ)/ω_b²`, ratio −2.0000).
+   * **Interactions surface where they matter**: TT z4's canonical cluster
+     carries the f1hat-bearing top forms (residual MI 2.40 vs 2.16
+     additive; η̂_post_comb 0.758 → 0.787), TT z3's f₂ strengthens to
+     R_SR 1.00, EE z0 as in item 1.
+   * **No card status changes**; controls stay null (≤ 0.053 nat); the
+     f1hat composite is validated (T2 reconstruction error exactly 0).
+   Deliverables: `experiments/residual_sr_ia_<run>.{md,json}`,
+   `experiments/levelset_audit_joint_ia_<run>.{md,json}`. Infrastructure
+   (all backwards-identical when unused): `run_blind_sr.py`/
+   `run_shuffled_control.py` `--extra-input-npy`, the `semantics`
+   extra-input registry with chain-rule gradients,
+   `--variant ia` on the residual consolidator and joint level-set audit,
+   `scripts/build_f1hat_cache.py`, `hpc/slurm_residual_sr_ia*.sh`.
 4. **R_model** — Phase 9 as specified.

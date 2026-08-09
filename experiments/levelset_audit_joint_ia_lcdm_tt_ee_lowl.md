@@ -1,0 +1,114 @@
+# Joint (f1, f2) level-set audit, interaction-aware f2 — `lcdm_tt_ee_lowl` (post-closure follow-up)
+
+f2 here is the interaction-aware residual coordinate (`residual_sr_ia`, stage-1 prediction f1hat exposed to the stage-2 search); f1hat-bearing forms are evaluated as θ-functions through the registered composite h_full(f1(θ)). Statistic, thresholds, and machinery are otherwise identical to the frozen joint audit below.
+
+Pairs are drawn within joint quantile cells (14x14 equal-count on f1 x f2, T1), maximising nuisance distance in the complement of the union support; frozen rule unchanged (E_inv <= 0.05, matched-response R2 >= 0.9 vs the hierarchical composite h(f1) + g(f2)). The `f1-only` column is the Phase-7a E_inv this audit sharpens; the expected band is [1-R2_comb, 2(1-R2_comb)] from the Phase-6 combined account. Latents whose union support is all 6 parameters have no nuisance direction: E_inv undefined, pass = None, and only the response legs are evidence.
+
+_Reading the band_: inside = the movement within joint level sets is exactly the (still-structured) stage-2 residual, audit and calibration agree. Above = that residual is itself systematic along the remaining nuisance directions, amplified at the extreme-separation pairs this audit deliberately draws (the distance curve rises); the band's factor-2 cap assumes typical, not extremal, separations. Below = the stage-2 misfit lives along the support coordinates themselves, so the joint cells pin it instead of the nuisance moves exposing it.
+
+| latent | role | union S | comp | E_inv +/- SE | f1-only | expected band | rand | R2 resp (n) | T2 E_inv | T2 R2 | pass |
+|---|---|---|---|---|---:|---|---:|---|---:|---:|---|
+| z0 | omega_cdm | {omega_b, omega_cdm, H0, ln10As, n_s} | {tau} | 0.062 +/- 0.002 | 0.138 | 0.046-0.093 | 1.04 | 0.953 (12730) | 0.067 | 0.954 | False |
+| z1 | H0 | {omega_b, omega_cdm, H0, tau, ln10As} | {n_s} | 0.023 +/- 0.001 | 0.169 | 0.005-0.011 | 1.01 | 0.994 (12757) | 0.025 | 0.994 | True |
+| z2 | omega_b | {omega_b, omega_cdm, ln10As, n_s} | {H0, tau} | 0.015 +/- 0.000 | 0.164 | 0.003-0.006 | 0.97 | 0.997 (12592) | 0.015 | 0.997 | True |
+| z3 | n_s | {omega_b, omega_cdm, H0, n_s} | {tau, ln10As} | 0.014 +/- 0.000 | 0.086 | 0.008-0.016 | 1.01 | 0.994 (12941) | 0.014 | 0.994 | True |
+| z4 | tau (amplitude sector) | {tau, ln10As} | {omega_b, omega_cdm, H0, n_s} | 0.031 +/- 0.001 | 0.051 | 0.043-0.086 | 0.99 | 0.957 (12354) | 0.032 | 0.959 | True |
+| z5 | amplitude (A_s, tau) | {omega_cdm, H0, tau, ln10As, n_s} | {omega_b} | 0.029 +/- 0.001 | 0.226 | 0.007-0.015 | 1.03 | 0.992 (12983) | 0.030 | 0.992 | True |
+
+## z0 — omega_cdm
+
+f1 `omega_cdm/(H0*n_s*omega_b)`; f2 `-A_s*H0**2*(f1hat - 10.8708105)`; 196 joint cells, 4847 pairs, mean nuisance distance 1.47.
+
+E_inv vs nuisance distance:
+| d range | E_inv | n |
+|---|---:|---:|
+| 0.05-1.25 | 0.043 | 1212 |
+| 1.25-1.49 | 0.055 | 1211 |
+| 1.49-1.75 | 0.073 | 1212 |
+| 1.75-2.00 | 0.079 | 1212 |
+
+## z1 — H0
+
+f1 `H0**2*omega_cdm`; f2 `A_s*exp(-2*tau)/omega_b**2`; 196 joint cells, 4900 pairs, mean nuisance distance 1.50.
+
+E_inv vs nuisance distance:
+| d range | E_inv | n |
+|---|---:|---:|
+| 0.64-1.27 | 0.019 | 1225 |
+| 1.27-1.50 | 0.021 | 1225 |
+| 1.50-1.75 | 0.024 | 1225 |
+| 1.75-2.00 | 0.028 | 1225 |
+
+## z2 — omega_b
+
+f1 `omega_b/n_s**2`; f2 `log(A_s*omega_b*(n_s*omega_cdm - 0.024653804)**2)`; 196 joint cells, 4900 pairs, mean nuisance distance 1.96.
+
+E_inv vs nuisance distance:
+| d range | E_inv | n |
+|---|---:|---:|
+| 0.92-1.76 | 0.014 | 1225 |
+| 1.76-1.93 | 0.015 | 1225 |
+| 1.93-2.13 | 0.015 | 1225 |
+| 2.13-2.74 | 0.015 | 1225 |
+
+## z3 — n_s
+
+f1 `log(omega_b)/(n_s + omega_cdm)`; f2 `H0/omega_cdm**2`; 196 joint cells, 4840 pairs, mean nuisance distance 1.94.
+
+E_inv vs nuisance distance:
+| d range | E_inv | n |
+|---|---:|---:|
+| 0.02-1.75 | 0.011 | 1210 |
+| 1.75-1.94 | 0.013 | 1210 |
+| 1.94-2.14 | 0.015 | 1210 |
+| 2.14-2.77 | 0.015 | 1210 |
+
+## z4 — tau (amplitude sector)
+
+f1 `-A_s/(tau - 0.4454238)`; f2 `tau`; 137 joint cells, 3289 pairs, mean nuisance distance 2.69.
+
+E_inv vs nuisance distance:
+| d range | E_inv | n |
+|---|---:|---:|
+| 0.64-2.51 | 0.020 | 822 |
+| 2.51-2.69 | 0.027 | 822 |
+| 2.69-2.88 | 0.037 | 822 |
+| 2.88-3.56 | 0.040 | 823 |
+
+## z5 — amplitude (A_s, tau)
+
+f1 `A_s*exp(-2*tau)`; f2 `H0*omega_cdm/n_s`; 196 joint cells, 4900 pairs, mean nuisance distance 1.49.
+
+E_inv vs nuisance distance:
+| d range | E_inv | n |
+|---|---:|---:|
+| 0.64-1.26 | 0.023 | 1225 |
+| 1.26-1.50 | 0.025 | 1225 |
+| 1.50-1.75 | 0.034 | 1225 |
+| 1.75-2.00 | 0.034 | 1225 |
+
+## Wrong-latent specificity (amplitude joint cells)
+
+The amplitude (f1, f2) cells must NOT be invariant for the other latents:
+
+| latent | E_inv +/- SE |
+|---:|---|
+| z0 | 1.41 +/- 0.03 |
+| z1 | 0.23 +/- 0.00 |
+| z2 | 2.27 +/- 0.03 |
+| z3 | 1.52 +/- 0.03 |
+| z4 | 1.01 +/- 0.02 |
+
+# Gate G4a-joint
+
+| bullet | numbers | pass |
+|---|---|---|
+| E_inv <= 0.05 | 0.029 | PASS |
+| response R2 >= 0.9 | 0.992 | PASS |
+| T2 confirmation | E_inv 0.030, R2 0.992 | PASS |
+| wrong-latent controls > 0.05 | see table | PASS |
+
+**Gate G4a-joint: PASS**
+
+---
+_Generated by `scripts/levelset_audit_joint.py`._

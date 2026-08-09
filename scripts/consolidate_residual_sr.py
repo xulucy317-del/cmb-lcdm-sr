@@ -63,6 +63,73 @@ SHAPE_SECTOR = {"omega_b", "omega_cdm", "H0", "n_s"}  # sampled-basis labels
 _G: dict = {}
 
 
+def make_f1hat_extra_input(f1_str: str, mu_col: np.ndarray,
+                           e1_all: np.ndarray, theta_t1: np.ndarray,
+                           theta_t2: np.ndarray, half: np.ndarray):
+    """(values_fn, grads_fn, diag) for f1hat = h_full(f1(θ)) as a θ-function.
+
+    The Phase-3 cache wrote every non-T1 row of e1 through the full-T1
+    calibration h_full — including the T0 rows the stage-2 search consumed —
+    so the (f1(θ), mu − e1) pairs on T2 lie exactly on h_full's graph and a
+    PCHIP through them reconstructs the function the search saw. grads_fn is
+    the chain rule h'(f1)·∇_u f1, so the frozen clustering / signature /
+    Sobol instruments apply verbatim to f1hat-bearing forms as θ-functions.
+    diag: exactness on T2; the T1 rows carry the cross-fitted fold-h, whose
+    scatter vs h_full is reported, not used. The caller registers.
+    """
+    from scipy.interpolate import PchipInterpolator
+
+    f1_expr = semantics.parse_expr(f1_str)
+    if f1_expr is None:
+        raise RuntimeError(f"cannot parse canonical f1 '{f1_str}'")
+    t1, t2 = tiers.T1, tiers.T2
+    f1hat_all = mu_col - e1_all
+    x2 = semantics.evaluate_on_theta(f1_expr, theta_t2)
+    y2 = f1hat_all[t2]
+    m2 = np.isfinite(x2) & np.isfinite(y2)
+    xs, first = np.unique(x2[m2], return_index=True)
+    pch = PchipInterpolator(xs, y2[m2][first], extrapolate=True)
+    hprime = pch.derivative()
+
+    def values_fn(theta):
+        x = semantics.evaluate_on_theta(f1_expr, theta)
+        out = np.full(x.shape, np.nan)
+        fin = np.isfinite(x)
+        out[fin] = pch(x[fin])
+        return out
+
+    def grads_fn(theta):
+        x = semantics.evaluate_on_theta(f1_expr, theta)
+        g1 = semantics.gradients_on_theta(f1_expr, theta, half)
+        hp = np.full(x.shape, np.nan)
+        fin = np.isfinite(x)
+        hp[fin] = hprime(x[fin])
+        return hp[:, None] * g1
+
+    x1 = semantics.evaluate_on_theta(f1_expr, theta_t1)
+    y1 = f1hat_all[t1]
+    m1 = np.isfinite(x1) & np.isfinite(y1)
+    fold = np.abs(pch(x1[m1]) - y1[m1]) if m1.any() else np.array([0.0])
+    recon = np.abs(pch(x2[m2]) - y2[m2]) if m2.any() else np.array([0.0])
+    diag = {"f1_expr": f1_str,
+            "recon_max_err_t2": float(recon.max()),
+            "fold_scatter_t1_max": float(fold.max()),
+            "fold_scatter_t1_p99": float(np.quantile(fold, 0.99))}
+    return values_fn, grads_fn, diag
+
+
+def _register_f1hat(k: int) -> dict:
+    """Interaction-aware variant: register f1hat for latent k (worker-side)."""
+    semantics.clear_extra_inputs()
+    e1_all = np.load(Path(_G["run_dir"]) / "analysis"
+                     / f"residual_z{k}_v1.npy")
+    values_fn, grads_fn, diag = make_f1hat_extra_input(
+        _G["f1_exprs"][k], _G["mu"][:, k], e1_all,
+        _G["theta_t1"], _G["theta_t2"], _G["half"])
+    semantics.register_extra_input("f1hat", values_fn, grads_fn)
+    return diag
+
+
 def _f(v):
     return float(v) if v is not None and np.isfinite(v) else None
 
@@ -102,24 +169,27 @@ def _tick(k: int, stage: str, t0: float) -> float:
 
 def _latent_worker(k: int) -> dict:
     run = _G["run"]
+    subdir = _G.get("subdir", "residual_sr")
     out = {"latent": k, "audit_expected": AUDIT_EXPECTED[run].get(k)}
+    if _G.get("variant") == "ia":
+        out["f1hat"] = _register_f1hat(k)
     t = time.time()
 
-    seed_dirs = sorted(Path(_G["results_root"], run, "residual_sr")
+    seed_dirs = sorted(Path(_G["results_root"], run, subdir)
                        .glob(f"z{k}_seed*/report.json"))
     fronts = {int(p.parent.name.split("seed")[1]): load_front(p)
               for p in seed_dirs}
     out["n_seeds"] = len(fronts)
     if not fronts:
-        out["error"] = "no residual_sr reports"
+        out["error"] = f"no {subdir} reports"
         return out
 
     # 1–2: residual knee + semantic recurrence (frozen machinery)
-    rec = sr_mod.latent_recurrence({"residual_sr": fronts},
+    rec = sr_mod.latent_recurrence({subdir: fronts},
                                    plat_ref=sr_mod.family_knee(fronts)["plat"],
                                    anchors=_G["anchors"], half=_G["half"],
                                    eta_floor=_G["eta_floor"])
-    knee = rec["families"]["residual_sr"]
+    knee = rec["families"][subdir]
     out["residual_plateau"] = {"mi_plat": _f(knee["plat"]),
                                "se": _f(knee["se"]),
                                "c_star": knee["c_star"],
@@ -129,7 +199,7 @@ def _latent_worker(k: int) -> dict:
                          "rep_support", "c_range", "n_forms", "n_rows",
                          "rep_linked", "pair_cohesion", "r_sr_headline")}
                        | {"best_mi": c["best_mi"],
-                          "r_sr": c["r_sr"].get("residual_sr")}
+                          "r_sr": c["r_sr"].get(subdir)}
                        for c in rec["clusters"][:8]]
     out["canonical_cluster"] = rec["canonical_cluster"]
     t = _tick(k, "recurrence", t)
@@ -143,16 +213,21 @@ def _latent_worker(k: int) -> dict:
     expr = semantics.parse_expr(f2_expr)
     grads = semantics.gradients_on_theta(expr, _G["anchors"], _G["half"])
     sig = semantics.sensitivity_signature(grads)
+    theta_support = [s for s in canon["rep_support"]
+                     if s not in semantics.EXTRA_INPUTS]
     f2 = {
         "expr": f2_expr,
         "complexity": canon["rep_complexity"],
         "support": canon["rep_support"],
+        "theta_support": theta_support,
+        "uses_f1hat": "f1hat" in canon["rep_support"],
         "r_sr": canon["r_sr_headline"],
         "signature": [float(v) for v in sig],
         "ratio_pairs": semantics.constant_ratio_pairs(grads, _G["half"]),
         "sobol_ST": _fl(semantics.sobol_indices(
             expr, _G["mid"], _G["half"], n_base=2048, seed=0)["ST"]),
         "shape_sector": bool(set(canon["rep_support"]) <= SHAPE_SECTOR),
+        "theta_shape_sector": bool(set(theta_support) <= SHAPE_SECTOR),
     }
     out["f2"] = f2
     t = _tick(k, "signature+sobol", t)
@@ -251,42 +326,92 @@ def fmt(x, prec=3):
 
 def to_markdown(payload: dict) -> str:
     run = payload["run"]
-    md = [f"# Residual SR — `{run}` (roadmap Phase 6)\n"]
-    md.append(
-        "Blind second-stage SR on the Phase-3 residual caches e1 = mu − "
-        "h(f1) (all-6 inputs, protocol budget, 5 seeds), consolidated with "
-        "the frozen Phase 1–3 machinery. f2 = canonical residual coordinate "
-        "(most recurrent cluster at the residual knee). Hierarchical "
-        "account: combined yhat = h(f1) + g(f2), both stages cross-fitted "
-        "on T1; eta_post ratios on T2 against the Phase-5 ceiling (same "
-        "posterior draw). Stage-2 residual audited with the frozen rule "
-        "(R2 <= 0.05 AND max MI <= null p97.5) — PASS means the hierarchy "
-        "terminates at two levels. Shuffled-residual controls give the "
-        "residual-MI null.\n")
+    ia = payload.get("variant") == "ia"
+    if ia:
+        md = [f"# Residual SR (interaction-aware) — `{run}` "
+              "(post-closure follow-up to roadmap Phase 6)\n"]
+        md.append(
+            "Blind second-stage SR on the SAME Phase-3 residual caches "
+            "e1 = mu − h(f1) as Phase 6 (protocol budget, 5 seeds), with "
+            "one change: the stage-1 prediction **f1hat = h(f1)** is "
+            "exposed as a 7th input column, so the search can express the "
+            "amplitude × shape interactions the additive hierarchy could "
+            "not absorb (deviation D-DoD-z2). Consolidated with the frozen "
+            "Phase 1–3 machinery; f1hat is registered as a semantics extra "
+            "input — evaluated as the θ-function h_full(f1(θ)) "
+            "reconstructed exactly from the T2 rows of the caches, with "
+            "chain-rule u-gradients — so clustering, signatures, Sobol and "
+            "supports treat f1hat-bearing forms as θ-functions. The "
+            "combined account and the stage-2 residual audit are unchanged "
+            "(g is a 1-D monotone recalibration of f2, which may itself "
+            "contain f1hat — a multiplicative interaction lives inside "
+            "f2). DoD (amplitude): the θ-part of f2's support is pure "
+            "shape-sector (f1hat itself allowed), R_SR >= 0.6.\n")
+    else:
+        md = [f"# Residual SR — `{run}` (roadmap Phase 6)\n"]
+        md.append(
+            "Blind second-stage SR on the Phase-3 residual caches e1 = mu − "
+            "h(f1) (all-6 inputs, protocol budget, 5 seeds), consolidated with "
+            "the frozen Phase 1–3 machinery. f2 = canonical residual coordinate "
+            "(most recurrent cluster at the residual knee). Hierarchical "
+            "account: combined yhat = h(f1) + g(f2), both stages cross-fitted "
+            "on T1; eta_post ratios on T2 against the Phase-5 ceiling (same "
+            "posterior draw). Stage-2 residual audited with the frozen rule "
+            "(R2 <= 0.05 AND max MI <= null p97.5) — PASS means the hierarchy "
+            "terminates at two levels. Shuffled-residual controls give the "
+            "residual-MI null.\n")
 
+    shape_col = "theta-shape | f1hat" if ia else "shape-sector"
     md.append("| latent | role | res plat +/- SE | c* | f2 (rep) | support "
-              "| shape-sector | R_SR | R2 st2(e1) | comb R2(mu) "
+              f"| {shape_col} | R_SR | R2 st2(e1) | comb R2(mu) "
               "| eta_plat_comb | eta_hat f1 -> f1+f2 | st2 residual |")
-    md.append("|---|---|---|---:|---|---|---|---:|---:|---:|---:|---|---|")
+    md.append("|---|---|---|---:|---|---|---|" + ("---|" if ia else "")
+              + "---:|---:|---:|---:|---|---|")
     for L in payload["latents"]:
         if L.get("error") or L.get("f2") is None:
             md.append(f"| z{L['latent']} | {L['audit_expected']} | — | — "
                       f"| {L.get('error', 'no recurrent cluster')} "
-                      "| — | — | — | — | — | — | — | — |")
+                      "| — | — | " + ("— | " if ia else "")
+                      + "— | — | — | — | — | — |")
             continue
         f2, h, s2 = L["f2"], L["hierarchy"], L["stage2_residual"]
         rp = L["residual_plateau"]
         verdict = ("PASS" if s2["residual_pass"]
                    else "FAIL" if s2["residual_pass"] is False else "n/a")
+        shape_cell = (f"{f2['theta_shape_sector']} | {f2['uses_f1hat']}"
+                      if ia else f"{f2['shape_sector']}")
         md.append(
             f"| z{L['latent']} | {L['audit_expected']} "
             f"| {fmt(rp['mi_plat'])} +/- {fmt(rp['se'])} | {rp['c_star']} "
             f"| `{f2['expr'][:36]}` | {{{', '.join(f2['support'])}}} "
-            f"| {f2['shape_sector']} | {f2['r_sr']:.2f} "
+            f"| {shape_cell} | {f2['r_sr']:.2f} "
             f"| {fmt(h['r2_stage2_of_residual'])} "
             f"| {fmt(h['combined_r2_vs_mu'])} | {fmt(h['eta_plat_comb'])} "
             f"| {fmt(h['eta_post_hat_f1'])} -> {fmt(h['eta_post_hat_comb'])} "
             f"| {verdict} ({', '.join(s2['loadings']) or 'none'}) |")
+
+    base = payload.get("baseline_additive")
+    if ia and base:
+        md.append("\n## Against the additive Phase-6 account\n")
+        md.append("| latent | comb R2(mu) add -> ia | eta_hat_comb add -> ia "
+                  "| st2 residual add -> ia | additive f2 |")
+        md.append("|---|---|---|---|---|")
+        for L in payload["latents"]:
+            b = base.get(str(L["latent"])) or base.get(L["latent"])
+            if b is None or L.get("f2") is None:
+                continue
+            h, s2 = L["hierarchy"], L["stage2_residual"]
+
+            def _pf(v):
+                return ("PASS" if v else "FAIL" if v is False else "n/a")
+            md.append(
+                f"| z{L['latent']} "
+                f"| {fmt(b['combined_r2_vs_mu'])} -> "
+                f"{fmt(h['combined_r2_vs_mu'])} "
+                f"| {fmt(b['eta_post_hat_comb'])} -> "
+                f"{fmt(h['eta_post_hat_comb'])} "
+                f"| {_pf(b['st2_pass'])} -> {_pf(s2['residual_pass'])} "
+                f"| `{(b['f2'] or '')[:36]}` |")
 
     for L in payload["latents"]:
         if L.get("error") or L.get("f2") is None:
@@ -297,6 +422,12 @@ def to_markdown(payload: dict) -> str:
                   f"{{{', '.join(f2['support'])}}}, R_SR {f2['r_sr']:.2f}, "
                   f"MI vs e1 = {fmt(f2['mi_vs_e1'])} +/- "
                   f"{fmt(f2['mi_vs_e1_err'])})")
+        fh = L.get("f1hat")
+        if ia and fh:
+            md.append(f"\nf1hat = h_full(`{fh['f1_expr']}`): T2 "
+                      f"reconstruction max err {fh['recon_max_err_t2']:.2e}; "
+                      f"T1 fold scatter p99 {fh['fold_scatter_t1_p99']:.2e} "
+                      f"(max {fh['fold_scatter_t1_max']:.2e})")
         sig = f2["signature"]
         md.append("\nSignature g_j: " + ", ".join(
             f"{lab} {sig[j]:.2f}" for j, lab in
@@ -325,7 +456,13 @@ def to_markdown(payload: dict) -> str:
                       f"| {fmt(c['best_mi_unshuffled'])} |")
 
     dod = payload["dod_amplitude"]
-    if dod is not None:
+    if dod is not None and dod.get("variant") == "ia":
+        md.append(f"\n**Definition of done, ia (amplitude z{dod['latent']}): "
+                  f"theta-support pure shape = {dod['theta_shape_sector']}, "
+                  f"uses f1hat = {dod['uses_f1hat']}, R_SR = "
+                  f"{fmt(dod['r_sr'], 2)} -> "
+                  f"{'MET' if dod['met'] else 'NOT MET'}**")
+    elif dod is not None:
         md.append(f"\n**Definition of done (amplitude z{dod['latent']}): "
                   f"f2 shape-sector = {dod['shape_sector']}, R_SR = "
                   f"{fmt(dod['r_sr'], 2)} -> "
@@ -352,6 +489,13 @@ def main() -> int:
     p.add_argument("--n-perm-mi", type=int, default=39)
     p.add_argument("--n-perm-r2", type=int, default=10)
     p.add_argument("--max-samples-mi", type=int, default=5000)
+    p.add_argument("--variant", choices=["", "ia"], default="",
+                   help="'' = the frozen Phase-6 additive consolidation. "
+                        "'ia' = interaction-aware follow-up: fronts from "
+                        "results/<run>/residual_sr_ia (stage-1 prediction "
+                        "f1hat exposed as a 7th input), f1hat registered as "
+                        "a semantics extra input with chain-rule gradients, "
+                        "DoD judged on the θ-support (f1hat allowed).")
     p.add_argument("--out", default=None)
     args = p.parse_args()
 
@@ -360,9 +504,20 @@ def main() -> int:
         print(f"[FAIL] unknown run {args.run}")
         return 1
     _label, run, n_latents, amp_idx = model
+    subdir = "residual_sr_ia" if args.variant == "ia" else "residual_sr"
 
-    # residual_sr is the canonical family for R_SR headlines here
-    sr_mod.CANONICAL_FAMILIES = ["residual_sr"]
+    # the residual family is the canonical family for R_SR headlines here
+    sr_mod.CANONICAL_FAMILIES = [subdir]
+
+    f1_exprs = None
+    if args.variant == "ia":
+        rec_json = json.loads(
+            Path(f"experiments/semantic_recurrence_{run}.json").read_text())
+        f1_exprs = {}
+        for name, L in rec_json["latents"].items():
+            ci = L.get("canonical_cluster")
+            f1_exprs[int(name[1:])] = (L["clusters"][ci]["representative"]
+                                       if ci is not None else None)
 
     knee = json.loads(Path(f"experiments/knee_readout_{run}.json").read_text())
     p5_raw = json.loads(Path(f"experiments/posterior_ceiling_{run}.json")
@@ -379,6 +534,7 @@ def main() -> int:
     _G.update({
         "run": run, "run_dir": str(run_dir),
         "results_root": args.results_root,
+        "variant": args.variant, "subdir": subdir, "f1_exprs": f1_exprs,
         "knee": knee, "p5": p5,
         "mu": mu, "logvar": logvar,
         "theta_t1": theta_all[tiers.T1], "theta_t2": theta_all[tiers.T2],
@@ -421,7 +577,7 @@ def main() -> int:
             latents_out.append(L)
 
     controls = []
-    for path in sorted(Path(args.results_root, run, "residual_sr")
+    for path in sorted(Path(args.results_root, run, subdir)
                        .glob("shuffled_*/report.json")):
         rep = json.loads(path.read_text())
         controls.append({
@@ -433,21 +589,51 @@ def main() -> int:
     dod = None
     amp = next((L for L in latents_out if L["latent"] == amp_idx), None)
     if amp is not None and amp.get("f2") is not None:
-        dod = {"latent": amp_idx,
-               "shape_sector": amp["f2"]["shape_sector"],
-               "r_sr": amp["f2"]["r_sr"],
-               "met": bool(amp["f2"]["shape_sector"]
-                           and amp["f2"]["r_sr"] >= 0.6)}
-        print(f"  DoD (amplitude): shape-sector={dod['shape_sector']} "
-              f"R_SR={dod['r_sr']:.2f} -> "
-              f"{'MET' if dod['met'] else 'NOT MET'}")
+        if args.variant == "ia":
+            dod = {"latent": amp_idx, "variant": "ia",
+                   "theta_shape_sector": amp["f2"]["theta_shape_sector"],
+                   "uses_f1hat": amp["f2"]["uses_f1hat"],
+                   "r_sr": amp["f2"]["r_sr"],
+                   "met": bool(amp["f2"]["theta_shape_sector"]
+                               and amp["f2"]["r_sr"] >= 0.6)}
+            print(f"  DoD-ia (amplitude): theta-shape-sector="
+                  f"{dod['theta_shape_sector']} uses_f1hat="
+                  f"{dod['uses_f1hat']} R_SR={dod['r_sr']:.2f} -> "
+                  f"{'MET' if dod['met'] else 'NOT MET'}")
+        else:
+            dod = {"latent": amp_idx,
+                   "shape_sector": amp["f2"]["shape_sector"],
+                   "r_sr": amp["f2"]["r_sr"],
+                   "met": bool(amp["f2"]["shape_sector"]
+                               and amp["f2"]["r_sr"] >= 0.6)}
+            print(f"  DoD (amplitude): shape-sector={dod['shape_sector']} "
+                  f"R_SR={dod['r_sr']:.2f} -> "
+                  f"{'MET' if dod['met'] else 'NOT MET'}")
 
-    out = Path(args.out or f"experiments/residual_sr_{run}")
+    baseline = None
+    if args.variant == "ia":
+        base_path = Path(f"experiments/residual_sr_{run}.json")
+        if base_path.exists():
+            bj = json.loads(base_path.read_text())
+            baseline = {L["latent"]: {
+                "f2": (L.get("f2") or {}).get("expr"),
+                "shape_sector": (L.get("f2") or {}).get("shape_sector"),
+                "combined_r2_vs_mu":
+                    (L.get("hierarchy") or {}).get("combined_r2_vs_mu"),
+                "eta_post_hat_comb":
+                    (L.get("hierarchy") or {}).get("eta_post_hat_comb"),
+                "st2_pass":
+                    (L.get("stage2_residual") or {}).get("residual_pass"),
+            } for L in bj["latents"]}
+
+    suffix = "_ia" if args.variant == "ia" else ""
+    out = Path(args.out or f"experiments/residual_sr{suffix}_{run}")
     out.parent.mkdir(parents=True, exist_ok=True)
-    payload = {"run": run, "eta_floor": args.eta_floor,
+    payload = {"run": run, "variant": args.variant, "subdir": subdir,
+               "eta_floor": args.eta_floor,
                "n_perm_mi": args.n_perm_mi, "n_perm_r2": args.n_perm_r2,
                "latents": latents_out, "controls": controls,
-               "dod_amplitude": dod,
+               "dod_amplitude": dod, "baseline_additive": baseline,
                "generated_by": "scripts/consolidate_residual_sr.py"}
     out.with_suffix(".json").write_text(json.dumps(payload, indent=2))
     print(f"[write] {out.with_suffix('.json')}")

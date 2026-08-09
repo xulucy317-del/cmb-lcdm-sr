@@ -31,7 +31,7 @@ Thresholds are frozen in the roadmap §0.3; keyword defaults here mirror them.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, Sequence
+from typing import Callable, Optional, Sequence
 
 import numpy as np
 import sympy
@@ -53,15 +53,58 @@ _PARSE_LOCALS["square"] = lambda x: x**2
 _PARSE_LOCALS["neg"] = lambda x: -x
 
 
+# --- extra input columns (post-closure interaction-aware experiments) --------
+
+@dataclass
+class ExtraInput:
+    """One SR input symbol beyond the six sampled parameters.
+
+    ``values_fn(theta) -> (n,)`` evaluates the column on sampled-basis rows
+    (composite through whatever deterministic θ-function defines it);
+    ``grads_fn(theta) -> (n, 6)`` its u-gradient via the chain rule, or None
+    when unavailable — gradients of expressions using the symbol are then
+    NaN and the gradient-based instruments abstain.
+    """
+    name: str
+    symbol: sympy.Symbol
+    values_fn: Callable
+    grads_fn: Optional[Callable] = None
+
+
+#: name -> ExtraInput. Empty by default, so every frozen Phase 1–8 code path
+#: is bit-identical. The interaction-aware stage-2 consolidator registers
+#: ``f1hat`` (the stage-1 prediction h(f1) as a θ-function) per latent.
+EXTRA_INPUTS: dict[str, ExtraInput] = {}
+
+
+def register_extra_input(name: str, values_fn: Callable,
+                         grads_fn: Optional[Callable] = None) -> None:
+    EXTRA_INPUTS[name] = ExtraInput(name, sympy.Symbol(name), values_fn, grads_fn)
+
+
+def clear_extra_inputs() -> None:
+    EXTRA_INPUTS.clear()
+
+
+def _extras_in(expr: sympy.Expr) -> list[ExtraInput]:
+    free = expr.free_symbols
+    return [e for e in EXTRA_INPUTS.values() if e.symbol in free]
+
+
 def parse_expr(expr_str: str) -> Optional[sympy.Expr]:
     """Parse an SR expression string; None if unparseable or has unknown symbols."""
+    locals_ = dict(_PARSE_LOCALS)
+    known = set(KNOWN_SYMBOLS)
+    for e in EXTRA_INPUTS.values():
+        locals_[e.name] = e.symbol
+        known.add(e.symbol)
     try:
-        expr = sympy.sympify(expr_str, locals=dict(_PARSE_LOCALS))
+        expr = sympy.sympify(expr_str, locals=locals_)
     except Exception:
         return None
     if not isinstance(expr, sympy.Expr):
         return None
-    if not expr.free_symbols <= KNOWN_SYMBOLS:
+    if not expr.free_symbols <= known:
         return None
     return expr
 
@@ -89,13 +132,22 @@ def _sampledify(expr: sympy.Expr) -> sympy.Expr:
 def _eval_sampled(expr: sympy.Expr, theta: np.ndarray) -> np.ndarray:
     """Evaluate a sampled-basis expression on (n, 6) theta rows → (n,) with NaN."""
     n = theta.shape[0]
+    extras = _extras_in(expr)
+    syms = SAMPLED_SYMBOLS + tuple(e.symbol for e in extras)
     try:
-        fn = sympy.lambdify(SAMPLED_SYMBOLS, expr, modules=["numpy"])
+        fn = sympy.lambdify(syms, expr, modules=["numpy"])
     except Exception:
         return np.full(n, np.nan)
+    cols = [theta[:, j] for j in range(6)]
+    for e in extras:
+        try:
+            with np.errstate(all="ignore"):
+                cols.append(np.asarray(e.values_fn(theta), dtype=np.float64))
+        except Exception:
+            return np.full(n, np.nan)
     with np.errstate(all="ignore"):
         try:
-            v = fn(*(theta[:, j] for j in range(6)))
+            v = fn(*cols)
         except Exception:
             return np.full(n, np.nan)
     v = np.asarray(v)
@@ -135,13 +187,33 @@ def gradients_on_theta(expr: sympy.Expr | str, theta: np.ndarray,
             return np.full((theta.shape[0], 6), np.nan)
         expr = parsed
     sampled = _sampledify(expr)
-    out = np.full((theta.shape[0], 6), np.nan)
+    n = theta.shape[0]
+    out = np.full((n, 6), np.nan)
+    extras = _extras_in(sampled)
+    if any(e.grads_fn is None for e in extras):
+        return out  # no chain rule available for an extra input → abstain
+    chain = np.zeros((n, 6))
+    ok = np.ones(n, dtype=bool)
+    for e in extras:
+        try:
+            de = sympy.diff(sampled, e.symbol)
+        except Exception:
+            return out
+        dv = _eval_sampled(de, theta)                       # ∂f/∂e on the rows
+        with np.errstate(all="ignore"):
+            eg = np.asarray(e.grads_fn(theta), dtype=np.float64)  # (n, 6), u-units
+        ok &= np.isfinite(dv) & np.isfinite(eg).all(axis=1)
+        with np.errstate(all="ignore"):
+            term = dv[:, None] * eg
+        chain += np.where(np.isfinite(term), term, 0.0)
     for j, sym in enumerate(SAMPLED_SYMBOLS):
         try:
             d = sympy.diff(sampled, sym)
         except Exception:
             continue
-        out[:, j] = _eval_sampled(d, theta) * float(half[j])
+        col = _eval_sampled(d, theta) * float(half[j]) + chain[:, j]
+        col[~ok] = np.nan
+        out[:, j] = col
     return out
 
 
@@ -164,9 +236,11 @@ class FormEval:
 
     @property
     def support(self) -> list[str]:
-        """Sampled-basis labels the form actually depends on."""
+        """Sampled-basis labels (+ registered extra inputs) the form depends on."""
         syms = _sampledify(self.expr).free_symbols
-        return [lab for lab, s in zip(SAMPLED_LABELS, SAMPLED_SYMBOLS) if s in syms]
+        sup = [lab for lab, s in zip(SAMPLED_LABELS, SAMPLED_SYMBOLS) if s in syms]
+        sup += [e.name for e in EXTRA_INPUTS.values() if e.symbol in syms]
+        return sup
 
 
 def evaluate_form(expr_str: str, theta_anchors: np.ndarray, half: np.ndarray,

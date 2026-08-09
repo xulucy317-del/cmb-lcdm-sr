@@ -62,6 +62,7 @@ import _bootstrap  # noqa: F401,E402
 import numpy as np  # noqa: E402
 
 from consolidate_allparams import AUDIT_EXPECTED, MODELS  # noqa: E402
+from consolidate_residual_sr import make_f1hat_extra_input  # noqa: E402
 from levelset_audit import (SEED_BASE, distance_curve, e_inv_stat, fmt,  # noqa: E402
                             matched_response, pair_within_bins, quantile_bins)
 
@@ -141,11 +142,13 @@ def audit_joint(f1v: np.ndarray, f2v: np.ndarray, yhat: np.ndarray,
 # ---- per-run driver ----------------------------------------------------------
 
 def run_audit(run: str, n_latents: int, amp_idx: int, args) -> dict:
+    ia = args.variant == "ia"
     sem = json.loads(Path(args.semantic_json or
                           f"experiments/semantic_recurrence_{run}.json")
                      .read_text())
-    res = json.loads(Path(args.residual_json or
-                          f"experiments/residual_sr_{run}.json").read_text())
+    res_default = (f"experiments/residual_sr_ia_{run}.json" if ia
+                   else f"experiments/residual_sr_{run}.json")
+    res = json.loads(Path(args.residual_json or res_default).read_text())
     res_by_k = {L["latent"]: L for L in res["latents"]}
 
     ls_f1 = {}
@@ -186,6 +189,14 @@ def run_audit(run: str, n_latents: int, amp_idx: int, args) -> dict:
             L["note"] = "no Phase-6 residual coordinate"
             latents_out.append(L)
             continue
+        e1_all = np.load(run_dir / "analysis" / f"residual_z{k}_v1.npy")
+        if ia:
+            # f2 may contain f1hat: register the composite for this latent
+            semantics.clear_extra_inputs()
+            vfn, gfn, _diag = make_f1hat_extra_input(
+                L["f1_expr"], mu[:, k], e1_all,
+                tier_rows["T1"][0], tier_rows["T2"][0], half)
+            semantics.register_extra_input("f1hat", vfn, gfn)
         expr1 = semantics.parse_expr(L["f1_expr"])
         expr2 = semantics.parse_expr(L["f2_expr"])
         support, comp = joint_support(expr1, expr2)
@@ -197,8 +208,6 @@ def run_audit(run: str, n_latents: int, amp_idx: int, args) -> dict:
         L["r2_comb_phase6"] = r2_comb
         L["e_inv_expected_band"] = ([1.0 - r2_comb, 2.0 * (1.0 - r2_comb)]
                                     if r2_comb is not None else None)
-
-        e1_all = np.load(run_dir / "analysis" / f"residual_z{k}_v1.npy")
 
         # stage-2 calibration, exact consolidate_residual_sr conventions
         th1, u1, sl1 = tier_rows["T1"]
@@ -293,7 +302,8 @@ def run_audit(run: str, n_latents: int, amp_idx: int, args) -> dict:
               f"T2 confirm {g4a['pass_t2_confirm']} controls "
               f"{g4a['controls_sane']} -> {verdict}")
 
-    return {"run": run, "config": cfg, "seed_base": SEED_BASE,
+    return {"run": run, "variant": args.variant, "config": cfg,
+            "seed_base": SEED_BASE,
             "latents": latents_out, "controls": controls,
             "gate_G4a_joint": g4a,
             "generated_by": "scripts/levelset_audit_joint.py"}
@@ -303,8 +313,18 @@ def run_audit(run: str, n_latents: int, amp_idx: int, args) -> dict:
 
 def to_markdown(payload: dict) -> str:
     run, cfg = payload["run"], payload["config"]
-    md = [f"# Joint (f1, f2) level-set audit — `{run}` "
-          "(Phase 7a follow-up after Phase 6)\n"]
+    if payload.get("variant") == "ia":
+        md = [f"# Joint (f1, f2) level-set audit, interaction-aware f2 — "
+              f"`{run}` (post-closure follow-up)\n"]
+        md.append("f2 here is the interaction-aware residual coordinate "
+                  "(`residual_sr_ia`, stage-1 prediction f1hat exposed to "
+                  "the stage-2 search); f1hat-bearing forms are evaluated "
+                  "as θ-functions through the registered composite "
+                  "h_full(f1(θ)). Statistic, thresholds, and machinery are "
+                  "otherwise identical to the frozen joint audit below.\n")
+    else:
+        md = [f"# Joint (f1, f2) level-set audit — `{run}` "
+              "(Phase 7a follow-up after Phase 6)\n"]
     md.append(
         f"Pairs are drawn within joint quantile cells "
         f"({cfg['n_bins_axis']}x{cfg['n_bins_axis']} equal-count on f1 x f2, "
@@ -426,6 +446,9 @@ def main() -> int:
     p.add_argument("--n-seeds", type=int, default=500)
     p.add_argument("--k-nn", type=int, default=40)
     p.add_argument("--caliper-q", type=float, default=0.05)
+    p.add_argument("--variant", choices=["", "ia"], default="",
+                   help="'ia' audits the interaction-aware f2 "
+                        "(residual_sr_ia json; f1hat registered per latent).")
     p.add_argument("--out", default=None)
     args = p.parse_args()
 
@@ -437,7 +460,8 @@ def main() -> int:
 
     payload = run_audit(run, n_latents, amp_idx, args)
 
-    out = Path(args.out or f"experiments/levelset_audit_joint_{run}")
+    suffix = "_ia" if args.variant == "ia" else ""
+    out = Path(args.out or f"experiments/levelset_audit_joint{suffix}_{run}")
     out.parent.mkdir(parents=True, exist_ok=True)
     out.with_suffix(".json").write_text(json.dumps(payload, indent=2))
     print(f"[write] {out.with_suffix('.json')}")

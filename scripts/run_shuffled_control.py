@@ -39,7 +39,7 @@ import _bootstrap  # noqa: F401
 
 import numpy as np
 
-from run_blind_sr import resolve_target
+from run_blind_sr import load_extra_inputs, resolve_target
 
 # Reuse the EXACT blind-SR machinery so this is the same configuration.
 from cmb_lcdm_sr.sr import (
@@ -64,6 +64,11 @@ def main() -> None:
     p.add_argument("--target-label", default=None,
                    help="Label for --target-npy targets (default: file stem).")
     p.add_argument("--inputs", nargs="+", default=["A_s", "tau"])
+    p.add_argument("--extra-input-npy", action="append", default=[],
+                   metavar="LABEL=PATH",
+                   help="Additional SR input column ('label=path.npy', "
+                        "repeatable) — same interface as run_blind_sr.py, so "
+                        "the interaction-aware control exposes f1hat too.")
     p.add_argument("--n-samples", type=int, default=5000)
     p.add_argument("--val-frac", type=float, default=0.2)
     p.add_argument("--niterations", type=int, default=200)
@@ -95,7 +100,12 @@ def main() -> None:
     y_true = y_full[:n]
 
     # Inputs — UNCHANGED (only the target is permuted).
+    extra_labels, extra_cols = load_extra_inputs(args.extra_input_npy,
+                                                 len(y_full))
     X_raw, input_labels = build_inputs(theta[test_idx], args.inputs)
+    if extra_labels:
+        X_raw = np.column_stack([X_raw] + [c[:n] for c in extra_cols])
+        input_labels = input_labels + extra_labels
 
     # Permute ONLY the target across rows (preserves marginal, kills relation).
     perm = np.random.default_rng(args.shuffle_seed).permutation(n)
@@ -200,6 +210,7 @@ def main() -> None:
         "target_index": args.target_index,
         "target_label": target_label,
         "inputs_exposed": input_labels,
+        "extra_inputs": args.extra_input_npy,
         "inner_loss": INNER_LOSS_NAME,
         "control": "shuffled_target",
         "shuffle_seed": args.shuffle_seed,

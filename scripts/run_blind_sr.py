@@ -110,6 +110,31 @@ def resolve_target(run_dir: Path, latent_index, target_npy, target_label,
     return means[:, latent_index].astype(np.float64), f"z{latent_index}"
 
 
+def load_extra_inputs(specs, n_test_rows: int):
+    """Parse repeated ``label=path.npy`` specs into (labels, columns).
+
+    Each vector must be 1-D and row-aligned with the full test split (the
+    caller truncates to --n-samples alongside the target). Labels must be
+    identifiers (they become PySR/sympy variable names)."""
+    labels, cols = [], []
+    for spec in specs:
+        label, sep, path = spec.partition("=")
+        if not sep or not label.isidentifier():
+            raise SystemExit("--extra-input-npy expects 'label=path.npy' with "
+                             f"an identifier label, got '{spec}'")
+        v = np.squeeze(np.asarray(np.load(path)))
+        if v.ndim != 1:
+            raise SystemExit(f"extra input '{label}' must be 1-D, got shape {v.shape}")
+        if len(v) != n_test_rows:
+            raise SystemExit(f"extra input '{label}' has {len(v)} rows, test "
+                             f"split has {n_test_rows} — must be row-aligned")
+        if label in labels:
+            raise SystemExit(f"duplicate extra-input label '{label}'")
+        labels.append(label)
+        cols.append(v.astype(np.float64))
+    return labels, cols
+
+
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -128,6 +153,12 @@ def main() -> None:
                    help="Label for --target-npy outputs (default: file stem).")
     p.add_argument("--inputs", nargs="+", required=True,
                    help=f"Input names. One or more of: {list(INPUT_ALIASES)}")
+    p.add_argument("--extra-input-npy", action="append", default=[],
+                   metavar="LABEL=PATH",
+                   help="Additional SR input column: 'label=path.npy', a 1-D "
+                        "test-aligned cached vector appended after --inputs "
+                        "(repeatable). Interaction-aware stage 2 exposes the "
+                        "stage-1 prediction f1hat = mu - residual this way.")
     p.add_argument("--n-samples", type=int, default=5000)
     p.add_argument("--val-frac", type=float, default=0.2, help="Held-out fraction for MI rerank.")
     p.add_argument("--niterations", type=int, default=200)
@@ -171,12 +202,20 @@ def main() -> None:
     if len(y_full) != len(test_idx):
         raise SystemExit(f"target has {len(y_full)} rows, test split has "
                          f"{len(test_idx)} — must be row-aligned")
+    extra_labels, extra_cols = load_extra_inputs(args.extra_input_npy,
+                                                 len(test_idx))
     n = min(args.n_samples, len(test_idx))
     test_idx = test_idx[:n]
     print(f"[load] using first {n} test indices")
 
     y_raw = y_full[:n]
     X_raw, input_labels = build_inputs(theta[test_idx], args.inputs)
+    if extra_labels:
+        clash = sorted(set(extra_labels) & set(input_labels))
+        if clash:
+            raise SystemExit(f"extra-input labels clash with --inputs: {clash}")
+        X_raw = np.column_stack([X_raw] + [c[:n] for c in extra_cols])
+        input_labels = input_labels + extra_labels
     print(f"[load] X shape={X_raw.shape}, input_labels={input_labels}, "
           f"y mean={y_raw.mean():.3f}, std={y_raw.std():.3f}")
 
@@ -339,6 +378,7 @@ def main() -> None:
         "target_npy": args.target_npy,
         "target_label": target_label,
         "input_labels": input_labels,
+        "extra_inputs": args.extra_input_npy,
         "n_samples": n,
         "n_fit": n_fit,
         "n_val": n_val,
