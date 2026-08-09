@@ -37,11 +37,13 @@ discovered forms themselves: the first-order Taylor direction `A_s·(τ−c)`
 with c ≈ τ̄ + ½, and (TT+EE) the literal `A_s·e⁻²ᵗ`. Full protocol,
 per-seed tables, and the negative control: [`docs/method.md`](docs/method.md).
 
-## Where the project stands (2026-08-06)
+## Where the project stands (2026-08-09 — wrapped up)
 
-Five layers, protocol-identical throughout (gmm_mi pure-Julia inner loss,
+Six layers, protocol-identical throughout (gmm_mi pure-Julia inner loss,
 5000 samples, post-hoc held-out GMM-MI ranking), each consolidated into
-`experiments/`:
+`experiments/`. **The complete numeric digest of every result — written as
+raw material for the official write-up — is
+[`docs/results_compendium.md`](docs/results_compendium.md).**
 
 **1. Reference study — reproduced.** Inputs `(A_s, τ)` only, amplitude latent
 only (table above): `A_s·(τ−c)` in every seed, literal `A_s·e⁻²ᵗ` in the
@@ -128,6 +130,27 @@ expected band). No latent reaches full "interpreted": the stage-2
 residuals remain structured — the encoder hierarchy does not terminate at
 two symbolic levels.
 
+**6. Interaction-aware stage 2 (post-closure follow-up, 2026-08-09) —
+done.** The roadmap Closure's open-item 3: the Phase-6 residual SR rerun
+with the stage-1 prediction f1hat = h(f₁) exposed as a 7th input, so the
+search can express amplitude × shape interactions (55 protocol runs + 6
+controls, ≈ 98 core-h; `experiments/residual_sr_ia_*.md`,
+`levelset_audit_joint_ia_*.md`). Outcomes: **D-DoD-z2 sharpened** — TT
+z2's recurrent knee coordinate keeps τ even with the interaction channel
+available (same form as additive, f1hat unused): the τ-coupling is
+genuine structure, not an ansatz artifact. **The additive account is
+confirmed** where it was good (8/11 latents return the same canonical f₂;
+EE amplitude DoD still MET; EE z1's residual again literally
+`A_s·e⁻²ᵗ/ω_b²`, ratio −2.0000). **Interactions surface where real**: TT
+z4's cluster carries f1hat forms (residual MI 2.40 vs 2.16; η̂_comb
+0.758 → 0.787), TT z3 reaches R_SR 1.00, and EE z0's f₂ upgrades to the
+unanimous interaction form `−A_s·H0²·(f1hat − c)` (R_SR 1.00, MI
+0.40 → 0.50) — though its joint E_inv stays at 0.062 (band
+[0.046, 0.093]), so the card remains unresolved. **No card status
+changes**; controls null (≤ 0.053 nat); stage-2 residuals still fail the
+frozen audit for all 11 — the non-terminating hierarchy is robust to the
+enriched ansatz.
+
 ## Remaining gaps
 
 1. **R_model (roadmap Phase 9).** Search-stability (5 PySR seeds) is
@@ -138,13 +161,16 @@ two symbolic levels.
    per-checkpoint, and Phase 9 remains executable later without touching
    the frozen thresholds or any existing card number.
 2. **The hierarchy does not terminate.** Stage-2 residuals still fail the
-   frozen audit for all 11 latents; a third stage is possible but the
-   returns are shrinking (combined R²(μ) already 0.955–0.998). Recorded on
+   frozen audit for all 11 latents — confirmed robust to the
+   interaction-aware ansatz (layer 6); a third stage is possible but the
+   returns are shrinking (combined R²(μ) already 0.954–0.998). Recorded on
    the cards rather than pursued.
-3. **EE z0.** The one unresolved card: its stage-2 account explains only
-   R² 0.41 of the residual and its joint level sets stay at E_inv 0.060.
-   A better f₂ family (or a 3-coordinate account) is the concrete next
-   experiment if this latent matters downstream.
+3. **EE z0.** Still the one unresolved card, now with the blocker
+   localised (layer 6): even the unanimous interaction-form f₂ leaves
+   joint E_inv at 0.062 vs the 0.05 rule, because the stage-2 residual
+   (R² 0.39) holds more than one coordinate's worth of structure. A
+   3-coordinate account is the concrete next experiment if this latent
+   matters downstream.
 
 ## What's here
 
@@ -178,7 +204,10 @@ cmb-lcdm-sr/
 ├── hpc/                         SLURM wrappers (CSD3/icelake, 16 CPU); sweeps/ = sweep specs
 ├── experiments/                 consolidated deliverables (one .md + .json per experiment)
 ├── tests/                       pytest — model shapes, checkpoint loads, MI, sweep planner
-└── docs/method.md               distilled protocol + results + controls
+└── docs/
+    ├── method.md                distilled protocol + results + controls
+    ├── results_compendium.md    ★ every result in one digest (for the write-up)
+    └── discovery_roadmap.md     the executed phase programme + Closure
 ```
 
 ★ = the heart of the repo.
