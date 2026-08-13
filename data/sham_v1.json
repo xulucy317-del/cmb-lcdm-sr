@@ -1,0 +1,24 @@
+{
+  "n_test_rows": 50000,
+  "sr_block": 5000,
+  "donors": {
+    "ob": {
+      "theta_col": 0,
+      "seed": 90001,
+      "path": "data/sham_v1_ob.npy",
+      "frac_rows_moved": 1.0
+    },
+    "tau": {
+      "theta_col": 3,
+      "seed": 90002,
+      "path": "data/sham_v1_tau.npy",
+      "frac_rows_moved": 0.9998
+    },
+    "ns": {
+      "theta_col": 5,
+      "seed": 90003,
+      "path": "data/sham_v1_ns.npy",
+      "frac_rows_moved": 0.9998
+    }
+  }
+}

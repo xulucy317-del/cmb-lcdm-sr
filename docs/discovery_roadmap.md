@@ -808,3 +808,93 @@ instrument failure, and it is recorded on the cards rather than pursued.
    `--variant ia` on the residual consolidator and joint level-set audit,
    `scripts/build_f1hat_cache.py`, `hpc/slurm_residual_sr_ia*.sh`.
 4. **R_model** — Phase 9 as specified.
+5. **Exhaustive support at full protocol (R-P4)** — **launched 2026-08-13**,
+   pre-registration below. Phase 4 screened all 63 supports but scored them
+   with a capacity metric and promoted only finalists to full protocol; the
+   search-dilution question needs a budget-matched readout over the complete
+   grid. Does not touch any frozen threshold or existing card number.
+
+---
+
+## Post-closure pre-registration (2026-08-13) — R-P4, exhaustive support under a budget-matched readout
+
+**Frozen before any full-protocol result exists.** Registered as a
+*refinement* of Phase 4's readout, in the style of R-P5: the Phase-4 grid and
+gate G2 stand as recorded; this adds a second readout over a completed grid.
+
+### Why
+
+Phase 4a screened all 2⁶−1 = 63 supports (ni100, 2 seeds) and scored each by
+**Î_S = the front-max validation MI**. `hp_v1` established that front-max MI
+is a *capacity* dial — every capacity knob raises it — so Î_S is biased
+toward larger supports by construction, and 4b promoted only Pareto
+finalists to the protocol budget. Neither step addresses the distinct
+question of whether inputs a latent does not depend on **degrade the search**:
+extra variables enlarge the mutation space at fixed iteration budget, and a
+spurious variable that shaves train loss consumes complexity the true
+structure needs. That damage is invisible at the front maximum and shows up
+only at a matched complexity budget.
+
+**Disclosure (the peek).** Before this registration, the existing 4a screen
+runs (ni100, 2 seeds) were re-scored at MI@c≤10 and inspected; a strict
+subset led all-6 in 6/11 latents, including all three N-G2-flagged latents.
+The 4a screen is therefore a **peeked** dataset and supplies no confirmatory
+number here. The primary readout below (C = 10) is `hp_v1`'s pre-existing
+aim-aligned metric, defined before this experiment and not selected from that
+re-scoring; every statistic that carries a claim is computed on new
+full-protocol runs and confirmed on T2.
+
+### Grid
+
+All 63 supports × every latent × seeds 0–4 at the study protocol (ni200,
+pops15, ms20, n = 5000), both models — 3,465 cells, of which 1,040 already
+exist at exactly that protocol (4b finalists + `allparams` for all-6) and are
+symlinked in with a verified protocol match
+(`scripts/link_existing_subset_runs.py`, provenance in
+`<sweep-dir>/reused_runs.json`). Specs: `hpc/sweeps/subsets_full_{tt,ee}.json`.
+
+### Frozen definitions
+
+* **Budget-matched readout** `M_S^(C)` = mean over the 5 PySR seeds of
+  (max validation MI over front equations of complexity ≤ C). **Primary
+  C = 10**; C ∈ {6, 14, 20} reported descriptively only.
+* **Paired difference** — supports share the seed set, so all comparisons are
+  paired by seed; SE is the standard error of the 5 paired differences.
+* **T2 confirmation** — the per-seed best-at-c≤10 form is re-scored by full
+  `gmm-mi` on T2 (rows 25k–50k, confirmatory-only per `src/cmb_lcdm_sr/tiers.py`),
+  giving 5 paired T2 values per support.
+
+### Frozen decision rules
+
+1. **Dilution predicate.** Latent *k* is **dilution-affected** iff, in a
+   two-stage procedure, (a) selection: S⁺ = argmax over the 62 strict subsets
+   of `M_S^(10)` on T0-val, and (b) confirmation: the paired T2 mean of
+   S⁺ − all-6 exceeds **+1 SE**. Stage (b) is what carries the claim; stage
+   (a) is selection over 62 candidates and is winner's-cursed by construction.
+2. **Sham control — the mechanism test.** `Δ_sham` = paired
+   `M_{all6+sham}^(10) − M_all6^(10)`, pooled over the 3 donor columns
+   (`data/sham_v1_{ob,tau,ns}.npy`: permutations of real θ columns, so a
+   genuine parameter's marginal with zero information about any latent).
+   **Dilution is demonstrated** iff the pooled `Δ_sham` is negative by more
+   than 1 SE, per model; per-latent values are descriptive.
+   This is the leg that settles the mechanism — a strict subset beating all-6
+   can always be argued away as "the dropped parameter did carry a little
+   information", whereas a sham column provably carries none.
+3. **Scope of consequences.** The exhaustive full-protocol S\* may resolve the
+   three **N-G2** attention flags (TT z0, EE z3, EE z4), whose content is
+   precisely "S\* not screen-recurrent" — a statement about the two-tier
+   design, which this grid removes. Any S\* revision is recorded as a card
+   *field* update plus a note; **no card status flips** without re-running the
+   downstream card instruments, and no headline claim depends on this
+   experiment. The −2 result is read from all-params runs, four ways, and is
+   untouched either way.
+4. **A null result is an outcome, not a failure.** If `M_S^(10)` does not
+   favour strict subsets at full protocol and `Δ_sham` is not negative
+   beyond 1 SE, that is recorded as "all-6 is not diluting at protocol
+   budget" and Phase 4's verdict stands unchanged.
+
+### Deliverables
+
+`experiments/subsets_full_<run>.{md,json}` (63-row budget-matched table per
+latent, staircase by |S|, S⁺ with its T2 confirmation, N-G2 disposition) and
+`experiments/sham_control_<run>.{md,json}` (per-latent and pooled `Δ_sham`).
