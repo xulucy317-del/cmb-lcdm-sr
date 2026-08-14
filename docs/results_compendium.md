@@ -250,8 +250,10 @@ reproducible **superset finding** — the all-parameter ceiling beats
 {A_s, τ} by more than 1 SE because the shape-sector modulation is real
 information (G2 "PASS (superset finding)"). Minimal supports elsewhere
 range |S| = 3 (EE z4: {ω_b, τ, A_s}) to 6. Three latents carry N-G2
-attention flags (S* not screen-recurrent: TT z0, EE z3, EE z4). Sources:
-`experiments/subset_selection_*` (staircase tables per latent).
+attention flags (S* not screen-recurrent: TT z0, EE z3, EE z4) — all
+three dispositioned by the post-closure exhaustive full-protocol grid
+(§6.13). Sources: `experiments/subset_selection_*` (staircase tables per
+latent).
 
 ### 6.7 Phase 5 — the intrinsic ceiling I(Z_k; θ)
 
@@ -350,6 +352,47 @@ verdicts:
 No card status changes. Sources: `experiments/residual_sr_ia_*`,
 `levelset_audit_joint_ia_*`.
 
+### 6.13 Post-closure — R-P4, exhaustive support at full protocol (2026-08-14)
+
+Phase 4 screened all 63 supports with a *capacity* readout (front-max
+Î_S) and promoted only finalists to protocol; R-P4 ran the **complete**
+63-support × 5-seed grid at the study protocol for every latent (3,465
+cells; 2,425 fresh runs, 1,040 reused with verified protocol match;
+≈5,800 core-h measured) and read it with the pre-registered
+budget-matched M_S^(c≤10), two-stage: select S⁺ on T0-val over the 62
+strict subsets, confirm S⁺ − all-6 paired on T2 (> +1 SE), plus a
+sham-input control (the all-6 search rerun with a permuted real θ column
+— a genuine parameter's marginal, provably zero information). Rules
+frozen before any full-protocol result existed (roadmap, "Post-closure
+pre-registration (2026-08-13)", which also discloses the 4a-screen
+re-scoring as a peek carrying nothing).
+
+* **Dilution predicate: 6/11 latents confirm** a strict subset above
+  all-6 on T2 — substantively TT z3 (+0.090 ± 0.062 nat, drop {τ, A_s}),
+  EE z2 (+0.115 ± 0.104, drop {H0, τ}), EE z3 (+0.085 ± 0.040, drop
+  A_s), EE z4 (+0.126 ± 0.047, S⁺ = {ω_cdm, τ, A_s, n_s}); EE z0/z5
+  pass at ≤ 0.003 nat (hairline, recorded as confirmed, read as
+  negligible). The other five: not confirmed.
+* **The sham mechanism test crosses**: TT pooled Δ_sham = **−0.0404 ±
+  0.0134** nat → dilution demonstrated (3 SE; z0 most affected, −0.138);
+  EE +0.0137 ± 0.0126 → null. In both models **0.0 %** of best-at-c≤10
+  forms use the sham symbol — degradation, where present, is
+  search-space dilution, never complexity spend.
+* **Reading**: TT has the mechanism but (z3 aside) no confirmed subset
+  advantage; EE has five subset advantages but no generic-dilution
+  mechanism — its gains come from removing *specific* real inputs (a
+  distractor effect), not from a smaller search space per se.
+* **N-G2 dispositions** (all three flags resolved; no status flips, no
+  headline change): TT z0 → all-6 stands (S⁺ not confirmed; the
+  screen-era instability was near-ties among top supports); EE z3 →
+  dilution-affected, S⁺ drops A_s; EE z4 → dilution-affected, the
+  study's strongest case (every top-10 support beats all-6 on val).
+  Cards carry the new `s_star.exhaustive_full` field + amended N-G2
+  notes; every pre-existing card number is unchanged.
+
+Sources: `experiments/subsets_full_*`, `sham_control_*`; full tables and
+the per-rule verdicts in the roadmap "Outcome (2026-08-14)" section.
+
 ---
 
 ## 7. Controls (every null in one place)
@@ -361,6 +404,7 @@ No card status changes. Sources: `experiments/residual_sr_ia_*`,
 | Stage-1 permutation nulls (R², per-param MI) | p97.5 ≈ −0.002 / 0.001 for all 11 latents | `sufficiency_audit_*`, cards appendix |
 | Shuffled-residual SR (additive stage 2) | best MI vs true residual 0.066–0.074 (TT z2), 0.009–0.060 (EE z5) vs real 0.40–1.77 | `residual_sr_*` |
 | Shuffled-residual SR (interaction-aware, 7-input) | 0.010–0.053 nat (TT z2, EE z0, EE z5 × 2 seeds) | `residual_sr_ia_*` |
+| Sham-input dilution control (all-6 + permuted real θ column) | TT pooled Δ_sham −0.040 ± 0.013 (dilution demonstrated); EE +0.014 ± 0.013 (null); sham symbol in 0.0 % of best-at-c≤10 forms | `sham_control_*` |
 | Level-set shuffled-form E_inv | 0.81–2.20 (TT), 1.59–1.81 (EE) vs pass threshold 0.05 | `levelset_audit_*` |
 | Wrong-latent E_inv (specificity) | 0.2–2.8 across latents (amplitude cells are not invariant for other latents) | `levelset_audit_*`, `_joint_*` |
 | Subspace shuffled-probe | max R² ≈ 0.000; shuffled-f MI floors ≈ 0.001 nat | `subspace_probe_*` |
@@ -403,7 +447,7 @@ No card status changes. Sources: `experiments/residual_sr_ia_*`,
 | C3 | Degeneracy breaking is visible blind, twice: the amplitude-latent *count* (1 → 2) before any SR, and the split-not-duplicated structure after (z4 alone carries τ; no redundant pair; synergy 0.013 → 0.473 nat) | §4; `method.md` §1, `subspace_probe_*` | — | **Main or strong secondary** |
 | C4 | The methodology: freeze → validate-on-positive-control → unblind, with an η ladder (η_S/η_plat/η_post), semantic recurrence, interventional level sets, decoder triangulation, and a deviations register — a reusable recipe for scientific-VAE interpretation | §5; roadmap §0.3–0.5, gates in every deliverable | — | **Methods centerpiece** |
 | C5 | The encoder hierarchy is symbolically non-terminating: structured residuals at every level probed, robust to interaction-aware enrichment; level-set failures agree *quantitatively* with calibration (E_inv/(1−R²) ∈ [1.1, 2.6]) | §6.5, §6.9, §6.12 | two levels probed (+ enriched ansatz); third level not attempted | **Secondary result / discussion** |
-| C6 | Negative results with practical value: top-front MI is a capacity dial (search big, slice small); MI@c≤10 is tuning-flat; the additive-hierarchy limit at the TT amplitude latent is real structure (D-DoD-z2 → §6.12) | §6.3, §6.12 | — | **Methods / appendix** |
+| C6 | Negative results with practical value: top-front MI is a capacity dial (search big, slice small); MI@c≤10 is tuning-flat; the additive-hierarchy limit at the TT amplitude latent is real structure (D-DoD-z2 → §6.12); input-set dilution is model-dependent — sham-demonstrated on TT, absent on EE, 6/11 budget-matched subset confirmations (§6.13) | §6.3, §6.12, §6.13 | — | **Methods / appendix** |
 | C7 | The intrinsic-ceiling reframing: η̂_post turns "fraction of a search plateau" into "fraction of what the latent physically stores" (0.29–0.84 for primaries, 0.59–0.96 with secondaries) | §6.7–6.8; `posterior_ceiling_*` | GMM entropy estimate; DPI-checked | **Methods + results table** |
 | C8 | Scope statement: everything is per-checkpoint pending R_model | §8 | — | **Limitations (verbatim)** |
 
@@ -426,13 +470,15 @@ No card status changes. Sources: `experiments/residual_sr_ia_*`,
 | `subspace_probe_<run>` | carrier sets, redundancy/synergy |
 | `latent_cards_<run>` | **the synthesis**: cards, gates, controls, deviations |
 | `residual_sr_ia_<run>`, `levelset_audit_joint_ia_<run>` | post-closure interaction-aware follow-up |
+| `subsets_full_<run>`, `sham_control_<run>` | post-closure R-P4: budget-matched exhaustive support + sham dilution control |
 
 Narrative: `docs/method.md` (protocol + amplitude story + §9 full-study
 synthesis) · programme + closure: `docs/discovery_roadmap.md` (§0.3 frozen
 rules; Closure section with phase ledger and Phase-9 disposition) ·
 motivation/derivations: `docs/next_step.md` (superseded, annotated).
 Compute: roadmap budget table (~1,700 core-h planned; hp_v1 ~77/model,
-1b ~65, 4a screen ~1,015, ia follow-up 98 measured).
+1b ~65, 4a screen ~1,015, ia follow-up 98 measured, R-P4 grid + sham
+≈5,800 measured).
 
 *Everything in this file is reproducible from `experiments/*.json`; the
 per-latent numbers quoted here are the T2-confirmed card values.*

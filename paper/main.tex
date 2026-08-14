@@ -45,7 +45,7 @@ mutual-information regression rediscovers $\combo$}
 \author{Author name(s) here\\
 \small Institute, University of Cambridge\\
 \small \texttt{zx332@cam.ac.uk}}
-\date{Draft of 2026-08-09 --- compiled from \texttt{docs/results\_compendium.md}}
+\date{Draft of 2026-08-14 --- compiled from \texttt{docs/results\_compendium.md}}
 
 \begin{document}
 \maketitle
@@ -215,7 +215,7 @@ Disentanglement audit & which raw parameters does $z_k$ carry? & $\MI(z_k;\theta
 Blind SR (\S\ref{sec:objective}) & which function of $\theta$ is $\mu_k$? & held-out MI of Pareto forms & shuffled target \\
 Plateau/knee readout & where does the front saturate? & envelope plateau, 1-SE knee $c^*$ & --- \\
 Semantic recurrence & does the \emph{same function} recur across seeds? & $\RSR$ via 3 equivalence tests & anti-chaining diagnostics \\
-Blind subset selection & minimal input support $S^*$? & all-63-subset MI ceilings $\hat I_S$ & screen recurrence flags \\
+Blind subset selection & minimal input support $S^*$? & all-63-subset MI ceilings $\hat I_S$ & screen recurrence flags; sham-input dilution control \\
 Calibrated sufficiency & does $f_1$ account for $\mu_k$? & $\etaS$; residual $R^2_\mathrm{res}$ audit & permutation null \\
 Intrinsic ceiling & fraction of what $z_k$ \emph{stores}? & $\etapost=\MI(Z;f)/\MI(Z;\mu)$ & DPI sanity \\
 Residual SR (stage 2) & is the residual itself symbolic? & recurrent $f_2$; MI vs.\ $e_1$ & shuffled residual \\
@@ -393,7 +393,11 @@ $2^6{-}1=63$-subset campaign) and recurs across search seeds ($\RSR\ge0.8$
 everywhere, 8/11 at 1.00). The amplitude latents return $S^*=$ all six
 parameters as a reproducible superset finding --- the all-parameter ceiling
 genuinely beats $\{\As,\tau\}$ because shape-sector modulation of the latent is
-real information.
+real information. A post-closure, pre-registered rerun of the \emph{complete}
+63-support grid at full protocol under a budget-matched readout later resolved
+the three supports flagged as non-recurrent at the screen tier and bounded
+input-set search dilution; its crossed outcome is reported with the negative
+results (\S\ref{sec:negative}).
 
 \emph{Every stage-1 residual is structured} ($R^2_\mathrm{res}=0.96$--$0.994$
 against permutation nulls $\approx0$): no latent is a clean one-function
@@ -520,6 +524,28 @@ hyperparameter-robust ($r\approx-1.97$ to $-2.00$ in every configuration);
 own front is \emph{worse} at complexity $\le$10 than the sliced maxsize-20
 front (1.60 vs.\ 1.89 nat TT; 1.69 vs.\ 2.02 EE).
 
+A fourth fact comes from a post-closure, pre-registered experiment (R-P4):
+\emph{all} 63 supports rerun at full protocol (3\,465 grid cells, five seeds)
+and read with a budget-matched statistic $M_S^{(c\le10)}$ under a frozen
+select-then-confirm rule, alongside a sham-input control --- the
+all-parameter search rerun with a seventh input that is a permuted copy of a
+real parameter column, hence provably carrying zero information. The two legs
+cross. On TT the sham input demonstrably dilutes the search
+($\Delta_\mathrm{sham}=-0.040\pm0.013$ nat pooled over 75 paired runs), yet
+only one strict subset beats all-six on the held-out tier ($z_3$,
+$+0.090\pm0.062$); on EE the sham costs nothing ($+0.014\pm0.013$), yet five
+of six latents confirm a strict-subset advantage --- three substantive,
+$+0.09$ to $+0.13$ nat, the strongest at $z_4$ where $\{\omC,\tau,\As,\ns\}$
+beats all-six by $+0.126\pm0.047$; the other two pass the frozen $+1$-SE rule
+at magnitudes $\le0.003$ nat and are read as negligible. The sham symbol appears in $0.0\%$ of
+best-at-budget forms in either model. The practical reading: budget-matched
+damage from searching on the full input set is real but small
+($\lesssim0.13$ nat), and where subsets win the gain comes from removing
+specific weakly-coupled true inputs (a distractor effect), not from a smaller
+search space per se. The three screen-tier support-recurrence flags are
+thereby resolved (TT $z_0$: all-six stands; EE $z_3$, $z_4$: genuine subset
+advantages); no card status or headline number changes.
+
 \section{Limitations and scope}
 \label{sec:limits}
 
@@ -550,8 +576,8 @@ symbolic levels. Nothing in the ladder of Table~\ref{tab:ladder} is specific
 to the CMB: it is a recipe any scientific-VAE interpretation study can run,
 every instrument shipping its own null.
 
-\paragraph*{Reproducibility.} All searches ($\approx$2\,000 PySR runs,
-$\approx$1\,800 CPU core-hours), consolidated deliverables, frozen thresholds,
+\paragraph*{Reproducibility.} All searches ($\approx$4\,600 PySR runs,
+$\approx$7\,600 CPU core-hours), consolidated deliverables, frozen thresholds,
 deviation register, and the per-latent cards are in the repository
 (\texttt{cmb-lcdm-sr}); every number above is regenerable from
 \texttt{experiments/*.json} and is a confirmatory-tier (T2) value.

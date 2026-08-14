@@ -20,3 +20,8 @@ logs/
 # Large external inputs are never vendored here (see README: data provenance).
 # theta.npy + splits_v1.npz in data/ ARE tracked; spectra shards are not.
 data/shards_*
+
+# LaTeX build artifacts
+paper/*.aux
+paper/*.log
+paper/*.out
