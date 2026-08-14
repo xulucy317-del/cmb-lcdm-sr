@@ -32,7 +32,10 @@ A joint FAIL where defined blocks the leg — no tolerance is added.
 Reads (experiments/):  knee_readout, semantic_recurrence,
   sufficiency_audit, subset_selection, posterior_ceiling, residual_sr,
   levelset_audit, levelset_audit_joint, decoder_effect, subspace_probe
-  (each `<name>_<run>.json`; subspace_probe optional -> column pending)
+  (each `<name>_<run>.json`; subspace_probe optional -> column pending),
+  subsets_full (optional; post-closure R-P4 — adds the s_star
+  `exhaustive_full` field and the N-G2 dispositions, per roadmap R-P4
+  rule 3: a field + note only, never a status input)
 Writes: experiments/latent_cards_<run>.{md,json}
 
     python scripts/build_latent_cards.py --run lcdm_tt_beta3e-4
@@ -155,6 +158,7 @@ def build_card(run: str, k: int, src: dict) -> dict:
     st2 = res.get("stage2_residual") or {}
     g2 = (src["subsets"]["finals"].get("gate_G2") or {}) \
         .get("per_latent", {}).get(f"z{k}", {})
+    sf = (src.get("subsets_full") or {}).get("latents", {}).get(f"z{k}")
 
     card = {
         "latent": k,
@@ -183,6 +187,18 @@ def build_card(run: str, k: int, src: dict) -> dict:
             "eta_se": fin["s_star"]["eta_se"],
             "screen_recurrent": fin["screen_recurrence"]["recurrent"],
             "gate_G2_verdict": g2.get("verdict"),
+            # R-P4 (post-closure, roadmap rule 3): descriptive field only,
+            # never read by assign_status.
+            "exhaustive_full": (None if sf is None else {
+                "s_plus": sf["s_plus"],
+                "m_c10_all6": sf["all6"]["M_c10"],
+                "m_c10_s_plus": next(
+                    e["M_c10"] for e in sf["entries"]
+                    if sorted(e["S"]) == sorted(sf["s_plus"])),
+                "t2_diff": sf["t2_confirmation"]["mean_diff"],
+                "t2_se": sf["t2_confirmation"]["se"],
+                "dilution_affected": sf["t2_confirmation"]["confirmed"],
+            }),
         },
         "sufficiency": {
             "eta_s": fin["s_star"]["eta"],
@@ -289,9 +305,25 @@ def build_card(run: str, k: int, src: dict) -> dict:
                       "level-set leg via response-only (joint union "
                       "support = all 6)")})
     if not card["s_star"]["screen_recurrent"]:
-        devs.append({"id": "N-G2", "phase": 4, "text":
-                     "S* not recurrent across the two screen seeds "
-                     f"({card['s_star']['gate_G2_verdict']})"})
+        txt = ("S* not recurrent across the two screen seeds "
+               f"({card['s_star']['gate_G2_verdict']})")
+        ef = card["s_star"]["exhaustive_full"]
+        if ef is not None:
+            # R-P4 rule 3: the exhaustive full-protocol grid removes the
+            # two-tier design the flag was about; disposition appended as a
+            # note, statuses untouched.
+            if ef["dilution_affected"]:
+                txt += (" — R-P4 disposition (2026-08-14): "
+                        "dilution-affected; budget-matched S+ = "
+                        + _sup(ef["s_plus"])
+                        + f" (paired T2 {ef['t2_diff']:+.4f} +/- "
+                        f"{ef['t2_se']:.4f} nat); no status change")
+            else:
+                txt += (" — R-P4 disposition (2026-08-14): resolved, "
+                        "all-6 stands at protocol budget (S+ "
+                        f"{ef['t2_diff']:+.4f} +/- {ef['t2_se']:.4f} nat, "
+                        "not confirmed)")
+        devs.append({"id": "N-G2", "phase": 4, "text": txt})
     card["deviations"] = devs
     return card
 
@@ -308,6 +340,7 @@ def build_run(run: str, n_latents: int, amp_idx: int, exp_dir: Path) -> dict:
         "levelset_joint": _load(exp_dir, "levelset_audit_joint", run),
         "decoder": _load(exp_dir, "decoder_effect", run),
         "subspace": _load(exp_dir, "subspace_probe", run, required=False),
+        "subsets_full": _load(exp_dir, "subsets_full", run, required=False),
     }
     cards = [build_card(run, k, src) for k in range(n_latents)]
 
@@ -366,8 +399,8 @@ def to_markdown(payload: dict) -> str:
     md.append("One §0.1 card per latent, statuses from the frozen §0.3 "
               "predicates (deviation register at the end; D-LS defines the "
               "level-set leg). All numbers are merged verbatim from the "
-              "Phase 1-8 deliverables named on each line — no new "
-              "computation.\n")
+              "Phase 1-8 and post-closure deliverables named on each line "
+              "— no new computation.\n")
     if payload.get("subspace_pending"):
         md.append("**NOTE: Phase-8 subspace columns pending** (probe jobs "
                   "not yet consolidated when this was built).\n")
@@ -406,6 +439,17 @@ def to_markdown(payload: dict) -> str:
         md.append(f"* S* = {_sup(s['inputs'])} (|S|={s['size']}, eta_S "
                   f"{_pm(s['eta'], s['eta_se'])}, screen-recurrent "
                   f"{s['screen_recurrent']}) [subset_selection]")
+        if s.get("exhaustive_full"):
+            ef = s["exhaustive_full"]
+            md.append(f"* R-P4 exhaustive full-protocol (M@c<=10 "
+                      f"{fmt(ef['m_c10_s_plus'])} vs all-6 "
+                      f"{fmt(ef['m_c10_all6'])}): S+ = {_sup(ef['s_plus'])}, "
+                      f"paired T2 vs all-6 {ef['t2_diff']:+.4f} +/- "
+                      f"{ef['t2_se']:.4f} nat -> "
+                      + ("dilution-affected"
+                         if ef["dilution_affected"] else
+                         "not confirmed (all-6 stands)")
+                      + " [subsets_full]")
         suf, ce = c["sufficiency"], c["ceiling"]
         md.append(f"* ceiling I(Z;theta) = {_pm(ce['I'], ce['se'])} nat "
                   f"(SNR {fmt(ce['snr'], 1)}); eta_post "

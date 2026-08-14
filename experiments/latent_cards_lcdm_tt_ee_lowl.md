@@ -1,6 +1,6 @@
 # Latent cards — `lcdm_tt_ee_lowl` (roadmap Phase 10)
 
-One §0.1 card per latent, statuses from the frozen §0.3 predicates (deviation register at the end; D-LS defines the level-set leg). All numbers are merged verbatim from the Phase 1-8 deliverables named on each line — no new computation.
+One §0.1 card per latent, statuses from the frozen §0.3 predicates (deviation register at the end; D-LS defines the level-set leg). All numbers are merged verbatim from the Phase 1-8 and post-closure deliverables named on each line — no new computation.
 
 | latent | role | status | f1 | eta_S | eta_post_hat | eta_ph_comb | R_SR | E_inv joint | axis-aligned |
 |---|---|---|---|---:|---:|---:|---:|---:|---|
@@ -18,6 +18,7 @@ One §0.1 card per latent, statuses from the frozen §0.3 predicates (deviation 
 * f1 `omega_cdm/(H0*n_s*omega_b)` (C=7, support {omega_b, omega_cdm, H0, n_s}, R_SR 1.00, cohesion 0.97) [semantic_recurrence]
 * knee c* = 19, plateau 1.788 +/- 0.008 nat (allparams_ms30), MI@c<=10 1.457, envelope: no knee (diffuse) [knee_readout]
 * S* = {omega_b, omega_cdm, H0, tau, A_s, n_s} (|S|=6, eta_S 1.000 +/- 0.000, screen-recurrent True) [subset_selection]
+* R-P4 exhaustive full-protocol (M@c<=10 1.457 vs all-6 1.457): S+ = {omega_b, omega_cdm, H0, A_s, n_s}, paired T2 vs all-6 +0.0015 +/- 0.0013 nat -> dilution-affected [subsets_full]
 * ceiling I(Z;theta) = 1.343 +/- 0.003 nat (SNR 11.5); eta_post 0.737 +/- 0.009, eta_post_hat 0.756 +/- 0.012; combined (f1+f2): eta_post_hat 0.842, eta_plat 0.925 [posterior_ceiling, residual_sr]
 * signature g_j: ob=0.23 oc=0.33 H0=0.32 ns=0.12; decoder cos_g 0.99 [sufficiency_audit, decoder_effect]
 * stage-1 residual: R2_cal 0.924, R2_res 0.960 -> FAIL (loadings {omega_b, omega_cdm, H0, tau, ln10As, n_s}) [sufficiency_audit]
@@ -33,6 +34,7 @@ One §0.1 card per latent, statuses from the frozen §0.3 predicates (deviation 
 * f1 `H0**2*omega_cdm` (C=4, support {omega_cdm, H0}, R_SR 1.00, cohesion 0.98) [semantic_recurrence]
 * knee c* = 25, plateau 4.006 +/- 0.045 nat (allparams_ms30), MI@c<=10 1.952, envelope: no knee (diffuse) [knee_readout]
 * S* = {omega_b, omega_cdm, H0, tau, A_s, n_s} (|S|=6, eta_S 1.000 +/- 0.000, screen-recurrent True) [subset_selection]
+* R-P4 exhaustive full-protocol (M@c<=10 1.957 vs all-6 1.952): S+ = {omega_b, omega_cdm, H0, tau, A_s}, paired T2 vs all-6 -0.0113 +/- 0.0225 nat -> not confirmed (all-6 stands) [subsets_full]
 * ceiling I(Z;theta) = 3.835 +/- 0.003 nat (SNR 2179.5); eta_post 0.352 +/- 0.003, eta_post_hat 0.348 +/- 0.004; combined (f1+f2): eta_post_hat 0.663, eta_plat 0.652 [posterior_ceiling, residual_sr]
 * signature g_j: oc=0.34 H0=0.66; decoder cos_g 0.93 [sufficiency_audit, decoder_effect]
 * stage-1 residual: R2_cal 0.931, R2_res 0.993 -> FAIL (loadings {omega_b, omega_cdm, H0, tau, ln10As, n_s}) [sufficiency_audit]
@@ -49,6 +51,7 @@ One §0.1 card per latent, statuses from the frozen §0.3 predicates (deviation 
 * f1 `omega_b/n_s**2` (C=4, support {omega_b, n_s}, R_SR 1.00, cohesion 0.99) [semantic_recurrence]
 * knee c* = 22, plateau 3.330 +/- 0.020 nat (allparams_ms30), MI@c<=10 3.057, envelope: knee + slow climb [knee_readout]
 * S* = {omega_b, omega_cdm, A_s, n_s} (|S|=4, eta_S 0.995 +/- 0.008, screen-recurrent True) [subset_selection]
+* R-P4 exhaustive full-protocol (M@c<=10 3.005 vs all-6 2.885): S+ = {omega_b, omega_cdm, A_s, n_s}, paired T2 vs all-6 +0.1148 +/- 0.1039 nat -> dilution-affected [subsets_full]
 * ceiling I(Z;theta) = 2.180 +/- 0.003 nat (SNR 78.6); eta_post 0.576 +/- 0.006, eta_post_hat 0.574 +/- 0.006; combined (f1+f2): eta_post_hat 0.963, eta_plat 0.933 [posterior_ceiling, residual_sr]
 * signature g_j: ob=0.49 ns=0.51; decoder cos_g 0.97 [sufficiency_audit, decoder_effect]
 * stage-1 residual: R2_cal 0.927, R2_res 0.993 -> FAIL (loadings {omega_b, omega_cdm, H0, ln10As, n_s}) [sufficiency_audit]
@@ -65,6 +68,7 @@ One §0.1 card per latent, statuses from the frozen §0.3 predicates (deviation 
 * f1 `log(omega_b)/(n_s + omega_cdm)` (C=6, support {omega_b, omega_cdm, n_s}, R_SR 0.80, cohesion 0.98) [semantic_recurrence]
 * knee c* = 18, plateau 3.212 +/- 0.071 nat (allparams_ms30), MI@c<=10 2.048, envelope: no knee (diffuse) [knee_readout]
 * S* = {omega_b, omega_cdm, H0, n_s} (|S|=4, eta_S 0.992 +/- 0.010, screen-recurrent False) [subset_selection]
+* R-P4 exhaustive full-protocol (M@c<=10 2.123 vs all-6 2.048): S+ = {omega_b, omega_cdm, H0, tau, n_s}, paired T2 vs all-6 +0.0854 +/- 0.0403 nat -> dilution-affected [subsets_full]
 * ceiling I(Z;theta) = 2.724 +/- 0.003 nat (SNR 234.1); eta_post 0.493 +/- 0.005, eta_post_hat 0.493 +/- 0.005; combined (f1+f2): eta_post_hat 0.864, eta_plat 0.819 [posterior_ceiling, residual_sr]
 * signature g_j: ob=0.30 oc=0.17 ns=0.52; decoder cos_g 0.97; ratio pairs: (omega_b,omega_cdm) r=+12.909; (omega_b,n_s) r=+12.909; (omega_cdm,n_s) r=+1.000 [sufficiency_audit, decoder_effect]
 * stage-1 residual: R2_cal 0.935, R2_res 0.991 -> FAIL (loadings {omega_b, omega_cdm, H0, ln10As, n_s}) [sufficiency_audit]
@@ -72,7 +76,7 @@ One §0.1 card per latent, statuses from the frozen §0.3 predicates (deviation 
 * level sets: f1-only E_inv 0.086 (band 0.065-0.129, resp R2 0.94) -> FAIL; joint (f1,f2) E_inv 0.014 (band 0.008-0.016, resp 0.99) -> PASS [levelset_audit, levelset_audit_joint]
 * decoder effect: a = [ob=+0.27 oc=+0.26 H0=-0.07 lnAs=-0.01 ns=+0.43], R2_W 1.000, amp mass 0.01, frac_brk 0.26 [decoder_effect]
 * subspace probe: A* = {z0, z2, z3, z4, z5} (axis-aligned False), R2 own 0.933 / full 0.990 (T2 0.989); top pair (z3, z2), redundancy(2|1) n/a [subspace_probe]
-* deviations: **D-LS** level-set leg via joint (f1,f2) audit; **N-G2** S* not recurrent across the two screen seeds (ATTENTION (not screen-recurrent))
+* deviations: **D-LS** level-set leg via joint (f1,f2) audit; **N-G2** S* not recurrent across the two screen seeds (ATTENTION (not screen-recurrent)) — R-P4 disposition (2026-08-14): dilution-affected; budget-matched S+ = {omega_b, omega_cdm, H0, tau, n_s} (paired T2 +0.0854 +/- 0.0403 nat); no status change
 
 ## z4 — tau (amplitude sector) (reionization bump)
 
@@ -81,6 +85,7 @@ One §0.1 card per latent, statuses from the frozen §0.3 predicates (deviation 
 * f1 `-A_s/(tau - 0.4454238)` (C=5, support {tau, ln10As}, R_SR 1.00, cohesion 0.81) [semantic_recurrence]
 * knee c* = 20, plateau 2.370 +/- 0.082 nat (allparams_ms30), MI@c<=10 1.905, envelope: no knee (diffuse) [knee_readout]
 * S* = {omega_b, tau, A_s} (|S|=3, eta_S 1.068 +/- 0.026, screen-recurrent False) [subset_selection]
+* R-P4 exhaustive full-protocol (M@c<=10 1.985 vs all-6 1.854): S+ = {omega_cdm, tau, A_s, n_s}, paired T2 vs all-6 +0.1259 +/- 0.0467 nat -> dilution-affected [subsets_full]
 * ceiling I(Z;theta) = 1.535 +/- 0.003 nat (SNR 17.7); eta_post 0.811 +/- 0.006, eta_post_hat 0.842 +/- 0.011; combined (f1+f2): eta_post_hat 0.842, eta_plat 0.761 [posterior_ceiling, residual_sr]
 * signature g_j: tau=0.54 lnAs=0.46; decoder cos_g 1.00 [sufficiency_audit, decoder_effect]
 * stage-1 residual: R2_cal 0.955, R2_res 0.980 -> FAIL (loadings {omega_b, omega_cdm, H0, tau, ln10As, n_s}) [sufficiency_audit]
@@ -88,7 +93,7 @@ One §0.1 card per latent, statuses from the frozen §0.3 predicates (deviation 
 * level sets: f1-only E_inv 0.051 (band 0.045-0.089, resp R2 0.96) -> FAIL; joint (f1,f2) E_inv 0.031 (band 0.043-0.086, resp 0.96) -> PASS [levelset_audit, levelset_audit_joint]
 * decoder effect: a = [oc=+0.03 H0=-0.02 tau=-0.40 lnAs=-0.33 ns=-0.03], R2_W 0.988, amp mass 0.90, frac_brk 0.01 [decoder_effect]
 * subspace probe: A* = {z2, z4} (axis-aligned False), R2 own 0.946 / full 0.950 (T2 0.950); top pair (z4, z0), redundancy(2|1) -5.08 [subspace_probe]
-* deviations: **D-LS** level-set leg via joint (f1,f2) audit; **N-G2** S* not recurrent across the two screen seeds (ATTENTION (not screen-recurrent))
+* deviations: **D-LS** level-set leg via joint (f1,f2) audit; **N-G2** S* not recurrent across the two screen seeds (ATTENTION (not screen-recurrent)) — R-P4 disposition (2026-08-14): dilution-affected; budget-matched S+ = {omega_cdm, tau, A_s, n_s} (paired T2 +0.1259 +/- 0.0467 nat); no status change
 
 ## z5 — amplitude (A_s, tau) (overall amplitude)
 
@@ -97,6 +102,7 @@ One §0.1 card per latent, statuses from the frozen §0.3 predicates (deviation 
 * f1 `A_s*exp(-2*tau)` (C=5, support {tau, ln10As}, R_SR 1.00, cohesion 1.00) [semantic_recurrence]
 * knee c* = 28, plateau 4.087 +/- 0.004 nat (allparams_ms30), MI@c<=10 2.019, envelope: no knee (diffuse) [knee_readout]
 * S* = {omega_b, omega_cdm, H0, tau, A_s, n_s} (|S|=6, eta_S 1.000 +/- 0.000, screen-recurrent True) [subset_selection]
+* R-P4 exhaustive full-protocol (M@c<=10 2.019 vs all-6 2.017): S+ = {omega_cdm, H0, tau, A_s, n_s}, paired T2 vs all-6 +0.0032 +/- 0.0032 nat -> dilution-affected [subsets_full]
 * ceiling I(Z;theta) = 4.176 +/- 0.003 nat (SNR 4278.3); eta_post 0.290 +/- 0.003, eta_post_hat 0.289 +/- 0.003; combined (f1+f2): eta_post_hat 0.590, eta_plat 0.609 [posterior_ceiling, residual_sr]
 * signature g_j: tau=0.46 lnAs=0.54; decoder cos_g 0.98; ratio pairs: (tau,ln10As) r=-2.000 [sufficiency_audit, decoder_effect]
 * stage-1 residual: R2_cal 0.910, R2_res 0.994 -> FAIL (loadings {omega_b, omega_cdm, H0, n_s}) [sufficiency_audit]

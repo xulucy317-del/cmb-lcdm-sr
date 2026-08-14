@@ -40,7 +40,21 @@
         "eta": 1.0,
         "eta_se": 0.0,
         "screen_recurrent": true,
-        "gate_G2_verdict": "PASS"
+        "gate_G2_verdict": "PASS",
+        "exhaustive_full": {
+          "s_plus": [
+            "omega_b",
+            "omega_cdm",
+            "H0",
+            "A_s",
+            "n_s"
+          ],
+          "m_c10_all6": 1.4574283860700445,
+          "m_c10_s_plus": 1.4567650821564269,
+          "t2_diff": 0.001542059722184197,
+          "t2_se": 0.001336489489332101,
+          "dilution_affected": true
+        }
       },
       "sufficiency": {
         "eta_s": 1.0,
@@ -228,7 +242,21 @@
         "eta": 1.0,
         "eta_se": 0.0,
         "screen_recurrent": true,
-        "gate_G2_verdict": "PASS"
+        "gate_G2_verdict": "PASS",
+        "exhaustive_full": {
+          "s_plus": [
+            "omega_b",
+            "omega_cdm",
+            "H0",
+            "tau",
+            "A_s"
+          ],
+          "m_c10_all6": 1.9519280992396428,
+          "m_c10_s_plus": 1.9573451224604628,
+          "t2_diff": -0.011311897680482597,
+          "t2_se": 0.02253599647963795,
+          "dilution_affected": false
+        }
       },
       "sufficiency": {
         "eta_s": 1.0,
@@ -420,7 +448,20 @@
         "eta": 0.9947535927601663,
         "eta_se": 0.0077126318528917236,
         "screen_recurrent": true,
-        "gate_G2_verdict": "PASS"
+        "gate_G2_verdict": "PASS",
+        "exhaustive_full": {
+          "s_plus": [
+            "omega_b",
+            "omega_cdm",
+            "A_s",
+            "n_s"
+          ],
+          "m_c10_all6": 2.885346384196454,
+          "m_c10_s_plus": 3.004705602690189,
+          "t2_diff": 0.11482889807484842,
+          "t2_se": 0.10387425639252001,
+          "dilution_affected": true
+        }
       },
       "sufficiency": {
         "eta_s": 0.9947535927601663,
@@ -614,7 +655,21 @@
         "eta": 0.9915055833793588,
         "eta_se": 0.00996550122053901,
         "screen_recurrent": false,
-        "gate_G2_verdict": "ATTENTION (not screen-recurrent)"
+        "gate_G2_verdict": "ATTENTION (not screen-recurrent)",
+        "exhaustive_full": {
+          "s_plus": [
+            "omega_b",
+            "omega_cdm",
+            "H0",
+            "tau",
+            "n_s"
+          ],
+          "m_c10_all6": 2.047731463896134,
+          "m_c10_s_plus": 2.122504463515198,
+          "t2_diff": 0.08537047023631113,
+          "t2_se": 0.04034149575179902,
+          "dilution_affected": true
+        }
       },
       "sufficiency": {
         "eta_s": 0.9915055833793588,
@@ -808,7 +863,7 @@
         {
           "id": "N-G2",
           "phase": 4,
-          "text": "S* not recurrent across the two screen seeds (ATTENTION (not screen-recurrent))"
+          "text": "S* not recurrent across the two screen seeds (ATTENTION (not screen-recurrent)) \u2014 R-P4 disposition (2026-08-14): dilution-affected; budget-matched S+ = {omega_b, omega_cdm, H0, tau, n_s} (paired T2 +0.0854 +/- 0.0403 nat); no status change"
         }
       ]
     },
@@ -845,7 +900,20 @@
         "eta": 1.0682510752373562,
         "eta_se": 0.026375052215869214,
         "screen_recurrent": false,
-        "gate_G2_verdict": "ATTENTION (not screen-recurrent)"
+        "gate_G2_verdict": "ATTENTION (not screen-recurrent)",
+        "exhaustive_full": {
+          "s_plus": [
+            "omega_cdm",
+            "tau",
+            "A_s",
+            "n_s"
+          ],
+          "m_c10_all6": 1.8537721234119189,
+          "m_c10_s_plus": 1.9849077398274275,
+          "t2_diff": 0.12592437981911267,
+          "t2_se": 0.04671612187399426,
+          "dilution_affected": true
+        }
       },
       "sufficiency": {
         "eta_s": 1.0682510752373562,
@@ -999,7 +1067,7 @@
         {
           "id": "N-G2",
           "phase": 4,
-          "text": "S* not recurrent across the two screen seeds (ATTENTION (not screen-recurrent))"
+          "text": "S* not recurrent across the two screen seeds (ATTENTION (not screen-recurrent)) \u2014 R-P4 disposition (2026-08-14): dilution-affected; budget-matched S+ = {omega_cdm, tau, A_s, n_s} (paired T2 +0.1259 +/- 0.0467 nat); no status change"
         }
       ]
     },
@@ -1039,7 +1107,21 @@
         "eta": 1.0,
         "eta_se": 0.0,
         "screen_recurrent": true,
-        "gate_G2_verdict": "PASS (superset finding)"
+        "gate_G2_verdict": "PASS (superset finding)",
+        "exhaustive_full": {
+          "s_plus": [
+            "omega_cdm",
+            "H0",
+            "tau",
+            "A_s",
+            "n_s"
+          ],
+          "m_c10_all6": 2.0173385796623355,
+          "m_c10_s_plus": 2.018601742321491,
+          "t2_diff": 0.0032482135129453305,
+          "t2_se": 0.0032416756953965297,
+          "dilution_affected": true
+        }
       },
       "sufficiency": {
         "eta_s": 1.0,

@@ -37,7 +37,21 @@
         "eta": 1.0028612801524621,
         "eta_se": 0.020201078137282454,
         "screen_recurrent": false,
-        "gate_G2_verdict": "ATTENTION (not screen-recurrent)"
+        "gate_G2_verdict": "ATTENTION (not screen-recurrent)",
+        "exhaustive_full": {
+          "s_plus": [
+            "omega_b",
+            "omega_cdm",
+            "H0",
+            "A_s",
+            "n_s"
+          ],
+          "m_c10_all6": 2.560712683166588,
+          "m_c10_s_plus": 2.537536561620331,
+          "t2_diff": -0.024687073585062613,
+          "t2_se": 0.02292754575359826,
+          "dilution_affected": false
+        }
       },
       "sufficiency": {
         "eta_s": 1.0028612801524621,
@@ -195,7 +209,7 @@
         {
           "id": "N-G2",
           "phase": 4,
-          "text": "S* not recurrent across the two screen seeds (ATTENTION (not screen-recurrent))"
+          "text": "S* not recurrent across the two screen seeds (ATTENTION (not screen-recurrent)) \u2014 R-P4 disposition (2026-08-14): resolved, all-6 stands at protocol budget (S+ -0.0247 +/- 0.0229 nat, not confirmed)"
         }
       ]
     },
@@ -238,7 +252,21 @@
         "eta": 1.0,
         "eta_se": 0.0,
         "screen_recurrent": true,
-        "gate_G2_verdict": "PASS"
+        "gate_G2_verdict": "PASS",
+        "exhaustive_full": {
+          "s_plus": [
+            "omega_b",
+            "omega_cdm",
+            "H0",
+            "A_s",
+            "n_s"
+          ],
+          "m_c10_all6": 1.2107358162012556,
+          "m_c10_s_plus": 1.2107358162012622,
+          "t2_diff": 0.0,
+          "t2_se": 0.0,
+          "dilution_affected": false
+        }
       },
       "sufficiency": {
         "eta_s": 1.0,
@@ -458,7 +486,21 @@
         "eta": 1.0,
         "eta_se": 0.0,
         "screen_recurrent": true,
-        "gate_G2_verdict": "PASS (superset finding)"
+        "gate_G2_verdict": "PASS (superset finding)",
+        "exhaustive_full": {
+          "s_plus": [
+            "omega_b",
+            "omega_cdm",
+            "H0",
+            "tau",
+            "A_s"
+          ],
+          "m_c10_all6": 1.8889438711798345,
+          "m_c10_s_plus": 1.8197043760139338,
+          "t2_diff": -0.06767405886423376,
+          "t2_se": 0.06954953445418889,
+          "dilution_affected": false
+        }
       },
       "sufficiency": {
         "eta_s": 1.0,
@@ -668,7 +710,20 @@
         "eta": 0.9967692851038382,
         "eta_se": 0.005197332745823726,
         "screen_recurrent": true,
-        "gate_G2_verdict": "PASS"
+        "gate_G2_verdict": "PASS",
+        "exhaustive_full": {
+          "s_plus": [
+            "omega_b",
+            "omega_cdm",
+            "H0",
+            "n_s"
+          ],
+          "m_c10_all6": 2.197998373112064,
+          "m_c10_s_plus": 2.2697784372632577,
+          "t2_diff": 0.08951892567841133,
+          "t2_se": 0.062055188061013074,
+          "dilution_affected": true
+        }
       },
       "sufficiency": {
         "eta_s": 0.9967692851038382,
@@ -874,7 +929,21 @@
         "eta": 1.0,
         "eta_se": 0.0,
         "screen_recurrent": true,
-        "gate_G2_verdict": "PASS"
+        "gate_G2_verdict": "PASS",
+        "exhaustive_full": {
+          "s_plus": [
+            "omega_b",
+            "omega_cdm",
+            "H0",
+            "tau",
+            "A_s"
+          ],
+          "m_c10_all6": 1.3182473905006185,
+          "m_c10_s_plus": 1.2932443769715674,
+          "t2_diff": -0.01814989988291198,
+          "t2_se": 0.015471811313140852,
+          "dilution_affected": false
+        }
       },
       "sufficiency": {
         "eta_s": 1.0,
