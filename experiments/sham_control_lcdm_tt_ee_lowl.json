@@ -1,0 +1,66 @@
+{
+ "run": "lcdm_tt_ee_lowl",
+ "primary_cap": 10,
+ "rule": "R-P4 rule 2 (docs/discovery_roadmap.md)",
+ "baseline": "results/<run>/allparams (all-6, same protocol, same seeds)",
+ "donors": {
+  "ob": {
+   "n": 30,
+   "mean_delta": 0.02154197158726907,
+   "se": 0.01944610381546326,
+   "frac_forms_using_sham": 0.0
+  },
+  "tau": {
+   "n": 30,
+   "mean_delta": 0.010574900031757902,
+   "se": 0.0193672785842805,
+   "frac_forms_using_sham": 0.0
+  },
+  "ns": {
+   "n": 30,
+   "mean_delta": 0.009002758629268692,
+   "se": 0.02674229335652174,
+   "frac_forms_using_sham": 0.0
+  }
+ },
+ "per_latent": {
+  "z0": {
+   "n": 15,
+   "mean_delta": -0.004948019967143343,
+   "se": 0.0034006941625677302
+  },
+  "z1": {
+   "n": 15,
+   "mean_delta": -0.006013015519958698,
+   "se": 0.006680040583005163
+  },
+  "z2": {
+   "n": 15,
+   "mean_delta": 0.005586691279818427,
+   "se": 0.06824086071507361
+  },
+  "z3": {
+   "n": 15,
+   "mean_delta": 0.046248679428209066,
+   "se": 0.03209781440920653
+  },
+  "z4": {
+   "n": 15,
+   "mean_delta": 0.04065683105018446,
+   "se": 0.012476225015355846
+  },
+  "z5": {
+   "n": 15,
+   "mean_delta": 0.0007080942254814223,
+   "se": 0.0009013740989719264
+  }
+ },
+ "pooled": {
+  "n": 90,
+  "mean_delta": 0.013706543416098555,
+  "se": 0.012642700762878824,
+  "frac_forms_using_sham": 0.0,
+  "dilution_demonstrated": false
+ },
+ "generated_by": "scripts/consolidate_sham_control.py"
+}

@@ -808,8 +808,9 @@ instrument failure, and it is recorded on the cards rather than pursued.
    `--variant ia` on the residual consolidator and joint level-set audit,
    `scripts/build_f1hat_cache.py`, `hpc/slurm_residual_sr_ia*.sh`.
 4. **R_model** — Phase 9 as specified.
-5. **Exhaustive support at full protocol (R-P4)** — **launched 2026-08-13**,
-   pre-registration below. Phase 4 screened all 63 supports but scored them
+5. **Exhaustive support at full protocol (R-P4)** — **launched 2026-08-13,
+   completed 2026-08-14** (outcome at the end of the pre-registration
+   section below). Phase 4 screened all 63 supports but scored them
    with a capacity metric and promoted only finalists to full protocol; the
    search-dilution question needs a budget-matched readout over the complete
    grid. Does not touch any frozen threshold or existing card number.
@@ -898,3 +899,95 @@ symlinked in with a verified protocol match
 `experiments/subsets_full_<run>.{md,json}` (63-row budget-matched table per
 latent, staircase by |S|, S⁺ with its T2 confirmation, N-G2 disposition) and
 `experiments/sham_control_<run>.{md,json}` (per-latent and pooled `Δ_sham`).
+
+### Outcome (2026-08-14) — grid complete, consolidated under the frozen rules
+
+Full coverage: all 3,465 grid cells (315 TT + 378 EE (latent, support)
+pairs × 5 seeds; 2,425 fresh runs, 1,040 reused with verified protocol
+match) plus the 165 sham runs. Measured compute ≈ 5,800 core-h (sacct:
+grid 5,395, sham 407, consolidation 41). One **post-hoc mechanical fix**
+to the blind-written consolidator (`consolidate_subsets_full.py`): front
+entries whose validation evaluation errored are serialized as
+`mi_val: null` and crashed the readout; they are now mapped to nan and
+excluded — the identical treatment every non-finite evaluation always
+received. No frozen definition touched (the readout remains "best *valid*
+MI at c ≤ 10"); recorded here for transparency.
+
+**Rule 1 — dilution predicate** (S⁺ selected on T0-val, confirmed on T2,
+paired mean > +1 SE):
+
+| model | latent | S⁺ | paired T2, S⁺ − all-6 (nat) | verdict |
+|---|---|---|---|---|
+| TT | z0 (N-G2) | all-6 ∖ {τ} | −0.025 ± 0.023 | not confirmed |
+| TT | z1 | all-6 ∖ {τ} | +0.000 ± 0.000 (identical forms found) | not confirmed |
+| TT | z2 | all-6 ∖ {n_s} | −0.068 ± 0.070 | not confirmed |
+| TT | z3 | {ω_b, ω_cdm, H0, n_s} | **+0.090 ± 0.062** | **dilution-affected** |
+| TT | z4 | all-6 ∖ {n_s} | −0.018 ± 0.015 | not confirmed |
+| EE | z0 | all-6 ∖ {τ} | +0.0015 ± 0.0013 | **dilution-affected** (hairline) |
+| EE | z1 | all-6 ∖ {n_s} | −0.011 ± 0.023 | not confirmed |
+| EE | z2 | {ω_b, ω_cdm, A_s, n_s} | **+0.115 ± 0.104** | **dilution-affected** |
+| EE | z3 (N-G2) | all-6 ∖ {A_s} | **+0.085 ± 0.040** | **dilution-affected** |
+| EE | z4 (N-G2) | {ω_cdm, τ, A_s, n_s} | **+0.126 ± 0.047** | **dilution-affected** |
+| EE | z5 | all-6 ∖ {ω_b} | +0.0032 ± 0.0032 | **dilution-affected** (hairline: 1.002 SE) |
+
+6/11 confirmed under the frozen predicate. Effect sizes are reported
+beside the verdicts deliberately: EE z0 and z5 pass at magnitudes
+≤ 0.003 nat (z5 at 1.002 SE) — confirmed as registered, read as
+negligible. The substantive confirmations are TT z3, EE z2, EE z3, EE z4
+(+0.09 to +0.13 nat).
+
+**Rule 2 — sham mechanism test:**
+
+* TT: pooled Δ_sham = **−0.0404 ± 0.0134** nat (n = 75) → **dilution
+  demonstrated** (3.0 SE). All three donors negative (ob −0.029,
+  τ −0.060, n_s −0.032); dominated by z0 (−0.138 ± 0.044).
+* EE: pooled Δ_sham = +0.0137 ± 0.0126 nat (n = 90) → **not
+  demonstrated** (wrong sign).
+* Both models: **0.0 % of best-at-c≤10 forms use the sham symbol** —
+  where degradation occurs it is pure search-space dilution (mutation
+  space enlarged at fixed budget), never complexity spent on the sham.
+
+**The two legs cross, and that is the finding.** TT has the mechanism —
+a provably-zero-information 7th input degrades the budget-matched front
+by 3 SE — yet only one strict subset confirms; EE shows five subset
+confirmations (three substantive) yet an added zero-information input
+costs nothing. So the EE advantages cannot be generic search dilution:
+what helps there is removing *specific real* inputs (A_s for z3; {ω_b,
+H0} for z4; {H0, τ} for z2) — weakly-coupled true parameters act as
+distractors in a way a pure-noise column does not, plausibly because the
+search can latch onto their genuine but unhelpful correlations. The
+reverse holds on TT: the search is demonstrably dilutable (z0 most), yet
+no single dropped input reliably buys the loss back. This paragraph is
+interpretation; the frozen verdicts are the table and the two pooled
+numbers above.
+
+**Rule 3 — N-G2 dispositions** (flag content: "S* not screen-recurrent",
+a statement about the two-tier screen design, which this grid removes):
+
+* **TT z0 — resolved: all-6 stands.** No strict subset confirms at
+  protocol budget (S⁺ −0.025 ± 0.023); the val staircase is flat from
+  |S| = 4 up (2.36 → 2.56 nat). The screen-era instability was near-ties
+  among top supports, not a wrong S*. Recorded alongside: TT z0 is
+  simultaneously the *most* sham-dilutable latent (−0.138) — dilution is
+  real there, but no single-parameter drop recovers it.
+* **EE z3 — resolved: dilution-affected.** Budget-matched S⁺ =
+  {ω_b, ω_cdm, H0, τ, n_s} (drop A_s), +0.085 ± 0.040 on T2. Recorded as
+  a card field + amended N-G2 note; Phase-4 S* and G2 stand as recorded;
+  **no status flip**.
+* **EE z4 — resolved: dilution-affected**, the strongest case in the
+  study: S⁺ = {ω_cdm, τ, A_s, n_s} (+0.126 ± 0.047), and every support
+  in the staircase's top ten beats all-6 on T0-val, down to
+  {τ, A_s, n_s} at |S| = 3. Same recording; no status flip.
+
+Card carrier: `s_star.exhaustive_full` on every card (S⁺, M@c≤10 for S⁺
+and all-6, paired T2 diff, verdict) plus the amended N-G2 deviation
+texts, via a `build_latent_cards.py` re-run (regeneration verified
+additive: no status, leg, or existing number changed). No headline claim
+depends on this experiment; the −2 readout is all-params and untouched.
+
+**Rule 4 verdict, per model.** TT: *all-6 mildly dilutes the search at
+protocol budget* — mechanism demonstrated; damage to the best
+budget-matched form stays below the confirmation bar except z3. EE:
+*all-6 is not generically diluting* (sham null); five supports confirm
+input-specific gains, three substantive. Phase 4's G2 verdicts and every
+existing card number stand as recorded.

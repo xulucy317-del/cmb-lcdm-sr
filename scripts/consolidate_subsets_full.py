@@ -60,14 +60,28 @@ N_G2 = {("lcdm_tt_beta3e-4", 0), ("lcdm_tt_ee_lowl", 3), ("lcdm_tt_ee_lowl", 4)}
 MAX_SAMPLES_MI = 5000
 
 
+def mi_of(entry: dict) -> float:
+    """mi_val as a float, with every abstention mapped to nan.
+
+    A front entry that fails to evaluate carries `mi_val: null` (an
+    `eval_error` is recorded beside it) rather than the nan that a form
+    evaluating to a non-finite value gets, so the two abstention paths need
+    the same treatment here: no valid MI, hence excluded.
+    """
+    v = entry.get("mi_val")
+    if isinstance(v, (int, float)) and not isinstance(v, bool):
+        return float(v)
+    return float("nan")
+
+
 def best_at_cap(front: list, cap: int):
     """(mi_val, expression) of the best front entry with complexity <= cap."""
     sub = [e for e in front if e.get("complexity", 10**9) <= cap
-           and np.isfinite(e.get("mi_val", np.nan))]
+           and np.isfinite(mi_of(e))]
     if not sub:
         return None, None
-    row = max(sub, key=lambda e: e["mi_val"])
-    return float(row["mi_val"]), expr_of(row)
+    row = max(sub, key=mi_of)
+    return mi_of(row), expr_of(row)
 
 
 def load_cells(sweep_dir: Path) -> dict:
