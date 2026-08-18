@@ -43,19 +43,20 @@ all claims **per-checkpoint** (VAE-seed stability untested).
 
 ---
 
-## 2. Headline 1 — the −2 reionization exponent, recovered blindly, four ways
+## 2. Headline 1 — the −2 reionization exponent, recovered blindly, three ways
 
 The textbook TT amplitude combination is `ln(A_s·e^{−2τ})`. Independent
-blind readouts of the −2:
+blind readouts of the −2 (all encoder-side; the observable-domain attempt is
+row 4, which does **not** yield a readout):
 
 | # | Readout | Instrument | Value | Source |
 |---|---|---|---|---|
 | 1 | The discovered forms themselves | 2-input blind SR, (A_s, τ) → amplitude latent | TT: `A_s·(τ−0.598)` in 5/5 seeds; EE: `A_s·(τ−0.579)` + **literal `A_s·e⁻²ᵗ`** (seed 3). Affine constants match the Taylor prediction c = τ̄ + ½ ≈ 0.570 to 1.5–5% | `docs/method.md` §3 |
 | 2 | Derivative ratio r = (∂f/∂τ)/(∂f/∂lnA_s) over all-params top forms | 6-input blind SR, every latent | **−1.974 ± 0.018** (TT) / **−1.993 ± 0.008** (EE) | `experiments/allparams_blind_sr_*` |
 | 3 | Constant-ratio detector (answer-agnostic, frozen) | Phase-3 ratio field ρ_ij = (∂f/∂u_i)/(∂f/∂u_j), cv < 5% | (τ, lnA_s) pair emerges with **r_raw = −2.000** on the cards (TT z4 f₁, EE z5 f₁); G1 knee-slice latent-level r_lin = −1.977 (TT) vs stored −1.988 | `experiments/sufficiency_audit_*`, `latent_cards_*` |
-| 4 | Observable domain: decoder effect decomposed onto data-driven parameter templates | Phase 7b, d_k(ℓ) ≈ Σ a_j t_j(ℓ) | EE reionization bump identifies the amplitude pair with **r_dec = a_τ/a_lnAs = −1.87** (TT's ℓ≥30 spectra leave the pair collinear — no independent TT readout, by mechanism) | `experiments/decoder_effect_*` |
+| — | Observable domain: decoder effect decomposed onto data-driven parameter templates | Phase 7b, d_k(ℓ) ≈ Σ a_j t_j(ℓ) | **No readout.** The (τ, lnA_s) templates are near-antiparallel in both designs (uncentered cos −0.9902 EE / −0.9996 TT; cond 14.2 / 70.2), so the fitted split — and hence r_dec — drifts freely along the degenerate ridge. EE's r_dec = −1.87 is one point on that ridge (−1.67 to −2.32 across fit variants); TT gives +0.351. G4b FAILS on both. Only proj_brk and the shape-sector coefficients are identifiable | `experiments/decoder_effect_*` |
 
-**Bonus fifth appearance**: the EE H0-latent's *residual* coordinate is
+**Bonus fourth appearance**: the EE H0-latent's *residual* coordinate is
 literally `A_s·exp(−2τ)/ω_b²` with ratio −2.0000 — found blindly in Phase 6
 and found *again* by the independent interaction-aware rerun (§6.12).
 
@@ -159,8 +160,9 @@ interpretation** with falsifiable gates:
    "PASS (superset finding)") · G3 PASS (DPI holds; residuals are real
    stored information) · G4a f₁-only FAIL everywhere — *by design
    informative* (§6.9) — G4a-joint PASS on EE, TT undefined-by-support ·
-   G4b PASS-equivalent on EE (r_dec), FAIL-by-mechanism on TT (collinear
-   templates).
+   **G4b FAIL on both models** by the same mechanism (collinear (τ, lnA_s)
+   templates make the amplitude split unidentifiable): TT mass 0.64 /
+   r_dec +0.351, EE mass 0.79 / r_dec −1.873; R²_W bullet passes on both.
 3. **The η ladder** separates claims that are otherwise conflated:
    η_S (does f saturate its own variables?) vs η_plat (fraction of the
    SR-accessible mean map) vs η_post (fraction of what the latent
@@ -295,11 +297,23 @@ R² 0.91–1.00 throughout. Sources: `experiments/levelset_audit_*`,
 
 d_k(ℓ) = ∂Decoder/∂z_k decomposes onto data-driven parameter templates
 t_j(ℓ) at R²_W 0.988–1.000; cos(a*, g_j) between the decoder-side loading
-and the symbolic signature = 0.77–1.00 across the 11 latents. The EE
-reionization bump singles out the amplitude pair (amplitude mass 0.79–0.90
-on z4/z5) and yields r_dec = −1.87 (§2 row 4). TT G4b FAIL by mechanism:
-ℓ≥30 TT spectra leave τ and lnA_s collinear in template space — documented,
-not patched. Sources: `experiments/decoder_effect_*` (+ curve PNGs/NPZs).
+and the symbolic signature = 0.77–1.00 across the 11 latents — the stage's
+solid result: the decoder's observable effect and the symbolic coordinate
+agree about which parameters each latent moves.
+
+**The amplitude split is not identifiable, and G4b FAILS on both models.**
+The (τ, lnA_s) templates are near-antiparallel (uncentered cos −0.9902 EE
+concat / −0.9996 TT; cond 14.2 / 70.2): moving θ along the degenerate
+direction (δτ, δlnA_s) ∝ (1, 2) leaves these spectra invisible, so the
+fitted (a_τ, a_lnAs) split — hence r_dec and amplitude mass — slides freely
+along that ridge at no cost to R². The deliverables report r_dec and
+proj_deg "for completeness, not as claims". Frozen bullets: amplitude mass
+0.64 (TT) / 0.79 (EE) vs ≥0.8 — FAIL both; |r_dec+2| ≤ 0.3 — TT +0.351 FAIL,
+EE −1.873 nominally PASS but unidentifiable (−1.87 OLS / −1.67 (2ℓ+1)-weighted
+/ −1.77 h/2 templates / −2.32 anchor point); R²_W PASS both. Identifiable
+statements: the shape-sector coefficients and proj_brk, the projection on the
+degeneracy-breaking direction (−2, 1)/√5 (EE z5: 0.047, stable across
+variants). Sources: `experiments/decoder_effect_*` (+ curve PNGs/NPZs).
 
 ### 6.11 Phase 8 — subspace & redundancy
 
@@ -367,8 +381,12 @@ No card status changes. Sources: `experiments/residual_sr_ia_*`,
    latent, under both additive and interaction-aware stage-2 ansätze. A
    statement about the representation, not the instruments.
 3. **EE z0 unresolved** (see §6.12 for the localised blocker).
-4. **TT decoder triangulation is structurally unavailable** (template
-   collinearity of τ and lnA_s in ℓ≥30 TT) — the r_dec readout is EE-only.
+4. **Decoder triangulation of the amplitude pair is structurally unavailable
+   in both models** — the (τ, lnA_s) templates are near-collinear (cond 70.2
+   TT, 14.2 EE), so r_dec and amplitude mass are not identifiable and G4b
+   FAILS on both. Phase 7b supports the shape-sector attributions and
+   cos(a*, g_j); it contributes no −2 readout. All three surviving readouts
+   of the −2 are encoder-side.
 5. **Level-set legs for TT z1/z2/z4** are response-only (union support =
    all 6 leaves no nuisance direction; D-LS).
 6. Estimator caveats are handled by design: η ratios rather than raw MI
@@ -380,7 +398,7 @@ No card status changes. Sources: `experiments/residual_sr_ia_*`,
 
 | # | Claim | Evidence chain | Caveats | Suggested placement |
 |---|---|---|---|---|
-| C1 | A β-VAE amplitude latent blindly re-derives `ln(A_s·e^{−2τ})`; the −2 is read four independent ways (forms, derivative ratio, frozen ratio-field detector, decoder domain) and re-appears in another latent's residual | §2; `method.md` §3, `sufficiency_audit_*`, `decoder_effect_*`, `residual_sr_*` | decoder readout EE-only; per-checkpoint | **Main result** |
+| C1 | A β-VAE amplitude latent blindly re-derives `ln(A_s·e^{−2τ})`; the −2 is read three independent ways (forms, derivative ratio, frozen ratio-field detector) and re-appears in another latent's residual | §2; `method.md` stage 1 + stage 3a, `sufficiency_audit_*`, `residual_sr_*` | all three readouts are encoder-side — the decoder domain gives none (§6.10); per-checkpoint | **Main result** |
 | C2 | All 11 latents of both models receive validated symbolic cards under pre-registered predicates: 10/11 "primarily interpreted" (saturating 1-D primary + discovered secondary), 1 honest unresolved | §3; `latent_cards_*` | statuses are per-checkpoint; "interpreted" bar not reached (by the representation, not the method) | **Main result** |
 | C3 | Degeneracy breaking is visible blind, twice: the amplitude-latent *count* (1 → 2) before any SR, and the split-not-duplicated structure after (z4 alone carries τ; no redundant pair; synergy 0.013 → 0.473 nat) | §4; `method.md` §1, `subspace_probe_*` | — | **Main or strong secondary** |
 | C4 | The methodology: freeze → validate-on-positive-control → unblind, with an η ladder (η_S/η_plat/η_post), semantic recurrence, interventional level sets, decoder triangulation, and a deviations register — a reusable recipe for scientific-VAE interpretation | §5; roadmap §0.3–0.5, gates in every deliverable | — | **Methods centerpiece** |
