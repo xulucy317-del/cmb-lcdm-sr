@@ -25,7 +25,9 @@ if [[ ! -x "${LIGHTNING_VENV}/bin/python" ]]; then
         "${PYTHON_BIN}" -m venv "${LIGHTNING_VENV}"
     elif command -v uv >/dev/null 2>&1; then
         echo "[bootstrap] creating venv with uv (python 3.12)"
-        uv venv --python 3.12 "${LIGHTNING_VENV}"
+        # --seed puts pip inside the venv; a bare `uv venv` does not, and the
+        # install step below calls `python -m pip`.
+        uv venv --python 3.12 --seed "${LIGHTNING_VENV}"
     elif command -v python3.12 >/dev/null 2>&1; then
         echo "[bootstrap] creating venv with python3.12"
         python3.12 -m venv "${LIGHTNING_VENV}"
