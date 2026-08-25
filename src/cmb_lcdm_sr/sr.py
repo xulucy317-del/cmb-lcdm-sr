@@ -1,4 +1,4 @@
-"""The blind-SR core: input construction and the pure-Julia GMM-MI inner loss.
+"""Blind-SR input construction and explicit GMM-MI/MSE loss dispatch.
 
 Inner loss
 ----------
@@ -17,6 +17,11 @@ Being a real MI estimator, the loss is invariant under any bijection of either
 variable — the search is rewarded for functional dependence only, never for
 matching the encoder's calibration. It shares this invariance class with the
 post-hoc selection metric (``mi.mutual_information_gmm``).
+
+``JULIA_LOSS_MSE`` is the elementwise squared-error objective used by the
+one-stage latent-reconstruction experiment.  It is intentionally
+calibration-sensitive and is passed through PySR's ``elementwise_loss``
+keyword, never through the custom batch-loss path above.
 
 """
 from __future__ import annotations
@@ -215,3 +220,112 @@ end
 
 INNER_LOSS_NAME = "gmm_mi"
 LOSS_KIND_LABEL = "batch_exp_neg_gmm_mi_pure_julia"
+
+# PySR's elementwise loss syntax is Julia source.  Keep it explicit rather
+# than relying on the library default so reports completely specify the
+# reconstruction objective.
+JULIA_LOSS_MSE = "loss(prediction, target) = (prediction - target)^2"
+MSE_LOSS_NAME = "mse"
+MSE_LOSS_KIND_LABEL = "elementwise_squared_error"
+
+LOSS_SPECS = {
+    INNER_LOSS_NAME: {
+        "name": INNER_LOSS_NAME,
+        "kind_label": LOSS_KIND_LABEL,
+        "pysr_kwarg": "loss_function",
+        "source": JULIA_LOSS_GMM_MI,
+        "default_selection": "mi",
+        "plot_label": "exp(-GMM-MI)",
+    },
+    MSE_LOSS_NAME: {
+        "name": MSE_LOSS_NAME,
+        "kind_label": MSE_LOSS_KIND_LABEL,
+        "pysr_kwarg": "elementwise_loss",
+        "source": JULIA_LOSS_MSE,
+        "default_selection": "mse",
+        "plot_label": "squared error",
+    },
+}
+
+SELECTION_DIRECTIONS = {"mi": "max", "mse": "min"}
+POSTHOC_MI_MODES = {"auto", "full", "none"}
+
+
+def resolve_loss(inner_loss: str = INNER_LOSS_NAME,
+                 selection_metric: str = "auto") -> tuple[dict, str]:
+    """Return the frozen loss spec and resolved validation selector.
+
+    ``auto`` preserves the original GMM-MI/MI pipeline and maps the new MSE
+    objective to validation MSE.  Explicit cross-objective selectors remain
+    available for the selector-controlled ablations in the experiment plan.
+    """
+    if inner_loss not in LOSS_SPECS:
+        raise ValueError(
+            f"Unknown inner loss '{inner_loss}'. Choices: {sorted(LOSS_SPECS)}"
+        )
+    if selection_metric == "auto":
+        selection_metric = LOSS_SPECS[inner_loss]["default_selection"]
+    if selection_metric not in SELECTION_DIRECTIONS:
+        raise ValueError(
+            "Unknown selection metric "
+            f"'{selection_metric}'. Choices: auto, {sorted(SELECTION_DIRECTIONS)}"
+        )
+    return dict(LOSS_SPECS[inner_loss]), selection_metric
+
+
+def pysr_loss_kwargs(inner_loss: str = INNER_LOSS_NAME) -> dict[str, str]:
+    """The mutually-exclusive PySR keyword for one registered inner loss."""
+    spec, _ = resolve_loss(inner_loss)
+    return {spec["pysr_kwarg"]: spec["source"]}
+
+
+def resolve_posthoc_mi(mode: str, selection_metric: str) -> str:
+    """Resolve optional full GMM-MI front diagnostics.
+
+    MI-selected fronts must compute MI. MSE-selected fronts skip the costly
+    full GMM-MI estimator by default because it cannot affect their ranking;
+    callers may still request it explicitly for a diagnostic run.
+    """
+    if mode not in POSTHOC_MI_MODES:
+        raise ValueError(
+            f"Unknown post-hoc MI mode '{mode}'. Choices: "
+            f"{sorted(POSTHOC_MI_MODES)}"
+        )
+    if mode == "auto":
+        resolved = "full" if selection_metric == "mi" else "none"
+    else:
+        resolved = mode
+    if selection_metric == "mi" and resolved != "full":
+        raise ValueError(
+            "post-hoc MI cannot be disabled when selection_metric='mi'"
+        )
+    return resolved
+
+
+def rank_front(rows: list[dict], selection_metric: str) -> list[dict]:
+    """Rank valid front rows with deterministic parsimony tie-breaking.
+
+    MI is maximised and MSE minimised.  Rows without a finite requested metric
+    are omitted.  Exact metric ties prefer lower complexity, then lower
+    equation index.
+    """
+    if selection_metric not in SELECTION_DIRECTIONS:
+        raise ValueError(
+            f"Unknown selection metric '{selection_metric}': "
+            f"{sorted(SELECTION_DIRECTIONS)}"
+        )
+    metric_key = f"{selection_metric}_val"
+    valid = []
+    for row in rows:
+        value = row.get(metric_key)
+        if value is None or not np.isfinite(value):
+            continue
+        valid.append(row)
+
+    def key(row):
+        value = float(row[metric_key])
+        primary = value if selection_metric == "mse" else -value
+        return (primary, int(row.get("complexity", 10**9)),
+                int(row.get("index", 10**9)))
+
+    return sorted(valid, key=key)

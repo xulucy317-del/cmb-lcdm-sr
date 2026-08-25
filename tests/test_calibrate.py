@@ -95,3 +95,29 @@ def test_mi_jobs_parallel_matches_serial(setup):
     np.testing.assert_array_equal(serial["mi_null"], par["mi_null"])
     np.testing.assert_array_equal(serial["mi"], par["mi"])
     assert serial["r2_res"] == par["r2_res"]
+
+
+def test_holdout_residual_audit_trains_t1_scores_t2():
+    rng = np.random.default_rng(23)
+    th1 = rng.normal(size=(700, 3))
+    th2 = rng.normal(size=(800, 3))
+    e1 = 0.8 * th1[:, 1] + 0.05 * rng.normal(size=len(th1))
+    e2 = 0.8 * th2[:, 1] + 0.05 * rng.normal(size=len(th2))
+    diag = calibrate.residual_diagnostics_holdout(
+        e1, th1, e2, th2, seed=2, n_perm_r2=2, compute_mi=False,
+        gbm_max_iter=30)
+    assert diag["n_train"] == 700 and diag["n_test"] == 800
+    assert diag["finite_frac_train"] == 1.0
+    assert diag["finite_frac_test"] == 1.0
+    assert diag["r2_res"] > 0.8
+    assert diag["r2_res"] > diag["r2_null_p975"]
+    assert diag["r2_permutation_seeds"] == [3, 4]
+    assert diag["mi_permutation_seeds"] == []
+
+    e2_masked = e2.copy()
+    e2_masked[:8] = np.nan
+    masked = calibrate.residual_diagnostics_holdout(
+        e1, th1, e2_masked, th2, seed=2, n_perm_r2=0,
+        compute_mi=False, gbm_max_iter=20)
+    assert masked["n_test"] == 792
+    assert masked["finite_frac_test"] == pytest.approx(0.99)

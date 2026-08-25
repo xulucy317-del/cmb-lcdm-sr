@@ -207,3 +207,104 @@ def residual_diagnostics(residual: np.ndarray, theta: np.ndarray,
             out["mi_null"] = null
             out["mi_null_p975"] = np.quantile(null, 0.975, axis=0)
     return out
+
+
+def _holdout_r2(e_train: np.ndarray, theta_train: np.ndarray,
+                e_test: np.ndarray, theta_test: np.ndarray, seed: int,
+                max_iter: int = 100) -> float:
+    """Fit the frozen residual auditor on one tier and score another."""
+    from sklearn.ensemble import HistGradientBoostingRegressor
+    from sklearn.metrics import r2_score
+    from threadpoolctl import threadpool_limits
+
+    model = HistGradientBoostingRegressor(random_state=seed, max_iter=max_iter)
+    with threadpool_limits(limits=1):
+        model.fit(theta_train, e_train)
+        pred = model.predict(theta_test)
+    return float(r2_score(e_test, pred))
+
+
+def residual_diagnostics_holdout(
+        residual_train: np.ndarray, theta_train: np.ndarray,
+        residual_test: np.ndarray, theta_test: np.ndarray,
+        seed: int = 0, n_perm_r2: int = 10, compute_mi: bool = True,
+        n_perm_mi: int = 39, max_samples_mi: Optional[int] = 5000,
+        gbm_max_iter: int = 100, mi_jobs: int = 1) -> dict:
+    """Frozen T1→T2 residual audit used by confirmatory experiments.
+
+    The HistGradientBoosting auditor is fit on ``(theta_train,
+    residual_train)`` and scored once on the disjoint test tier.  R² nulls
+    independently permute train and test residuals.  GMM-MI and its null are
+    computed exclusively on the test tier, so observed values and thresholds
+    always use identical rows and sample size.
+    """
+    residual_train = np.asarray(residual_train, dtype=np.float64)
+    residual_test = np.asarray(residual_test, dtype=np.float64)
+    theta_train = np.asarray(theta_train, dtype=np.float64)
+    theta_test = np.asarray(theta_test, dtype=np.float64)
+    finite_train = (np.isfinite(residual_train)
+                    & np.isfinite(theta_train).all(axis=1))
+    finite_test = (np.isfinite(residual_test)
+                   & np.isfinite(theta_test).all(axis=1))
+    e1, th1 = residual_train[finite_train], theta_train[finite_train]
+    e2, th2 = residual_test[finite_test], theta_test[finite_test]
+    if len(e1) < 16 or len(e2) < 16:
+        raise ValueError("holdout residual audit requires at least 16 finite "
+                         "rows in both train and test tiers")
+
+    r2 = _holdout_r2(e1, th1, e2, th2, seed, max_iter=gbm_max_iter)
+    r2_permutation_seeds = [seed + 1 + p for p in range(n_perm_r2)]
+    r2_null = []
+    for permutation_seed in r2_permutation_seeds:
+        perm_rng = np.random.default_rng(permutation_seed)
+        r2_null.append(_holdout_r2(
+            perm_rng.permutation(e1), th1, perm_rng.permutation(e2), th2,
+            permutation_seed, max_iter=gbm_max_iter))
+    r2_null = np.asarray(r2_null, dtype=np.float64)
+    out = {
+        "r2_res": r2,
+        "r2_null": r2_null,
+        "r2_null_p975": (
+            float(np.quantile(r2_null, 0.975)) if len(r2_null) else None),
+        "observed_seed": int(seed),
+        "r2_permutation_seeds": r2_permutation_seeds,
+        "n_train": int(len(e1)),
+        "n_test": int(len(e2)),
+        "finite_frac_train": float(finite_train.mean()),
+        "finite_frac_test": float(finite_test.mean()),
+        "mi": None,
+        "mi_err": None,
+        "mi_null": None,
+        "mi_null_p975": None,
+        "mi_null_max_p975": None,
+        "mi_permutation_seeds": [],
+    }
+
+    if compute_mi:
+        from .mi import mutual_information_gmm
+
+        mi, err = mutual_information_gmm(
+            e2.reshape(-1, 1), th2, return_uncertainty=True,
+            max_samples=max_samples_mi, seed=seed)
+        out["mi"], out["mi_err"] = mi[0], err[0]
+        if n_perm_mi > 0:
+            mi_permutation_seeds = [seed + 1001 + p
+                                    for p in range(n_perm_mi)]
+            tasks = [
+                (np.random.default_rng(permutation_seed).permutation(e2),
+                 th2, max_samples_mi, permutation_seed)
+                for permutation_seed in mi_permutation_seeds]
+            if mi_jobs > 1:
+                from concurrent.futures import ProcessPoolExecutor
+
+                with ProcessPoolExecutor(max_workers=mi_jobs) as ex:
+                    rows = list(ex.map(_perm_mi_call, tasks))
+            else:
+                rows = [_perm_mi_call(t) for t in tasks]
+            null = np.stack(rows)
+            out["mi_null"] = null
+            out["mi_null_p975"] = np.quantile(null, 0.975, axis=0)
+            out["mi_null_max_p975"] = float(np.quantile(
+                np.nanmax(null, axis=1), 0.975))
+            out["mi_permutation_seeds"] = mi_permutation_seeds
+    return out

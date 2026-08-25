@@ -1,0 +1,127 @@
+{
+  "schema_version": 3,
+  "kind": "mse_one_stage_execution_provenance",
+  "created_utc": "2026-08-24T23:41:26Z",
+  "git_revision": "cbd93858b1661145c265f60382ad9014d1e34920",
+  "worktree_dirty": true,
+  "initial_execution": {
+    "job_id": 34325336,
+    "outcome": "cancelled_while_user_held_after_one_successful_requeue",
+    "completed_main_task_ids": [
+      0,
+      35
+    ],
+    "completed_main_report_count": 36,
+    "completed_control_report_count": 0,
+    "submitted_resources": {
+      "nodes": 3,
+      "tasks": 12,
+      "cpus_per_task": 16,
+      "requested_cpus": 192,
+      "memory_per_node_gb": 64
+    },
+    "submitted_batch_script_sha256": "59d24bc90a85dc2d219d9d0291e2001f50083615bf8353be3e9a409c4e37177a",
+    "source_sha256": {
+      "scripts/run_blind_sr.py": "d249ba4f7aaee7a5a82b173f20cf62de2bc8f341b86416da9f6cf7c267edafe2",
+      "scripts/run_shuffled_control.py": "45419d8ca37fa9c27f83936dccbbe79d2b005d54db4c975953825c7d139b46a7",
+      "src/cmb_lcdm_sr/sr.py": "552d3458684e1ab31b0f2a490a3a5ec6032d9d2582b4dda81d7799db9d0ddf2d",
+      "hpc/slurm_mse_one_stage_sr.sh": "0a1947299099717998b1f6a1f4b545fb1a88d1b309fda8170e700b0fd45dcc73"
+    }
+  },
+  "replacement_execution": {
+    "job_id": 34331307,
+    "submitted_utc": "2026-08-24T23:40:16Z",
+    "state_after_submission": "PENDING",
+    "reason_after_submission": "AssocGrpCPUMinutesLimit",
+    "outcome": "cancelled_by_user_without_start",
+    "cancelled_utc": "2026-08-25T10:11:19Z",
+    "resume_contract": "existing valid report.json files are skipped",
+    "expected_initial_skips": 36,
+    "submitted_resources": {
+      "nodes": 3,
+      "tasks": 3,
+      "cpus_per_task": 16,
+      "requested_cpus": 48,
+      "memory_per_node_gb": 32
+    },
+    "source_sha256": {
+      "scripts/run_blind_sr.py": "d69e7a1acd9e63633fac080baf4ddefb1dd49532d053ff3d0b7333d19fd98a87",
+      "scripts/run_shuffled_control.py": "9811eb48a6bf332a9100d3c2c125666b0f0e31907ea872ff0dac759c7e859956",
+      "src/cmb_lcdm_sr/sr.py": "552d3458684e1ab31b0f2a490a3a5ec6032d9d2582b4dda81d7799db9d0ddf2d",
+      "src/cmb_lcdm_sr/utils.py": "066aaf31be6f9a9e31ed48ddc463f23691a0380f88451aa6dcf7906cdbbfd628",
+      "hpc/slurm_mse_one_stage_sr.sh": "0a1947299099717998b1f6a1f4b545fb1a88d1b309fda8170e700b0fd45dcc73",
+      "hpc/slurm_mse_one_stage_pack.sh": "9a0c9ec4d4bee53648c24068e2b32fb22d071ad975bc1deeefed1eb77a20a331",
+      "scripts/consolidate_mse_one_stage.py": "012e724a8201a348ff58e3030896c80a30b7b3bda2c7cdd0fe01082fe368e902",
+      "experiments/mse_one_stage_sr_plan.md": "3508f874af1a566df82ab97bdc6956b67f9bfc5f5aa6a255185c4526bb99c3b6"
+    }
+  },
+  "execution_amendment_a1": {
+    "adopted_utc": "2026-08-25T10:25:37Z",
+    "boundary": "after 36 main MSE reports; before selection manifest or T1/T2 access",
+    "change": "skip full post-hoc GMM-MI for MSE-selected main and shuffled-control fronts",
+    "selection_impact": "none; MSE search, MSE ranking, expressions, and all decision rules are unchanged",
+    "compatibility": "first 36 reports retain historical MI diagnostics; subsequent reports store null MI fields plus explicit skip metadata",
+    "retained_mi": "MI-selected legacy fronts and confirmatory known-f2/full-residual audits",
+    "source_sha256": {
+      "scripts/run_blind_sr.py": "ee15515908c908af1feb0aa7ff1f5c7cc60e6733282fa73c88a65772a5cce908",
+      "scripts/run_shuffled_control.py": "f1536487de04e0961cd43a9f4917014b27b1f825fd6dbf88b7b8476fa40d9080",
+      "src/cmb_lcdm_sr/sr.py": "e568ca230a51590f3fbdadeecb5f48f696ee3eac5fe0878382c7ca3c9059aeb9",
+      "hpc/slurm_mse_one_stage_sr.sh": "4f561db4f8cdc0d9469046b19f40a95bbbfe267dcc36389e18dc32582699a146",
+      "hpc/slurm_mse_one_stage_control.sh": "b6a8d4bd2388140466500a9fb2273f9b44f4595a407ec7990f4bb7dcf8ec31fd",
+      "experiments/mse_one_stage_sr_plan.md": "62e535061bdf21c73cbab8b560ebc12670a15157f290980e8bc0e94622cc8d1b",
+      "tests/test_mse_loss_selection.py": "a077491114374d3bc3db58422b9531f18c6bdee320592804ddaaf0a651831e6d",
+      "tests/test_mse_one_stage_hpc.py": "3e720e1cb8105d7913df8184cbe97fab822ddf5d4069f553ee66aa392918b980"
+    },
+    "verification": "23 affected MSE runner/consolidation/HPC tests passed"
+  },
+  "execution_amendment_a2": {
+    "adopted_utc": "2026-08-25T10:57:38Z",
+    "boundary": "after 36 main MSE reports; before selection manifest, T1 calibration, or T2 confirmation",
+    "change": "remove newly computed T2 reconstruction MI and the optional H4 full direct-residual audit",
+    "decision_impact": "H1-H3, MSE search/selection, known-f2 absorption, and two-stage reconstruction thresholds are unchanged; no global residual-completeness claim will be made",
+    "removed_compute": [
+      "GMM-MI between prediction and target for direct primary selections",
+      "GMM-MI between prediction and target for one-standard-error selections",
+      "GMM-MI between prediction and target for fixed hierarchy baselines",
+      "HistGradientBoosting residual R2 audit and its 10 permutations",
+      "maximum six-parameter residual GMM-MI audit and its 39 permutations"
+    ],
+    "retained_mi": [
+      "stored validation MI and selection for existing MI-selected legacy fronts",
+      "39-permutation known-f2 residual MI required by the absorption decision"
+    ],
+    "execution_status": {
+      "platform": "CSD3",
+      "reason_paused": "AssocGrpCPUMinutesLimit",
+      "queued_mse_jobs": 0,
+      "main_reports_complete": 36,
+      "main_reports_total": 165,
+      "main_reports_remaining": 129,
+      "control_reports_complete": 0,
+      "control_reports_total": 12,
+      "selection_manifest_created": false,
+      "t1_calibration_created": false,
+      "t2_confirmation_opened": false
+    },
+    "resume_target": "Lightning AI; use experiments/mse_one_stage_sr_plan.md Section 11 as the starting checklist",
+    "reuse_contract": "do not rerun existing GMM-MI fronts or the 36 completed MSE reports",
+    "estimated_remaining_csd3_equivalent_cpu_minutes": [
+      16000,
+      18000
+    ],
+    "source_sha256": {
+      "scripts/consolidate_mse_one_stage.py": "c26022f60c23876f462f98b48a7d3fbc4b91361503dfda845b2cd7fb8751412a",
+      "hpc/slurm_mse_one_stage_consolidate.sh": "4c8ec61e118ff325d138c116b5503f09afdd4aa6eb3c90c7594526f1e27b3f37",
+      "experiments/mse_one_stage_sr_plan.md": "3a17d616b9ef502433d68f6f64f059b925303fcb03940865dabb0d7dadda9d47",
+      "tests/test_mse_one_stage_consolidation.py": "a87f5d56604dbdb70eedf2a33c9191674e92f4f88e8ec945e5f147692b025dfb",
+      "tests/test_mse_one_stage_hpc.py": "519eb57f8ea3a45f9d4578e2e30fd3623a023cf6fc9b690e0fba0fa401e43adf"
+    },
+    "verification": "23 affected MSE runner/consolidation/HPC tests passed; Python and shell syntax plus whitespace checks passed"
+  },
+  "compatibility_notes": [
+    "The resumed blind-SR search logic and PySR configuration are unchanged; the runner change is strict atomic JSON serialization.",
+    "Twenty-five of the first 36 reports contain non-standard NaN only in failed secondary GMM-MI diagnostic fields; their MSE fields and selected winners are finite and unchanged.",
+    "Existing result artifacts were not edited or replaced. The final selection manifest hashes every report and this provenance file.",
+    "Amendment A1 removed non-selecting T0 MI diagnostics from new MSE tasks; A2 then removed optional T2 reconstruction/full-residual MI while retaining the required known-f2 absorption MI test."
+  ]
+}

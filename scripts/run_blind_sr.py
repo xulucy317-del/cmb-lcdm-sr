@@ -1,18 +1,18 @@
 #!/usr/bin/env python
-"""Blind symbolic regression of a VAE amplitude latent — GMM-MI inner loss.
+"""Blind symbolic regression of a scalar VAE latent.
 
 Discover the closed-form expression f(inputs) that best predicts a given
 latent column, with no hint of the answer anywhere in the pipeline:
 
 * Inputs are *raw* ΛCDM parameters (for the amplitude study: A_s and τ only —
   no derived columns, no hand-coded A_s·e^{−2τ} baseline).
-* The inner loss PySR optimises is a pure-Julia GMM-MI estimator
-  (``exp(−MI)``, fixed K=2 EM, N_INNER=300) — invariant under any bijection
-  of either variable, so the search is rewarded for functional form, never
-  for matching the encoder's standardisation.
-* Every Pareto-front equation is then re-scored post hoc by the full GMM-MI
-  estimator (gmm-mi package) on a held-out validation split; the top-5 are
-  ranked by validation MI.
+* The original/default objective is the pure-Julia GMM-MI estimator
+  (``exp(−MI)``, fixed K=2 EM, N_INNER=300).
+* ``--inner-loss mse`` instead performs direct numerical reconstruction of
+  the fit-standardised latent with explicit elementwise squared error.
+* Every Pareto-front equation is re-scored by held-out MSE. Full post-hoc
+  GMM-MI is computed only when MI selects the front, or when explicitly
+  requested as a secondary diagnostic.
 
 The only auxiliary is a data-driven OLS baseline in the raw inputs.
 Cross-seed consolidation (tables + textbook-form scan) lives in
@@ -54,10 +54,14 @@ import numpy as np
 from cmb_lcdm_sr.sr import (
     INNER_LOSS_NAME,
     INPUT_ALIASES,
-    JULIA_LOSS_GMM_MI,
-    LOSS_KIND_LABEL,
+    LOSS_SPECS,
     build_inputs,
+    pysr_loss_kwargs,
+    rank_front,
+    resolve_loss,
+    resolve_posthoc_mi,
 )
+from cmb_lcdm_sr.utils import save_json
 
 
 def _with_timeout(seconds, fn, *args, **kwargs):
@@ -76,9 +80,10 @@ def _with_timeout(seconds, fn, *args, **kwargs):
         signal.signal(signal.SIGALRM, old)
 
 
-def default_out_dir(run_dir: Path, seed: int, tag: str) -> Path:
-    """results/<model-name>/symbolic_regression_gmm_mi_seed<N>[_<tag>]"""
-    name = f"symbolic_regression_gmm_mi_seed{seed}"
+def default_out_dir(run_dir: Path, seed: int, tag: str,
+                    inner_loss: str = INNER_LOSS_NAME) -> Path:
+    """Loss-isolated default result directory (GMM-MI name is unchanged)."""
+    name = f"symbolic_regression_{inner_loss}_seed{seed}"
     if tag:
         name = f"{name}_{tag}"
     return Path("results") / run_dir.name / name
@@ -165,6 +170,18 @@ def main() -> None:
     p.add_argument("--populations", type=int, default=15)
     p.add_argument("--maxsize", type=int, default=20)
     p.add_argument("--seed", type=int, default=0)
+    p.add_argument("--inner-loss", choices=sorted(LOSS_SPECS),
+                   default=INNER_LOSS_NAME,
+                   help="PySR search objective (default: gmm_mi).")
+    p.add_argument("--selection-metric", choices=["auto", "mi", "mse"],
+                   default="auto",
+                   help="Held-out front selector; auto maps gmm_mi->mi and "
+                        "mse->mse.")
+    p.add_argument("--posthoc-mi", choices=["auto", "full", "none"],
+                   default="auto",
+                   help="Full GMM-MI evaluation of every validation-front "
+                        "member. auto computes it only for MI selection; "
+                        "default: auto.")
     p.add_argument("--parallelism", choices=["serial", "multithreading", "multiprocessing"],
                    default="multithreading")
     p.add_argument("--unary-operators", nargs="*", default=["exp", "log", "neg", "square"])
@@ -174,8 +191,12 @@ def main() -> None:
                    help="JSON object of additional PySRRegressor kwargs, e.g. "
                         "'{\"population_size\": 50, \"parsimony\": 0.001}'. "
                         "Cannot override kwargs managed by dedicated flags.")
+    p.add_argument("--pysr-run-id", default="run",
+                   help="Internal PySR state subdirectory; use a new value on "
+                        "a scheduler restart (default: run).")
     p.add_argument("--out-dir", default=None,
-                   help="Defaults to results/<run-name>/symbolic_regression_gmm_mi_seed<seed>.")
+                   help="Defaults to a loss-specific results/<run-name>/ "
+                        "symbolic_regression_<loss>_seed<seed> directory.")
     p.add_argument("--tag", default="", help="Optional suffix on the default out-dir.")
     args = p.parse_args()
 
@@ -188,9 +209,13 @@ def main() -> None:
     y_full, target_label = resolve_target(run_dir, args.latent_index,
                                           args.target_npy, args.target_label,
                                           dataset_dir=args.dataset_dir)
+    loss_spec, selection_metric = resolve_loss(
+        args.inner_loss, args.selection_metric)
+    posthoc_mi = resolve_posthoc_mi(args.posthoc_mi, selection_metric)
 
     tag = args.tag or (target_label if args.target_npy else "")
-    out_dir = Path(args.out_dir) if args.out_dir else default_out_dir(run_dir, args.seed, tag)
+    out_dir = (Path(args.out_dir) if args.out_dir else
+               default_out_dir(run_dir, args.seed, tag, args.inner_loss))
     out_dir.mkdir(parents=True, exist_ok=True)
     print(f"[setup] out_dir={out_dir}  target={target_label}")
 
@@ -227,9 +252,11 @@ def main() -> None:
     print(f"[split] n_fit={n_fit}, n_val={n_val}")
 
     # --- Standardise y (fit-only mean/std) -----------------------------------
-    # Note: harmless under an MI loss (standardisation is a bijection); kept so
-    # equation constants stay on the same scale as the parent study.
+    # Harmless under MI (a bijection) and conditioning-preserving under MSE.
+    # The transform is fit on T0-fit only and is inverted for native metrics.
     y_mean, y_std = float(y_fit.mean()), float(y_fit.std())
+    if not np.isfinite(y_std) or y_std <= 0:
+        raise SystemExit("fit target has zero or non-finite standard deviation")
     y_fit_s = (y_fit - y_mean) / y_std
     y_val_s = (y_val - y_mean) / y_std
 
@@ -240,7 +267,7 @@ def main() -> None:
     mse_ols = float(np.mean((yhat_ols_val - y_val_s) ** 2))
     print(f"[baseline OLS] MSE_val={mse_ols:.4f}  beta={beta_ols}")
 
-    # --- PySR fit (gmm_mi inner loss) ----------------------------------------
+    # --- PySR fit -------------------------------------------------------------
     from pysr import PySRRegressor
     sr_kwargs = dict(
         niterations=args.niterations,
@@ -252,12 +279,12 @@ def main() -> None:
         parallelism=args.parallelism,
         progress=False,
         verbosity=1,
-        loss_function=JULIA_LOSS_GMM_MI,
         output_directory=str(out_dir / "pysr_state"),
-        run_id="run",
+        run_id=args.pysr_run_id,
     )
-    # The loss is batch-level: PySR mini-batching would bias the EM fit on tiny
-    # sub-batches, so it is not enabled here.
+    sr_kwargs.update(pysr_loss_kwargs(args.inner_loss))
+    # Keep mini-batching disabled for parity across objectives (and because it
+    # would bias the batch-level GMM-MI estimator on tiny sub-batches).
     if args.turbo:
         sr_kwargs["turbo"] = True
     if args.parallelism == "serial":
@@ -265,12 +292,16 @@ def main() -> None:
     pysr_extra = json.loads(args.pysr_extra)
     if not isinstance(pysr_extra, dict):
         raise SystemExit("--pysr-extra must be a JSON object")
-    clash = sorted(set(pysr_extra) & set(sr_kwargs))
+    managed = set(sr_kwargs) | {"loss_function", "elementwise_loss"}
+    clash = sorted(set(pysr_extra) & managed)
     if clash:
         raise SystemExit(f"--pysr-extra may not override managed kwargs: {clash}")
     sr_kwargs.update(pysr_extra)
-    print(f"[pysr] inner_loss={INNER_LOSS_NAME}  selection_metric=mi")
-    print(f"[pysr] kwargs={ {k: v for k, v in sr_kwargs.items() if k not in ('binary_operators', 'unary_operators', 'loss_function')} }")
+    print(f"[pysr] inner_loss={args.inner_loss}  "
+          f"selection_metric={selection_metric}")
+    hidden = ("binary_operators", "unary_operators", "loss_function",
+              "elementwise_loss")
+    print(f"[pysr] kwargs={ {k: v for k, v in sr_kwargs.items() if k not in hidden} }")
 
     model = PySRRegressor(**sr_kwargs)
     t0 = time.time()
@@ -287,23 +318,77 @@ def main() -> None:
     print(f"[pysr] {len(eqs)} equations -> {eqs_csv}")
 
     rows = []
+    val_predictions = {}
     for i in range(len(eqs)):
         # Degenerate front members (e.g. sub-expressions that simplify to 1/0
         # -> ComplexInfinity) can fail sympy lambdification inside predict;
         # keep the row with mse_val=None so downstream MI selection skips it.
         try:
-            yhat_val_s = _with_timeout(120, model.predict, X_val, index=i)
-            mse_val = float(np.mean((yhat_val_s - y_val_s) ** 2))
+            yhat_fit_s = np.asarray(
+                _with_timeout(120, model.predict, X_fit, index=i),
+                dtype=np.float64,
+            ).reshape(-1)
+            yhat_val_s = np.asarray(
+                _with_timeout(120, model.predict, X_val, index=i),
+                dtype=np.float64,
+            ).reshape(-1)
+            if len(yhat_fit_s) != n_fit or len(yhat_val_s) != n_val:
+                raise ValueError(
+                    "prediction row mismatch: "
+                    f"fit {len(yhat_fit_s)}/{n_fit}, "
+                    f"val {len(yhat_val_s)}/{n_val}")
+            finite_fit = np.isfinite(yhat_fit_s) & np.isfinite(y_fit_s)
+            finite = np.isfinite(yhat_val_s) & np.isfinite(y_val_s)
+            finite_frac_fit = float(finite_fit.mean())
+            finite_frac = float(finite.mean())
+            if finite_frac_fit < 0.999 or finite_frac < 0.999:
+                raise ValueError(
+                    "finite prediction fraction below 0.999: "
+                    f"fit={finite_frac_fit:.6f}, val={finite_frac:.6f}")
+            mse_fit_eval = float(np.mean(
+                (yhat_fit_s[finite_fit] - y_fit_s[finite_fit]) ** 2))
+            mse_val = float(np.mean((yhat_val_s[finite] - y_val_s[finite]) ** 2))
+            yhat_val = y_mean + y_std * yhat_val_s[finite]
+            y_val_finite = y_val[finite]
+            error_native = y_val_finite - yhat_val
+            mse_val_native = float(np.mean(error_native**2))
+            variance_val = float(np.var(y_val_finite))
+            abs_error_native = np.abs(error_native)
+            rmse_val_native = float(np.sqrt(mse_val_native))
+            nmse_val = (float(mse_val_native / variance_val)
+                        if variance_val > 0 else None)
+            r2_val = (float(1.0 - mse_val_native / variance_val)
+                      if variance_val > 0 else None)
+            mae_val_native = float(abs_error_native.mean())
+            p95_val_native = float(np.quantile(abs_error_native, 0.95))
+            p99_val_native = float(np.quantile(abs_error_native, 0.99))
+            val_predictions[i] = (yhat_val_s, finite)
             eval_error = None
         except Exception as exc:                                     # noqa: BLE001
+            mse_fit_eval = None
             mse_val = None
+            mse_val_native = rmse_val_native = nmse_val = r2_val = None
+            mae_val_native = p95_val_native = p99_val_native = None
+            finite_frac_fit = 0.0
+            finite_frac = 0.0
             eval_error = str(exc)
         row = {
             "index": int(i),
             "complexity": int(eqs.iloc[i]["complexity"]),
             "loss_train": float(eqs.iloc[i]["loss"]),
             "expression_raw": str(eqs.iloc[i]["equation"]),
+            "mse_fit_eval": mse_fit_eval,
             "mse_val": mse_val,
+            "mse_val_standardized": mse_val,
+            "mse_val_native": mse_val_native,
+            "rmse_val_native": rmse_val_native,
+            "nmse_val": nmse_val,
+            "r2_val": r2_val,
+            "mae_val_native": mae_val_native,
+            "abs_error_p95_native": p95_val_native,
+            "abs_error_p99_native": p99_val_native,
+            "finite_frac_fit": finite_frac_fit,
+            "finite_frac_val": finite_frac,
         }
         if eval_error is not None:
             row["eval_error"] = eval_error
@@ -318,33 +403,50 @@ def main() -> None:
         except Exception as exc:                                     # noqa: BLE001
             return f"<sympy failed: {exc}>"
 
-    # --- Post-hoc GMM-MI on val for every Pareto-front equation --------------
-    from cmb_lcdm_sr.mi import mutual_information_gmm
-
-    print(f"[selection=mi] computing GMM-MI for all {len(rows)} equations...")
+    # --- Optional post-hoc GMM-MI on validation ------------------------------
+    if posthoc_mi == "full":
+        from cmb_lcdm_sr.mi import mutual_information_gmm
+        print(f"[selection={selection_metric}] computing GMM-MI for all "
+              f"{len(rows)} equations...")
+    else:
+        mutual_information_gmm = None
+        print(f"[selection={selection_metric}] skipping secondary GMM-MI "
+              "front diagnostics")
     for r in rows:
-        try:
-            yhat_val = _with_timeout(120, model.predict, X_val, index=r["index"])
-            mi, err = _with_timeout(
-                300, mutual_information_gmm,
-                y_val_s.reshape(-1, 1), yhat_val.reshape(-1, 1),
-                return_uncertainty=True, max_samples=n_val, seed=0,
-            )
-            r["mi_val"] = float(mi[0, 0])
-            r["mi_val_err"] = float(err[0, 0])
-        except Exception as exc:                                     # noqa: BLE001
+        if mutual_information_gmm is None:
             r["mi_val"] = None
             r["mi_val_err"] = None
-            r["mi_val_error"] = str(exc)
+        else:
+            try:
+                yhat_val, finite = val_predictions[r["index"]]
+                mi, err = _with_timeout(
+                    300, mutual_information_gmm,
+                    y_val_s[finite].reshape(-1, 1),
+                    yhat_val[finite].reshape(-1, 1),
+                    return_uncertainty=True,
+                    max_samples=int(finite.sum()), seed=0,
+                )
+                r["mi_val"] = float(mi[0, 0])
+                r["mi_val_err"] = float(err[0, 0])
+            except Exception as exc:                                 # noqa: BLE001
+                r["mi_val"] = None
+                r["mi_val_err"] = None
+                r["mi_val_error"] = str(exc)
         r["expression_simplified"] = _simplify(r["index"])
+        try:
+            expression = sympy.sympify(r["expression_simplified"])
+            r["support"] = sorted(
+                str(symbol) for symbol in expression.free_symbols
+                if str(symbol) in input_labels)
+        except Exception:                                            # noqa: BLE001
+            r["support"] = None
 
-    def _mi_key(r):
-        v = r.get("mi_val")
-        return (v if v is not None and np.isfinite(v) else float("-inf"))
-
-    rows_sorted = sorted(rows, key=_mi_key, reverse=True)
+    rows_sorted = rank_front(rows, selection_metric)
+    if not rows_sorted:
+        raise RuntimeError(
+            f"no equation has a finite validation {selection_metric}")
     top_k = rows_sorted[:5]
-    rank_label = "VAL MI (primary)"
+    rank_label = f"VAL {selection_metric.upper()} (primary)"
 
     # --- Pareto plot ----------------------------------------------------------
     try:
@@ -360,9 +462,9 @@ def main() -> None:
         if loss.min() > 0:
             ax.set_yscale("log")
         ax.set_xlabel("complexity")
-        ax.set_ylabel(f"train loss ({LOSS_KIND_LABEL})")
+        ax.set_ylabel(f"train loss ({loss_spec['kind_label']})")
         ax.set_title(f"PySR Pareto front  (run={run_dir.name}, target={target_label}, "
-                     f"inner_loss={INNER_LOSS_NAME}, seed={args.seed})")
+                     f"inner_loss={args.inner_loss}, seed={args.seed})")
         ax.grid(True, alpha=0.3)
         fig.tight_layout()
         fig.savefig(out_dir / "pareto.png")
@@ -384,8 +486,22 @@ def main() -> None:
         "n_val": n_val,
         "y_mean_train": y_mean,
         "y_std_train": y_std,
-        "inner_loss": INNER_LOSS_NAME,
-        "selection_metric": "mi",
+        "target_transform": {
+            "kind": "standardize",
+            "fit_rows": [0, n_fit],
+            "mean": y_mean,
+            "std": y_std,
+        },
+        "inner_loss": args.inner_loss,
+        "loss_kind": loss_spec["kind_label"],
+        "selection_metric": selection_metric,
+        "selection_direction": (
+            "ascending" if selection_metric == "mse" else "descending"),
+        "posthoc_mi_mode": posthoc_mi,
+        "posthoc_mi_status": (
+            "computed" if posthoc_mi == "full" else "skipped_not_selected"),
+        "tie_break": ["complexity_ascending", "equation_index_ascending"],
+        "seed": args.seed,
         "pysr_kwargs": {
             "niterations": args.niterations,
             "populations": args.populations,
@@ -394,7 +510,8 @@ def main() -> None:
             "unary_operators": list(args.unary_operators),
             "parallelism": args.parallelism,
             "random_state": args.seed,
-            "loss_kind": LOSS_KIND_LABEL,
+            "run_id": args.pysr_run_id,
+            "loss_kind": loss_spec["kind_label"],
             "pysr_version": __import__("pysr").__version__,
             **pysr_extra,
         },
@@ -408,10 +525,14 @@ def main() -> None:
         "all_equations": rows,
         "top5": top_k,
         "top5_ranked_by": rank_label,
+        "best_index": top_k[0]["index"],
+        "best_expression": top_k[0]["expression_simplified"],
+        "best_mse_val": top_k[0].get("mse_val"),
+        "best_mse_val_native": top_k[0].get("mse_val_native"),
+        "best_mi_val": top_k[0].get("mi_val"),
     }
     out_json = out_dir / "report.json"
-    with open(out_json, "w") as f:
-        json.dump(report, f, indent=2)
+    save_json(report, out_json)
     print(f"[done] -> {out_json}")
 
     print(f"\n--- TOP-5 BY {rank_label} ---")
