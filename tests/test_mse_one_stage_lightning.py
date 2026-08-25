@@ -168,6 +168,31 @@ def test_consolidation_wrapper_keeps_the_phase_contract():
     assert "--manifest" in text and "--calibration" in text
 
 
+def test_consolidation_launchers_parse_their_own_arguments():
+    """A literal '}' inside ${1:?...} closes the expansion early.
+
+    `MODE="${1:?usage: $0 {select|...} <run-name>}"` leaves MODE holding
+    'select <run-name>}', which reaches the case statement and fails. Both
+    launchers carried this; the guard is static plus functional.
+    """
+    launchers = (LIGHTNING / "run_consolidation.sh",
+                 REPO / "hpc" / "slurm_mse_one_stage_consolidate.sh")
+    for path in launchers:
+        assert ":?usage: $0 {" not in path.read_text(), path
+
+    env = dict(os.environ, PYTHON="/bin/echo", SLURM_CPUS_PER_TASK="1")
+    proc = subprocess.run(
+        ["bash", str(LIGHTNING / "run_consolidation.sh"), "bogus", "somerun"],
+        env=env, cwd=REPO, text=True, capture_output=True)
+    assert "unknown mode 'bogus'" in proc.stdout, proc.stdout
+
+    proc = subprocess.run(
+        ["bash", str(LIGHTNING / "run_consolidation.sh"), "select", "somerun"],
+        env=env, cwd=REPO, text=True, capture_output=True, check=True)
+    assert "consolidate_mse_one_stage.py select --run somerun" in proc.stdout
+    assert "<run-name>" not in proc.stdout
+
+
 def test_frozen_environment_reference_is_carried():
     requirements = (LIGHTNING / "requirements-lightning.txt").read_text()
     assert "pysr==1.5.10" in requirements

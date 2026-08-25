@@ -28,8 +28,11 @@
 set -euo pipefail
 
 PROJ="${PROJ:-/rds/user/zx332/hpc-work/cmb-lcdm-sr}"
-MODE="${1:?usage: $0 {select|calibrate|confirm} <run-name>}"
-RUN="${2:?usage: $0 {select|calibrate|confirm} <run-name>}"
+# The usage text lives in a variable: a literal "}" inside ${1:?...}
+# would close the expansion early and end up appended to the value.
+USAGE="usage: $0 {select|calibrate|confirm} <run-name>"
+MODE="${1:?$USAGE}"
+RUN="${2:?$USAGE}"
 MANIFEST="results/${RUN}/mse_one_stage_selection_manifest.json"
 CALIBRATION="results/${RUN}/mse_one_stage_calibration.json"
 
