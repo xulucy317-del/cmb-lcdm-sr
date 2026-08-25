@@ -1,0 +1,22 @@
+# Frozen resume environment for the one-stage MSE experiment.
+#
+# These are the exact versions that produced the first 36 CSD3 reports
+# (python 3.12.12, PySR 1.5.10, Julia 1.11.9). Install with
+#   pip install -r hpc/lightning/requirements-lightning.txt
+# or let hpc/lightning/bootstrap_env.sh do it.
+numpy==2.4.2
+scipy==1.17.1
+sympy==1.13.1
+pandas==3.0.1
+matplotlib==3.10.8
+scikit-learn==1.5.2                # <1.6: gmm-mi uses sklearn._validate_data
+juliacall==0.9.26
+juliapkg==0.1.24
+pysr==1.5.10                       # protocol freeze; juliapkg pulls Julia 1.11.9
+gmm_mi @ git+https://github.com/dpiras/GMM-MI.git@e71bff75b23cabf622cfcec6b5a1042c4acb78c6
+pytest==9.0.2
+
+# torch is deliberately absent: the encoder pass is already cached in
+# models/<run>/analysis/encoder_means_test.npy, so nothing on the resume path
+# imports it. Install it only for scripts/encode_latents.py, and then use the
+# CPU wheel:  pip install torch --index-url https://download.pytorch.org/whl/cpu
