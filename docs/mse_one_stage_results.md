@@ -57,22 +57,47 @@ and a plain six-input linear model beats the best symbolic expression in 8 of
 
 ## 3. Decision ledger
 
-Rules exactly as frozen in §6 of the plan; `U95(x) = mean + 2.132·sd/√5` over
-the five seed-paired values, seeds (not rows) being the replication unit.
+Rules exactly as frozen in §6 of the plan, with every threshold fixed before
+T2 was opened.
 
-| model | latent | H1 objective | H2 capacity | H3 vs two-stage | known `f2` absorbed | R_SR | saturated | classification |
-|---|---|---|---|---|---|---|---|---|
-| TT | z0 | **pass** (0.005) | fail (1.022) | **pass** (0.43) | **fail** (1/5) | 1.00 | no | no capacity gain |
-| TT | z1 | **pass** (0.095) | **pass** (0.939) | fail (3.44) | **fail** (1/5) | 1.00 | yes | partial absorption |
-| TT | z2 | **pass** (0.342) | fail (13.190) | fail (25.81) | **fail** (0/5) | 0.80 | no | no capacity gain |
-| TT | z3 | **pass** (0.005) | fail (1.430) | **pass** (0.29) | **fail** (0/5) | 1.00 | no | no capacity gain |
-| TT | z4 | **pass** (0.124) | **pass** (0.057) | fail (1.18) | **fail** (0/5) | 1.00 | yes | partial absorption |
-| TT+EE | z0 | **pass** (0.058) | fail (1.505) | fail (1.48) | **fail** (0/5) | 1.00 | no | no capacity gain |
-| TT+EE | z1 | **pass** (0.021) | **pass** (0.949) | fail (3.49) | **fail** (0/5) | 1.00 | yes | partial absorption |
-| TT+EE | z2 | **pass** (0.010) | fail (1.118) | **pass** (0.92) | **fail** (0/5) | 1.00 | no | no capacity gain |
-| TT+EE | z3 | **pass** (0.005) | **pass** (0.718) | **pass** (0.34) | **fail** (0/5) | 1.00 | no | partial absorption |
-| TT+EE | z4 | **pass** (0.272) | **pass** (0.929) | **pass** (0.76) | **fail** (0/5) | 1.00 | no | partial absorption |
-| TT+EE | z5 | **pass** (0.038) | **pass** (0.438) | fail (1.52) | **fail** (0/5) | 1.00 | yes | partial absorption |
+#### TM1 — Decision ledger, per latent
+
+**TT (temperature only)**
+
+| $z$ | H1 | $U_{95}(Q_{\mathrm{obj}})$ | H2 | $U_{95}(Q_{\mathrm{cap}})$ | H3 | $U_{95}(Q_{\mathrm{rec}})$ | $f_2$ absorbed | $R_{\mathrm{SR}}$ | saturated | classification |
+|---|---|---:|---|---:|---|---:|---:|---:|---|---|
+| 0 | ✓ | 0.005 | — | 1.022 | ✓ | 0.43 | 1/5 | 1.00 | no | no capacity gain |
+| 1 | ✓ | 0.095 | ✓ | 0.939 | — | 3.44 | 1/5 | 1.00 | yes | partial absorption |
+| 2 | ✓ | 0.342 | — | 13.190 | — | 25.81 | 0/5 | 0.80 | no | no capacity gain |
+| 3 | ✓ | 0.005 | — | 1.430 | ✓ | 0.29 | 0/5 | 1.00 | no | no capacity gain |
+| 4 | ✓ | 0.124 | ✓ | 0.057 | — | 1.18 | 0/5 | 1.00 | yes | partial absorption |
+
+**EE (temperature + low-$\ell$ polarization)**
+
+| $z$ | H1 | $U_{95}(Q_{\mathrm{obj}})$ | H2 | $U_{95}(Q_{\mathrm{cap}})$ | H3 | $U_{95}(Q_{\mathrm{rec}})$ | $f_2$ absorbed | $R_{\mathrm{SR}}$ | saturated | classification |
+|---|---|---:|---|---:|---|---:|---:|---:|---|---|
+| 0 | ✓ | 0.058 | — | 1.505 | — | 1.48 | 0/5 | 1.00 | no | no capacity gain |
+| 1 | ✓ | 0.021 | ✓ | 0.949 | — | 3.49 | 0/5 | 1.00 | yes | partial absorption |
+| 2 | ✓ | 0.010 | — | 1.118 | ✓ | 0.92 | 0/5 | 1.00 | no | no capacity gain |
+| 3 | ✓ | 0.005 | ✓ | 0.718 | ✓ | 0.34 | 0/5 | 1.00 | no | partial absorption |
+| 4 | ✓ | 0.272 | ✓ | 0.929 | ✓ | 0.76 | 0/5 | 1.00 | no | partial absorption |
+| 5 | ✓ | 0.038 | ✓ | 0.438 | — | 1.52 | 0/5 | 1.00 | yes | partial absorption |
+
+**Table TM1.** Verdicts under the rules frozen in §6 of the experiment plan
+before T2 was opened. For five seed-paired values,
+$U_{95}(x)=\mathrm{mean}(x_s)+2.132\,\mathrm{sd}(x_s)/\sqrt{5}$; seeds, not rows,
+are the replication unit. The ratios are
+$Q_{\mathrm{obj}}=\mathrm{MSE}_{T2}(\texttt{mse20})/\mathrm{MSE}_{T2}(\texttt{mi20-mse})$,
+$Q_{\mathrm{cap}}=\texttt{mse40}/\texttt{mse20}$ and
+$Q_{\mathrm{rec}}=\texttt{mse40}/\text{interaction-aware hierarchy}$. A hypothesis
+passes (✓) when at least 4/5 seed ratios fall below the
+margin — 1.0 strict for H1 and H2, 1.10 inclusive for H3 — **and** $U_{95}$ does
+too, so a single wild seed can fail an otherwise favourable latent (TT $z_2$).
+"$f_2$ absorbed" counts seeds passing **both** legs of TM2. $R_{\mathrm{SR}}$ is
+the dominant-cluster fraction over the five `mse40` winners under the frozen
+semantic equivalence rule; "saturated" flags at least 3/5 winners at complexity
+$\ge 38$. $Q_{\mathrm{rec}}$ is unpaired: one canonical hierarchy is the
+denominator for all five direct seeds. T2-confirmed.
 
 Totals: H1 11/11, H2 6/11, H3 5/11, absorption 0/11, stability 11/11,
 saturation 4/11.
@@ -84,20 +109,40 @@ The pre-specified test has two legs, and a seed passes only if **both** hold:
 refit on all of T1, **and** `MI(e_direct; f2)` no greater than its own
 97.5th-percentile 39-permutation T2 null. No map or threshold is fitted on T2.
 
-| model | latent | max `R²_f2` | R² leg pass | max MI / null | MI leg pass | both |
-|---|---|---|---|---|---|---|
-| TT | z0 | 0.1664 | 4/5 | 35× | 1/5 | 1/5 |
-| TT | z1 | 0.1625 | 3/5 | 23× | 1/5 | 1/5 |
-| TT | z2 | 0.2065 | 2/5 | 140× | 0/5 | 0/5 |
-| TT | z3 | 0.0738 | 3/5 | 22× | 0/5 | 0/5 |
-| TT | z4 | 0.0875 | 4/5 | 10× | 0/5 | 0/5 |
-| TT+EE | z0 | 0.1468 | 2/5 | 62× | 0/5 | 0/5 |
-| TT+EE | z1 | 0.3617 | 2/5 | 51× | 0/5 | 0/5 |
-| TT+EE | z2 | 0.0548 | 4/5 | 11× | 0/5 | 0/5 |
-| TT+EE | z3 | 0.0400 | 5/5 | 13× | 0/5 | 0/5 |
-| TT+EE | z4 | 0.0572 | 2/5 | 30× | 0/5 | 0/5 |
-| TT+EE | z5 | 0.1261 | 1/5 | 19× | 0/5 | 0/5 |
-| **total** | | | **32/55** | | **2/55** | **2/55** |
+#### TM2 — Known-$f_2$ absorption, both legs
+
+**TT (temperature only)**
+
+| $z$ | max $R^2_{f_2}$ | $R^2$ leg | max MI/null | MI leg | both |
+|---|---:|---:|---:|---:|---:|
+| 0 | 0.1664 | 4/5 | 35 | 1/5 | 1/5 |
+| 1 | 0.1625 | 3/5 | 23 | 1/5 | 1/5 |
+| 2 | 0.2065 | 2/5 | 140 | 0/5 | 0/5 |
+| 3 | 0.0738 | 3/5 | 22 | 0/5 | 0/5 |
+| 4 | 0.0875 | 4/5 | 10 | 0/5 | 0/5 |
+
+**EE (temperature + low-$\ell$ polarization)**
+
+| $z$ | max $R^2_{f_2}$ | $R^2$ leg | max MI/null | MI leg | both |
+|---|---:|---:|---:|---:|---:|
+| 0 | 0.1468 | 2/5 | 62 | 0/5 | 0/5 |
+| 1 | 0.3617 | 2/5 | 51 | 0/5 | 0/5 |
+| 2 | 0.0548 | 4/5 | 11 | 0/5 | 0/5 |
+| 3 | 0.0400 | 5/5 | 13 | 0/5 | 0/5 |
+| 4 | 0.0572 | 2/5 | 30 | 0/5 | 0/5 |
+| 5 | 0.1261 | 1/5 | 19 | 0/5 | 0/5 |
+
+**Table TM2.** The pre-specified absorption test, per latent over five seeds.
+A seed passes only if **both** legs hold: $R^2_{f_2}\le 0.05$ for a five-fold,
+64-bin monotone $q(f_2)$ cross-fit on T1 and refit on all of T1, **and**
+$\mathrm{MI}(e_{\mathrm{direct}};f_2)$ no greater than its own 97.5th-percentile
+39-permutation T2 null. No map or threshold is fitted on T2. "max MI/null" is the
+worst seed's observed MI as a multiple of that null. Pooled over all 55
+latent–seed audits the variance leg passes **32/55** and the information leg
+**2/55** — the direct expression removes what a monotone function of $f_2$ can
+predict while leaving dependence the MI test sees at 10 to 140 times the null.
+Under amendment A2 this is the experiment's only newly computed MI.
+T2-confirmed.
 
 **The two legs disagree systematically.** The variance leg passes in 32 of 55
 latent–seed audits — the direct expression really does remove most of what a
@@ -126,21 +171,42 @@ i.e. no better than predicting the fit mean, in 10 of 11 latents.
 
 The plan pre-specified the fair comparison: fit the *same* monotone calibration
 family on T1 for the frozen `mi20-mse` and `mse20` winners, then compare
-calibrated T2 errors. Median over five seeds:
+calibrated T2 errors, median over five seeds.
 
-| model | latent | `mse20` raw | `mse20` calibrated | `mi20-mse` raw | `mi20-mse` calibrated | calibrated ratio |
-|---|---|---|---|---|---|---|
-| TT | z0 | 0.00469 | 0.00496 | 0.99857 | 0.01605 | 0.31 |
-| TT | z1 | 0.08681 | 0.08718 | 1.00040 | 0.02985 | **2.92** |
-| TT | z2 | 0.10986 | 0.10677 | 1.00000 | 0.52968 | 0.20 |
-| TT | z3 | 0.00299 | 0.00307 | 0.95653 | 0.31279 | 0.01 |
-| TT | z4 | 0.11355 | 0.11461 | 1.00003 | 0.15570 | 0.74 |
-| TT+EE | z0 | 0.04358 | 0.04336 | 1.00079 | 0.07598 | 0.57 |
-| TT+EE | z1 | 0.01852 | 0.01848 | 0.99936 | 0.03300 | 0.56 |
-| TT+EE | z2 | 0.00889 | 0.00924 | 0.99132 | 0.00944 | 0.98 |
-| TT+EE | z3 | 0.00332 | 0.00389 | 0.99543 | 0.00673 | 0.58 |
-| TT+EE | z4 | 0.04173 | 0.04052 | 1.00005 | 0.02730 | **1.48** |
-| TT+EE | z5 | 0.02652 | 0.02700 | 1.00001 | 0.47484 | 0.06 |
+#### TM3 — H1 re-read with both objectives symmetrically calibrated
+
+**TT (temperature only)**
+
+| $z$ | `mse20` raw | `mse20` cal. | `mi20-mse` raw | `mi20-mse` cal. | ratio |
+|---|---:|---:|---:|---:|---:|
+| 0 | 0.00469 | 0.00496 | 0.99857 | 0.01605 | 0.31 |
+| 1 | 0.08681 | 0.08718 | 1.00040 | 0.02985 | 2.92 ✗ |
+| 2 | 0.10986 | 0.10677 | 1.00000 | 0.52968 | 0.20 |
+| 3 | 0.00299 | 0.00307 | 0.95653 | 0.31279 | 0.01 |
+| 4 | 0.11355 | 0.11461 | 1.00003 | 0.15570 | 0.74 |
+
+**EE (temperature + low-$\ell$ polarization)**
+
+| $z$ | `mse20` raw | `mse20` cal. | `mi20-mse` raw | `mi20-mse` cal. | ratio |
+|---|---:|---:|---:|---:|---:|
+| 0 | 0.04358 | 0.04336 | 1.00079 | 0.07598 | 0.57 |
+| 1 | 0.01852 | 0.01848 | 0.99936 | 0.03300 | 0.56 |
+| 2 | 0.00889 | 0.00924 | 0.99132 | 0.00944 | 0.98 |
+| 3 | 0.00332 | 0.00389 | 0.99543 | 0.00673 | 0.58 |
+| 4 | 0.04173 | 0.04052 | 1.00005 | 0.02730 | 1.48 ✗ |
+| 5 | 0.02652 | 0.02700 | 1.00001 | 0.47484 | 0.06 |
+
+**Table TM3.** The labelled diagnostic the plan pre-specified for exactly this
+purpose: the same monotone calibration family fitted on T1 to the frozen
+`mi20-mse` and `mse20` winners, then scored on T2. Median over five seeds;
+"raw" is the uncalibrated endpoint the frozen H1 rule uses, "cal." the calibrated
+one. Ratio is `mse20` calibrated over `mi20-mse` calibrated, so below 1 favours
+the MSE objective; ✗ marks the two latents that reverse. Raw `mi20-mse` sits at
+NMSE $\approx 1$ — no better than predicting the fit mean — because MI selection
+optimises a bijection-invariant criterion and has no reason to return a
+numerically calibrated expression. Once scale and offset are treated
+symmetrically the MSE objective wins 9/11 rather than 11/11. This diagnostic
+cannot carry a success decision and does not. T2, T1-fitted calibration.
 
 Once scale and offset are treated symmetrically the MSE objective wins **9/11,
 not 11/11**, and TT z1 and EE z4 reverse outright. The honest statement is that
@@ -155,21 +221,39 @@ margin alone would misrepresent what the objective actually bought.
 ### 5.2 A six-input linear model beats the symbolic winner in 8 of 11 latents
 
 The plan keeps a plain OLS model in the six raw inputs as a reconstruction
-baseline. Fit on T0-fit only, scored on T2:
+baseline, fitted on T0-fit only and scored on T2.
 
-| model | latent | 6-input OLS | `mse40` (median) | winner |
-|---|---|---|---|---|
-| TT | z0 | 0.00186 | 0.00398 | OLS |
-| TT | z1 | 0.01402 | 0.01840 | OLS |
-| TT | z2 | 0.00099 | 0.01195 | OLS |
-| TT | z3 | 0.00214 | 0.00250 | OLS |
-| TT | z4 | 0.00054 | 0.00299 | OLS |
-| TT+EE | z0 | 0.03949 | 0.06430 | OLS |
-| TT+EE | z1 | 0.00097 | 0.01638 | OLS |
-| TT+EE | z2 | 0.00173 | 0.00167 | `mse40` |
-| TT+EE | z3 | 0.00311 | 0.00209 | `mse40` |
-| TT+EE | z4 | 0.04283 | 0.02662 | `mse40` |
-| TT+EE | z5 | 0.00115 | 0.00415 | OLS |
+#### TM4 — Symbolic reconstruction against a six-input linear baseline
+
+**TT (temperature only)**
+
+| $z$ | 6-input OLS | `mse40` | ratio | winner |
+|---|---:|---:|---:|---|
+| 0 | 0.00186 | 0.00398 | 2.14 | OLS |
+| 1 | 0.01402 | 0.01840 | 1.31 | OLS |
+| 2 | 0.00099 | 0.01195 | 12.10 | OLS |
+| 3 | 0.00214 | 0.00250 | 1.17 | OLS |
+| 4 | 0.00054 | 0.00299 | 5.56 | OLS |
+
+**EE (temperature + low-$\ell$ polarization)**
+
+| $z$ | 6-input OLS | `mse40` | ratio | winner |
+|---|---:|---:|---:|---|
+| 0 | 0.03949 | 0.06430 | 1.63 | OLS |
+| 1 | 0.00097 | 0.01638 | 16.92 | OLS |
+| 2 | 0.00173 | 0.00167 | 0.97 | `mse40` |
+| 3 | 0.00311 | 0.00209 | 0.67 | `mse40` |
+| 4 | 0.04283 | 0.02662 | 0.62 | `mse40` |
+| 5 | 0.00115 | 0.00415 | 3.60 | OLS |
+
+**Table TM4.** The plan's OLS control: ordinary least squares in the six raw
+parameters, fitted on the T0-fit rows only and scored on T2, against the median
+`mse40` winner. Ratio is `mse40` over OLS, so above 1 means the linear model
+wins. Seven least-squares coefficients beat a 40-node symbolic expression in
+8 of 11 latents, at times by an order of magnitude (TT $z_2$, ratio 12.1). The
+latents are largely linear in the six parameters, and a stochastic search over a
+40-node space does not reliably match exact least squares on the criterion it is
+optimising. T2-confirmed.
 
 Seven least-squares coefficients outperform a 40-node symbolic expression in
 8/11 latents, sometimes by an order of magnitude (TT z2: 0.00099 vs 0.01195).
@@ -187,19 +271,40 @@ contains — not reconstruction accuracy per se.
 T2 NMSE, median over five seeds; hierarchy rows are the frozen T1-fitted maps
 re-evaluated on the same T2 rows.
 
-| model | latent | `mi20-mi` | `mi20-mse` | `mse20` | `mse30` | `mse40` | `h(f1)` | `h+g` | interaction | 6-input OLS |
-|---|---|---|---|---|---|---|---|---|---|---|
-| TT | z0 | 57.27995 | 0.99857 | 0.00469 | 0.00408 | 0.00398 | 0.09495 | 0.01093 | 0.01094 | 0.00186 |
-| TT | z1 | 812.05832 | 1.00040 | 0.08681 | 0.03598 | 0.01840 | 0.09510 | 0.01887 | 0.01961 | 0.01402 |
-| TT | z2 | 542.52473 | 1.00000 | 0.10986 | 0.04972 | 0.01195 | 0.05260 | 0.00735 | 0.00742 | 0.00099 |
-| TT | z3 | 1.04717 | 0.95653 | 0.00299 | 0.00256 | 0.00250 | 0.08419 | 0.01160 | 0.01168 | 0.00214 |
-| TT | z4 | 61.71592 | 1.00003 | 0.11355 | 0.00405 | 0.00299 | 0.07918 | 0.00731 | 0.00535 | 0.00054 |
-| TT+EE | z0 | 76280.71998 | 1.00079 | 0.04358 | 0.04461 | 0.06430 | 0.07598 | 0.04565 | 0.04702 | 0.03949 |
-| TT+EE | z1 | 73.98375 | 0.99936 | 0.01852 | 0.01864 | 0.01638 | 0.06838 | 0.00538 | 0.00538 | 0.00097 |
-| TT+EE | z2 | 113.80700 | 0.99132 | 0.00889 | 0.00233 | 0.00167 | 0.07124 | 0.00244 | 0.00287 | 0.00173 |
-| TT+EE | z3 | 22.88692 | 0.99543 | 0.00332 | 0.00277 | 0.00209 | 0.06452 | 0.00777 | 0.00777 | 0.00311 |
-| TT+EE | z4 | 1.00019 | 1.00005 | 0.04173 | 0.02800 | 0.02662 | 0.04357 | 0.04216 | 0.04216 | 0.04283 |
-| TT+EE | z5 | 396.37415 | 1.00001 | 0.02652 | 0.00596 | 0.00415 | 0.08886 | 0.00725 | 0.00725 | 0.00115 |
+#### TM5 — T2 reconstruction NMSE, all methods
+
+**TT (temperature only)**
+
+| $z$ | `mi20-mi` | `mi20-mse` | `mse20` | `mse30` | `mse40` | $h(f_1)$ | $h+g$ | interaction | OLS |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 0 | 57.27995 | 0.99857 | 0.00469 | 0.00408 | 0.00398 | 0.09495 | 0.01093 | 0.01094 | 0.00186 |
+| 1 | 812.05832 | 1.00040 | 0.08681 | 0.03598 | 0.01840 | 0.09510 | 0.01887 | 0.01961 | 0.01402 |
+| 2 | 542.52473 | 1.00000 | 0.10986 | 0.04972 | 0.01195 | 0.05260 | 0.00735 | 0.00742 | 0.00099 |
+| 3 | 1.04717 | 0.95653 | 0.00299 | 0.00256 | 0.00250 | 0.08419 | 0.01160 | 0.01168 | 0.00214 |
+| 4 | 61.71592 | 1.00003 | 0.11355 | 0.00405 | 0.00299 | 0.07918 | 0.00731 | 0.00535 | 0.00054 |
+
+**EE (temperature + low-$\ell$ polarization)**
+
+| $z$ | `mi20-mi` | `mi20-mse` | `mse20` | `mse30` | `mse40` | $h(f_1)$ | $h+g$ | interaction | OLS |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 0 | 76280.71998 | 1.00079 | 0.04358 | 0.04461 | 0.06430 | 0.07598 | 0.04565 | 0.04702 | 0.03949 |
+| 1 | 73.98375 | 0.99936 | 0.01852 | 0.01864 | 0.01638 | 0.06838 | 0.00538 | 0.00538 | 0.00097 |
+| 2 | 113.80700 | 0.99132 | 0.00889 | 0.00233 | 0.00167 | 0.07124 | 0.00244 | 0.00287 | 0.00173 |
+| 3 | 22.88692 | 0.99543 | 0.00332 | 0.00277 | 0.00209 | 0.06452 | 0.00777 | 0.00777 | 0.00311 |
+| 4 | 1.00019 | 1.00005 | 0.04173 | 0.02800 | 0.02662 | 0.04357 | 0.04216 | 0.04216 | 0.04283 |
+| 5 | 396.37415 | 1.00001 | 0.02652 | 0.00596 | 0.00415 | 0.08886 | 0.00725 | 0.00725 | 0.00115 |
+
+**Table TM5.** Normalised mean squared error on T2, median over five seeds,
+against the variance of the scored tier. `mi20-mi` and `mi20-mse` are the stored
+GMM-MI front re-read under its own MI selector and under the validation-MSE
+selector respectively; `mse20/30/40` are the direct one-stage searches at each
+budget. $h(f_1)$, $h+g$ and "interaction" are the frozen hierarchy baselines with
+their T1-fitted calibrators re-evaluated on the same T2 rows; OLS is the
+six-input linear control of TM4. The `mi20-mi` column is not interpretable as
+accuracy — values reach $7.6\times10^{4}$ — and is shown to make the calibration
+point of TM3 concrete. Direct and hierarchical complexities are **not**
+comparable: $h$ and $g$ are flexible non-symbolic calibrators whose cost appears
+in no node count here. T2-confirmed.
 
 The `mi20-mi` column is uninterpretable as accuracy (values up to 7.6 × 10⁴)
 and is shown only to make the calibration point of §5.1 concrete: MI selection
@@ -344,20 +449,39 @@ known f2 probed  H0*omega_cdm/n_s
 Protocol-identical MSE searches on independently permuted targets, selected by
 shuffled-target validation MSE, scored on T2 against both targets:
 
-| model | latent | budget | shuffle seed | R² vs true target | R² vs its own shuffled target |
-|---|---|---|---|---|---|
-| TT | z2 | ms20 | 0 | -0.0022 | -0.0011 |
-| TT | z2 | ms20 | 1 | +0.0048 | -0.0004 |
-| TT | z2 | ms20 | 2 | -0.0001 | -0.0001 |
-| TT | z2 | ms40 | 0 | -0.0057 | -0.0000 |
-| TT | z2 | ms40 | 1 | +0.0048 | -0.0004 |
-| TT | z2 | ms40 | 2 | -0.0001 | -0.0001 |
-| TT+EE | z5 | ms20 | 0 | +0.0005 | -0.0021 |
-| TT+EE | z5 | ms20 | 1 | +0.0037 | -0.0004 |
-| TT+EE | z5 | ms20 | 2 | +0.0051 | -0.0042 |
-| TT+EE | z5 | ms40 | 0 | -0.0006 | -0.0012 |
-| TT+EE | z5 | ms40 | 1 | +0.0037 | -0.0004 |
-| TT+EE | z5 | ms40 | 2 | +0.0020 | -0.0047 |
+#### TM6 — MSE shuffled-target controls
+
+**TT (temperature only)**
+
+| $z$ | budget | shuffle seed | $C$ | $R^2$ vs true | $R^2$ vs shuffled |
+|---|---|---:|---:|---:|---:|
+| 2 | ms20 | 0 | 7 | -0.0022 | -0.0011 |
+| 2 | ms20 | 1 | 3 | +0.0048 | -0.0004 |
+| 2 | ms20 | 2 | 1 | -0.0001 | -0.0001 |
+| 2 | ms40 | 0 | 2 | -0.0057 | -0.0000 |
+| 2 | ms40 | 1 | 3 | +0.0048 | -0.0004 |
+| 2 | ms40 | 2 | 1 | -0.0001 | -0.0001 |
+
+**EE (temperature + low-$\ell$ polarization)**
+
+| $z$ | budget | shuffle seed | $C$ | $R^2$ vs true | $R^2$ vs shuffled |
+|---|---|---:|---:|---:|---:|
+| 5 | ms20 | 0 | 10 | +0.0005 | -0.0021 |
+| 5 | ms20 | 1 | 3 | +0.0037 | -0.0004 |
+| 5 | ms20 | 2 | 20 | +0.0051 | -0.0042 |
+| 5 | ms40 | 0 | 7 | -0.0006 | -0.0012 |
+| 5 | ms40 | 1 | 3 | +0.0037 | -0.0004 |
+| 5 | ms40 | 2 | 19 | +0.0020 | -0.0047 |
+
+**Table TM6.** Protocol-identical MSE searches on independently permuted
+targets, for the amplitude latent of each checkpoint at both endpoint budgets,
+selected by shuffled-target validation MSE. $C$ is the selected complexity;
+$R^2$ is reported on T2 against both the true latent and the control's own
+shuffled target. Every control sits within $|R^2|\le 0.006$ of zero against both,
+and lifting the budget from 20 to 40 buys a shuffled target nothing — the
+capacity gains of TM1 are not an artifact of a larger search space. Six paired
+controls per checkpoint; these are diagnostics only, and three permutations do
+not estimate any threshold. T2.
 
 Every control sits within |R²| ≤ 0.006 of zero against both targets, at both
 budgets. Lifting the budget from 20 to 40 buys a shuffled target nothing —
