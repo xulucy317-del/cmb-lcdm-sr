@@ -43,7 +43,8 @@ import run_mse_one_stage_pool as pool                            # noqa: E402
 
 PROVENANCE = REPO / "experiments" / "mse_one_stage_execution_provenance.json"
 PROVENANCE_BLOCKS = ("initial_execution", "replacement_execution",
-                     "execution_amendment_a1", "execution_amendment_a2")
+                     "execution_amendment_a1", "execution_amendment_a2",
+                     "lightning_execution")
 RUNS = ["lcdm_tt_beta3e-4", "lcdm_tt_ee_lowl"]
 N_LATENTS = {"lcdm_tt_beta3e-4": 5, "lcdm_tt_ee_lowl": 6}
 PACKAGES = ["pysr", "juliacall", "juliapkg", "numpy", "scipy", "pandas",

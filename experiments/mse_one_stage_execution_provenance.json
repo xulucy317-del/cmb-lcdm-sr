@@ -1,5 +1,5 @@
 {
-  "schema_version": 3,
+  "schema_version": 4,
   "kind": "mse_one_stage_execution_provenance",
   "created_utc": "2026-08-24T23:41:26Z",
   "git_revision": "cbd93858b1661145c265f60382ad9014d1e34920",
@@ -122,6 +122,145 @@
     "The resumed blind-SR search logic and PySR configuration are unchanged; the runner change is strict atomic JSON serialization.",
     "Twenty-five of the first 36 reports contain non-standard NaN only in failed secondary GMM-MI diagnostic fields; their MSE fields and selected winners are finite and unchanged.",
     "Existing result artifacts were not edited or replaced. The final selection manifest hashes every report and this provenance file.",
-    "Amendment A1 removed non-selecting T0 MI diagnostics from new MSE tasks; A2 then removed optional T2 reconstruction/full-residual MI while retaining the required known-f2 absorption MI test."
-  ]
+    "Amendment A1 removed non-selecting T0 MI diagnostics from new MSE tasks; A2 then removed optional T2 reconstruction/full-residual MI while retaining the required known-f2 absorption MI test.",
+    "The remaining 129 searches, 12 controls and all three consolidation stages ran on a Lightning AI free-plan CPU Studio; see lightning_execution for the environment, per-task thread attribution and recorded deviations."
+  ],
+  "lightning_execution": {
+    "recorded_utc": "2026-08-26T08:40:00Z",
+    "platform": "Lightning AI Studio, free plan, CPU only",
+    "reason": "CSD3 account at AssocGrpCPUMinutesLimit; see execution_amendment_a2",
+    "machine_spec": {
+      "cpus": 4,
+      "cpu_model": "Intel(R) Xeon(R) CPU @ 2.60GHz",
+      "memory_gb": 14,
+      "persistent_disk_gb": 387,
+      "home": "/teamspace/studios/this_studio"
+    },
+    "hosts": {
+      "vm-1787672304890030054": "benchmarks, main searches, controls 0-7",
+      "vm-1787697335265477583": "controls 8-11, select, calibrate, confirm"
+    },
+    "environment": {
+      "python": "3.12.3",
+      "python_on_csd3": "3.12.12",
+      "pysr": "1.5.10",
+      "julia": "1.11.9",
+      "SymbolicRegression.jl": "1.11.3",
+      "LoopVectorization.jl": "0.12.174",
+      "numpy": "2.4.2",
+      "scipy": "1.17.1",
+      "scikit-learn": "1.5.2",
+      "sympy": "1.13.1",
+      "pandas": "3.0.1",
+      "gmm_mi": "0.8.2",
+      "torch": null,
+      "julia_manifest_drift_vs_csd3": "none"
+    },
+    "transfer_and_gate": {
+      "method": "tar over ssh from CSD3, repository including .git so the selection manifest could record a real git_revision",
+      "state_artifacts_sha256": {
+        "experiments/mse_one_stage_state_csd3.json": "c780469271f4a409aad6bc8a66f75e11a555fd91103970bee53ad8899a6a85e5",
+        "experiments/mse_one_stage_state_lightning.json": "bebab28b604a680ca43ef7bc83e92caa15a42eb5d85c0c718104aa9217d1c0f1"
+      },
+      "gate_result": "verify_mse_one_stage_state.py --compare: every carried input, source and existing report byte-identical to CSD3",
+      "counts_verified": {
+        "inputs": 33,
+        "legacy_gmm_mi_fronts": 55,
+        "provenance_source_hashes": 13
+      }
+    },
+    "execution": {
+      "orchestration": "scripts/run_mse_one_stage_pool.py, persistent Julia/PySR workers; no scheduler",
+      "task_identity": "rebuilt from the Slurm launchers' PRINT_MATRIX tables; per-task-id command parity asserted in tests/test_mse_one_stage_lightning.py",
+      "main_reports": "165/165",
+      "control_reports": "12/12",
+      "task_attempts": 141,
+      "failures": 0,
+      "invalid_reports": 0,
+      "julia_threads_per_worker": {
+        "4": {
+          "main": [
+            36,
+            37,
+            38
+          ]
+        },
+        "2": {
+          "main": "39-164 excluding 43-46 (122 tasks)",
+          "control": "0-11 (12 tasks)"
+        },
+        "1": {
+          "main": [
+            43,
+            44,
+            45,
+            46
+          ]
+        }
+      },
+      "median_fit_seconds": 181,
+      "interruption": "Lightning stopped the Studio mid-run; SIGTERM was caught, in-flight tasks finished, the pool exited cleanly and resumed on a new VM with the persistent disk intact",
+      "ledger": "logs/mse_one_stage_pool_ledger_lightning.jsonl"
+    },
+    "consolidation": {
+      "selection_manifests_sha256": {
+        "lcdm_tt_beta3e-4": "d4b11787a30d118d5b027a9b40b4aa6d407f8bf0230e43d9cf362619b879ed8a",
+        "lcdm_tt_ee_lowl": "7ccef5923388d2b98bfe1483e69383976b9fff5f40a1603ce3e452a5ae9121dc"
+      },
+      "calibration_sha256": {
+        "lcdm_tt_beta3e-4": "f892d302ffda8c60088821c39de621a7f61ea35f1274d7b28074b38c3ab2e706",
+        "lcdm_tt_ee_lowl": "86b7f75a87ab5c5c4fb2d431457e82673f28cd205dde28998919a00cacacc032"
+      },
+      "confirm": {
+        "started_utc": "2026-08-25T23:17:50Z",
+        "completed_utc": {
+          "lcdm_tt_beta3e-4": "2026-08-26T01:53:07Z",
+          "lcdm_tt_ee_lowl": "2026-08-26T07:21:48Z"
+        },
+        "wall_hours": 8.07,
+        "invocations": 1,
+        "settings": {
+          "n_perm_mi": 39,
+          "max_samples_mi": 5000,
+          "mi_jobs": 4
+        },
+        "note": "ran once end to end; no relaunch and no partial artifacts"
+      },
+      "confirmation_sha256": {
+        "lcdm_tt_beta3e-4": "1805b8edcced689d01ebf3897b72b039b9ea7c8251c0213fa075fb104ed976b2",
+        "lcdm_tt_ee_lowl": "0c0b0d8b53075a86ec20a5f2cd1584fce1341a062cb79d1e7c6c7022c74a932a"
+      },
+      "result_files_sha256": {
+        "experiments/mse_one_stage_sr_lcdm_tt_beta3e-4.json": "e0f04936c90bae910610107b0ca54b174dc52ccc0e32a6371b0b8034bd84d6d7",
+        "experiments/mse_one_stage_sr_lcdm_tt_beta3e-4.md": "9310ab4ecea0f110d88f2fd1bceb73715a594a4ce0c9096eaf54db64cbaed203",
+        "experiments/mse_one_stage_sr_lcdm_tt_ee_lowl.json": "0fafcd5beeacce0f967895a22b4b034932940882829089ece10c08eaa716a648",
+        "experiments/mse_one_stage_sr_lcdm_tt_ee_lowl.md": "11e6e2f47101f720d175794fab0b7b4960901f26f624b0ed1568639f3fd260cc"
+      }
+    },
+    "recorded_deviations": [
+      "Julia thread count differs from the 16 threads used for the first 36 CSD3 reports; per-task attribution is given above. Search volume (200 iterations x 15 populations), operators, seeds and maxsize ladder are unchanged.",
+      "Process model: many fits inside one persistent Julia/PySR process instead of one process per task. Each task still constructs a fresh PySRRegressor with its own output_directory and run_id.",
+      "Both selection manifests record git_dirty=true. The sole cause was one untracked provenance artifact (experiments/mse_one_stage_state_lightning.json, committed afterwards); no tracked file was modified. The manifests were left immutable rather than re-cut, since re-cutting a frozen selection artifact is what that guard exists to prevent."
+    ],
+    "code_fixes_during_execution": [
+      "bootstrap: `uv venv` without --seed produces a venv with no pip, which would have failed the install step on a fresh machine",
+      "both consolidation launchers mis-parsed their arguments: a literal '}' inside ${1:?...} closes the parameter expansion early, so MODE arrived as 'select <run-name>}'. hpc/slurm_mse_one_stage_consolidate.sh carried the identical defect and had never been exercised because CSD3 ran out of allowance before consolidation."
+    ],
+    "known_caveat": "src/cmb_lcdm_sr/mi.py calls EstimateMI().fit_estimate() without an explicit random_state. Subsampling and the 39 permutation seeds are deterministic, but a re-run of confirm need not reproduce MI values bit-identically. Not exercised here: confirm ran once.",
+    "source_sha256": {
+      "scripts/run_mse_one_stage_pool.py": "44e7e0c6cfc82599c4a1de42de6a033cc584de91590291cb3ec479f8ace7f679",
+      "scripts/verify_mse_one_stage_state.py": "9833c49c2be2020e3de6b76360f63221e15e2b814cac600cb115bbc67dcfb33d",
+      "scripts/consolidate_mse_one_stage.py": "c26022f60c23876f462f98b48a7d3fbc4b91361503dfda845b2cd7fb8751412a",
+      "scripts/run_blind_sr.py": "ee15515908c908af1feb0aa7ff1f5c7cc60e6733282fa73c88a65772a5cce908",
+      "scripts/run_shuffled_control.py": "f1536487de04e0961cd43a9f4917014b27b1f825fd6dbf88b7b8476fa40d9080",
+      "src/cmb_lcdm_sr/sr.py": "e568ca230a51590f3fbdadeecb5f48f696ee3eac5fe0878382c7ca3c9059aeb9",
+      "src/cmb_lcdm_sr/mi.py": "d8db64f1fc4e92c0b2e4e8511678f491a2869d1c53769c307bc6ebe6ca048a41",
+      "hpc/lightning/run_consolidation.sh": "396888d8974fff5722ee243ea752e180cf575fb421ed3960ca084ec2d399147b",
+      "hpc/lightning/env.sh": "c1df198d35c4b274ad0de965dff2c99f39faf3db00910b3f525503cc60b0f0e9",
+      "hpc/lightning/bootstrap_env.sh": "b3b8a87506fa4004647aee3fb07e32f294368d821ab26b3178f7ee5588497c8e",
+      "hpc/slurm_mse_one_stage_sr.sh": "4f561db4f8cdc0d9469046b19f40a95bbbfe267dcc36389e18dc32582699a146",
+      "hpc/slurm_mse_one_stage_control.sh": "b6a8d4bd2388140466500a9fb2273f9b44f4595a407ec7990f4bb7dcf8ec31fd",
+      "hpc/slurm_mse_one_stage_consolidate.sh": "1eadbc4343ff5334b051103e25a107aba99aad897751399792fc4ad9bbc1e225"
+    }
+  }
 }
