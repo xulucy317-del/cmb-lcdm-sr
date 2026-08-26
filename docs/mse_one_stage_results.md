@@ -343,7 +343,9 @@ direct forms are an order of magnitude larger in node count and still do not
 absorb the coordinate the 7-node `f2` carries.
 
 
-### TT — `lcdm_tt_beta3e-4`
+### 7.1 Canonical forms at the primary budget
+
+#### TT — `lcdm_tt_beta3e-4`
 
 **z0** — no capacity gain; canonical form from seed 3, complexity 31, support {omega_b, omega_cdm, H0, tau, n_s}; cluster sizes [5], `R_SR` = 1.00
 
@@ -396,7 +398,7 @@ known f2 probed  log(H0)/(n_s*omega_b)
 ```
 
 
-### TT+EE — `lcdm_tt_ee_lowl`
+#### TT+EE — `lcdm_tt_ee_lowl`
 
 **z0** — no capacity gain; canonical form from seed 3, complexity 25, support {omega_b, omega_cdm, H0, ln10As, n_s}; cluster sizes [5], `R_SR` = 1.00
 
@@ -460,12 +462,143 @@ known f2 probed  H0*omega_cdm/n_s
 
 ---
 
+---
+
+### 7.2 What MSE finds at each complexity ceiling
+
+The ladder below takes, for every seed, the best equation by T0-validation NMSE
+at or below each complexity ceiling, pooled over the three budget families, and
+asks what kind of object it is. "Separable" means no product or quotient of two
+distinct parameters appears anywhere in the expression; "coupled" means one
+does. Counts are the number of seeds sharing the dominant answer.
+
+#### TM6 — Reconstruction against the complexity ceiling
+
+
+**TT (temperature only)**
+
+| $z$ | $c\le5$ | $c\le8$ | $c\le10$ | $c\le15$ | $c\le20$ | $c\le30$ | $c\le40$ |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| 0 | 0.840 | 0.910 | 0.939 | 0.993 | 0.996 | 0.996 | 0.996 |
+| 1 | 0.541 | 0.775 | 0.830 | 0.902 | 0.965 | 0.982 | 0.982 |
+| 2 | 0.469 | 0.732 | 0.844 | 0.909 | 0.986 | 0.988 | 0.998 |
+| 3 | 0.664 | 0.904 | 0.968 | 0.993 | 0.997 | 0.998 | 0.998 |
+| 4 | 0.663 | 0.721 | 0.804 | 0.916 | 0.982 | 0.998 | 0.998 |
+
+**EE (temperature + low-$\ell$ polarization)**
+
+| $z$ | $c\le5$ | $c\le8$ | $c\le10$ | $c\le15$ | $c\le20$ | $c\le30$ | $c\le40$ |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| 0 | 0.486 | 0.698 | 0.867 | 0.936 | 0.958 | 0.960 | 0.960 |
+| 1 | 0.871 | 0.924 | 0.948 | 0.976 | 0.982 | 0.986 | 0.986 |
+| 2 | 0.569 | 0.931 | 0.963 | 0.997 | 0.998 | 0.998 | 0.998 |
+| 3 | 0.510 | 0.705 | 0.869 | 0.990 | 0.998 | 0.998 | 0.998 |
+| 4 | 0.541 | 0.696 | 0.958 | 0.964 | 0.968 | 0.976 | 0.976 |
+| 5 | 0.530 | 0.904 | 0.908 | 0.972 | 0.992 | 0.997 | 0.997 |
+
+**Table TM6.** Median over five seeds of $R^2 = 1-\mathrm{NMSE}$ on the T0
+validation block, for the best equation at or below each ceiling. Accuracy
+saturates by $c\le 20$–$30$ everywhere; the last ten nodes of the budget buy
+essentially nothing. EE $z_0$ tops out at 0.960, the lowest ceiling of the
+eleven and the same latent the discovery programme carries as unresolved.
+T0-validation.
+
+#### TM7 — The first parameter recruited, against the role MI assigned
+
+
+**TT (temperature only)**
+
+| $z$ | support at $c\le5$ | seeds | $R^2$ | role from T4.1 | contains role |
+|---|---|---:|---:|---|---|
+| 0 | $\omega_b$ | 5/5 | 0.840 | $\omega_b$ | ✓ |
+| 1 | $n_s$, $\omega_{\mathrm{cdm}}$ | 4/5 | 0.541 | $\omega_{\mathrm{cdm}}$ | ✓ |
+| 2 | $A_s$ | 3/5 | 0.469 | amplitude $(\tau,A_s)$ | ✓ |
+| 3 | $n_s$ | 5/5 | 0.664 | $n_s$ | ✓ |
+| 4 | $H_0$, $\omega_{\mathrm{cdm}}$ | 4/5 | 0.663 | $H_0$ | ✓ |
+
+**EE (temperature + low-$\ell$ polarization)**
+
+| $z$ | support at $c\le5$ | seeds | $R^2$ | role from T4.1 | contains role |
+|---|---|---:|---:|---|---|
+| 0 | $\omega_b$, $\omega_{\mathrm{cdm}}$ | 2/5 | 0.486 | $\omega_{\mathrm{cdm}}$ / early ISW | ✓ |
+| 1 | $H_0$, $\omega_{\mathrm{cdm}}$ | 4/5 | 0.871 | $H_0$ | ✓ |
+| 2 | $\omega_b$ | 5/5 | 0.569 | $\omega_b$ | ✓ |
+| 3 | $n_s$ | 5/5 | 0.510 | $n_s$ | ✓ |
+| 4 | $\tau$ | 5/5 | 0.541 | $\tau$ | ✓ |
+| 5 | $A_s$ | 5/5 | 0.530 | amplitude $(\tau,A_s)$ | ✓ |
+
+**Table TM7.** The support of the best expression at complexity $\le 5$ — the
+first one or two parameters the MSE search spends its budget on — against the
+role assigned to that latent by the independent, MI-selected discovery
+programme (T4.1 of the report). The two objectives have different invariance
+classes and select on different tiers, yet **the leading parameter agrees in
+all eleven latents**. Where the MI role is a pair, MSE recruits one member of
+it first ($A_s$ for both amplitude latents, $\tau$ for EE $z_4$).
+T0-validation.
+
+#### TM8 — Form family and parameter count against the ceiling
+
+
+**TT (temperature only)**
+
+| $z$ | $c\le5$ | $c\le10$ | $c\le20$ | $c\le40$ | vars at $c\le10$ | at $c\le20$ | at $c\le40$ |
+|---|---|---|---|---|---:|---:|---:|
+| 0 | separable 5/5 | coupled 2/5 | coupled 3/5 | coupled 3/5 | 3 | 4 | 5 |
+| 1 | coupled 4/5 | coupled 5/5 | coupled+log 4/5 | coupled+log 3/5 | 3 | 5 | 6 |
+| 2 | separable 5/5 | coupled+log 3/5 | coupled+log 4/5 | coupled+log 3/5 | 3 | 5 | 6 |
+| 3 | separable 5/5 | separable+log 2/5 | coupled+log 1/5 | coupled+log 2/5 | 2 | 5 | 5 |
+| 4 | coupled 4/5 | coupled 2/5 | coupled 4/5 | coupled+log 2/5 | 3 | 6 | 6 |
+
+**EE (temperature + low-$\ell$ polarization)**
+
+| $z$ | $c\le5$ | $c\le10$ | $c\le20$ | $c\le40$ | vars at $c\le10$ | at $c\le20$ | at $c\le40$ |
+|---|---|---|---|---|---:|---:|---:|
+| 0 | coupled 3/5 | coupled 5/5 | coupled+log 3/5 | coupled 3/5 | 3 | 5 | 5 |
+| 1 | coupled 4/5 | coupled 3/5 | coupled+log 2/5 | coupled+log 3/5 | 3 | 5 | 6 |
+| 2 | separable 5/5 | separable 4/5 | coupled+log 2/5 | coupled+log 2/5 | 3 | 5 | 6 |
+| 3 | separable 5/5 | coupled 2/5 | separable 2/5 | coupled 2/5 | 3 | 4 | 4 |
+| 4 | separable 5/5 | separable+log 3/5 | coupled+log 2/5 | coupled+log+exp 2/5 | 2 | 3 | 5 |
+| 5 | separable 5/5 | separable+log 2/5 | coupled+log 3/5 | coupled+log 3/5 | 2 | 5 | 6 |
+
+**Table TM8.** The dominant form family among the five seeds, with the number
+of seeds agreeing, and how many of the six parameters appear. Three things read
+off it. **Consensus decays with capacity**: at $c\le5$ seven of eleven latents
+have all five seeds on the same family, but by $c\le40$ the dominant family
+usually holds only 2–3 of 5 — accuracy keeps improving while the *form* stops
+agreeing. **Parameters are recruited at a steady rate**, roughly one per five
+nodes: 1–2 at $c\le5$, three at $c\le10$, four at $c\le15$, five or six by
+$c\le20$–30. **Coupling arrives early**: most latents move from a separable
+form to one containing a genuine product or quotient of two parameters between
+$c\le5$ and $c\le10$, with logarithms appearing from $c\le8$ onward.
+T0-validation.
+
+A worked ladder, TT $z_0$ — the same latent whose MI-discovered coordinate is
+$n_s/\omega_b$ at complexity 3. These are the **best** seed at each ceiling, so
+they run slightly above the medians in TM6:
+
+```text
+c<=5   c=5  R2 0.840
+   (0.38232777 / omega_b) + -17.44024
+c<=10  c=10 R2 0.952
+   (omega_b * -743.5626) + ((n_s * 19.000467) / exp(omega_cdm))
+c<=20  c=20 R2 0.999
+   ((omega_b * -1218.7023) * (omega_cdm + 0.53690153)) + ((106.06416 / H0) + (5.052643 - ((log(A_s) * n_s) * 0.5659249)))
+```
+
+Expressions verbatim from the fronts. The first five nodes buy $\omega_b$ alone
+and 84 % of the variance; the next five add $n_s$ and $\omega_{\mathrm{cdm}}$;
+ten more reach 0.999 and recruit $H_0$ and $A_s$. The MI programme reaches the same leading
+structure — the ratio $n_s/\omega_b$ — in three nodes, because it never has to
+pay for the scale.
+
+---
+
 ## 8. Controls
 
 Protocol-identical MSE searches on independently permuted targets, selected by
 shuffled-target validation MSE, scored on T2 against both targets:
 
-#### TM6 — MSE shuffled-target controls
+#### TM9 — MSE shuffled-target controls
 
 **TT (temperature only)**
 
@@ -489,7 +622,7 @@ shuffled-target validation MSE, scored on T2 against both targets:
 | 5 | ms40 | 1 | 3 | +0.0037 | -0.0004 |
 | 5 | ms40 | 2 | 19 | +0.0020 | -0.0047 |
 
-**Table TM6.** Protocol-identical MSE searches on independently permuted
+**Table TM9.** Protocol-identical MSE searches on independently permuted
 targets, for the amplitude latent of each checkpoint at both endpoint budgets,
 selected by shuffled-target validation MSE. $C$ is the selected complexity;
 $R^2$ is reported on T2 against both the true latent and the control's own
