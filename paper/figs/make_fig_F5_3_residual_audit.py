@@ -1,11 +1,16 @@
-"""F5.3 — every stage-1 residual is structured (section 5).
+"""F5.3 — the stage-1 residual's structure, seen (section 5).
 
-Left: calibrated-residual audit R2_res per latent (predicting e1 = mu -
-h(f1) from raw parameters) against the per-latent permutation null (p97.5
-~ +-0.002, an invisible band at zero). Right: the structure itself — the
-EE amplitude latent's residual e1 against its leading loading parameter
-(T1 subsample) with a binned mean. Sources: latent_cards_*.json;
-models/*/analysis/residual_z*_v1.npy + data/theta.npy for the inset.
+The EE amplitude latent's residual e1 = mu - h(f1) against its leading
+loading parameter (T1 subsample) with a binned mean overlaid: the residual
+is not noise, and the report says so with a picture rather than only a
+score. Sources: latent_cards_*.json for the loading list;
+models/<run>/analysis/residual_z<k>_v1.npy + data/theta.npy for the rows.
+
+The companion R2_res-vs-permutation-null panel was dropped (2026-08-19);
+those numbers are tabulated in the section text instead.
+
+NOTE: needs models/*/analysis/, which lives on CSD3 and is not part of a
+local checkout. Run this where the caches are (or sync them first).
 """
 import sys
 from pathlib import Path
@@ -22,45 +27,8 @@ from cmb_lcdm_sr.tiers import T1, split_test_indices  # noqa: E402
 
 st.apply_rc()
 
-fig, (axL, axR) = plt.subplots(
-    1, 2, figsize=(st.COL_W, 2.35), gridspec_kw={"width_ratios": [1.35, 1],
-                                                 "wspace": 0.42})
+fig, axR = plt.subplots(1, 1, figsize=(0.52 * st.COL_W, 2.35))
 
-# ---------------------------------------------------------------- left panel
-xpos, ticks = [], []
-x = 0
-for run in st.RUNS:
-    d = st.load_cards(run)
-    nulls = {e["latent"]: e["r2_null_p975"]
-             for e in d["controls"]["stage1_permutation"]}
-    col = st.MODEL_COLOR[run]
-    xs = []
-    for c in d["cards"]:
-        r2 = c["residual_stage1"]["r2_res"]
-        axL.scatter([x], [r2], s=20, facecolor=col, edgecolor="white",
-                    linewidth=0.6, zorder=4)
-        axL.scatter([x], [nulls[c["latent"]]], s=13, facecolor="white",
-                    edgecolor=st.NULL_EDGE, linewidth=0.8, zorder=3)
-        xs.append(x)
-        ticks.append(f"$z_{{{c['latent']}}}$")
-        x += 1
-    axL.text(np.mean(xs), 1.075, st.MODEL_LABEL[run], ha="center",
-             fontsize=6.8, color=st.SECONDARY)
-    x += 0.8
-axL.axhline(0.0, color=st.BASELINE, lw=0.6, zorder=1)
-axL.set_xticks([i for i in range(5)] + [j + 5.8 for j in range(6)])
-axL.set_xticklabels(ticks, fontsize=6.4)
-axL.set_ylim(-0.06, 1.13)
-axL.set_ylabel(r"residual audit $R^2_{\rm res}$")
-axL.annotate("permutation null\n($p_{97.5}\\approx\\pm0.002$)",
-             (5.8, 0.0), xytext=(0, 10), textcoords="offset points",
-             fontsize=6.0, color=st.SECONDARY, ha="center")
-st.despine(axL)
-axL.grid(axis="y", color=st.GRID, lw=0.5)
-axL.set_axisbelow(True)
-axL.tick_params(axis="x", length=0)
-
-# ------------------------------------------------- right panel: the structure
 RUN, Z = "lcdm_tt_ee_lowl", 5
 theta = np.load(st.REPO / "data" / "theta.npy")
 th_t1 = theta[split_test_indices(st.REPO / "data")][T1]
@@ -99,4 +67,4 @@ axR.grid(True, color=st.GRID, lw=0.4)
 axR.set_axisbelow(True)
 axR.tick_params(labelsize=6.3)
 
-st.save(fig, "F5_3_residual_audit")
+st.save(fig, "F5_3_residual_structure")
