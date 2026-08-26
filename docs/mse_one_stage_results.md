@@ -251,15 +251,31 @@ parameters, fitted on the T0-fit rows only and scored on T2, against the median
 `mse40` winner. Ratio is `mse40` over OLS, so above 1 means the linear model
 wins. Seven least-squares coefficients beat a 40-node symbolic expression in
 8 of 11 latents, at times by an order of magnitude (TT $z_2$, ratio 12.1). The
-latents are largely linear in the six parameters, and a stochastic search over a
-40-node space does not reliably match exact least squares on the criterion it is
-optimising. T2-confirmed.
+result does **not** imply the latents are linear: the OLS residual is itself
+97–99 % predictable from the same six parameters by a flexible nonlinear model
+on T1, so both rows sit about two orders of magnitude above the achievable
+floor. T2-confirmed; ceiling probe on T1.
 
 Seven least-squares coefficients outperform a 40-node symbolic expression in
-8/11 latents, sometimes by an order of magnitude (TT z2: 0.00099 vs 0.01195).
-The latents are largely linear in the six parameters, and a stochastic search
-over a 40-node space with in-search constant optimisation does not reliably
-match exact least squares on the criterion it is optimising.
+8/11 latents, sometimes by an order of magnitude (TT z2: 0.00099 vs 0.01195):
+a stochastic search over a 40-node space with in-search constant optimisation
+does not reliably match exact least squares on the criterion it is optimising.
+
+**This does not mean the latents are linear, and neither model is near the
+ceiling.** Refitting the OLS on T0-fit, taking its residual on T1 and modelling
+that residual from the *same six parameters* with gradient boosting (fitted on
+the first half of T1, scored on the second) recovers **97–99 % of the residual
+variance** in every latent, pulling NMSE from ≈2×10⁻³ down to ≈3×10⁻⁵. So
+μ_k(θ) is a smooth, essentially deterministic function of θ; a linear proxy
+captures ~99.8 % of its variance over this narrow LHS prior box, and what
+remains is structure, not noise. Both the linear baseline and the maxsize-40
+expression sit about two orders of magnitude above the achievable floor.
+
+The consequence is about *evidence*, not about the latents: on this data
+reconstruction accuracy discriminates weakly between hypotheses, since a plain
+affine map already reaches NMSE ≈ 10⁻³. That is precisely why the discovery
+protocol selects on a bijection-invariant criterion instead — a point §5.1
+makes from the other direction.
 
 **Consequence for the write-up.** As *reconstruction*, direct symbolic
 regression is not the right tool here and should not be sold as one. The
