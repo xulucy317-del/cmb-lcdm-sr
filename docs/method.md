@@ -1,7 +1,9 @@
 # Methodology pipeline — blind symbolic interpretation of CMB β-VAE latents
 
-Four stages, each with what it does and what it returned. All numbers are the
-T2-confirmed values in `docs/results_compendium.md`; sources named inline.
+Four discovery stages, each with what it does and what it returned, plus a
+fifth **post-closure reconstruction follow-up** (§5) that deliberately sits
+outside the blind-discovery protocol. All numbers are the T2-confirmed values
+in `docs/results_compendium.md`; sources named inline.
 
 **Scope**: 2 checkpoints (TT-only `PirasCVAE` L=5; TT+EE-lowl
 `DualEncoderCVAE` L=6; both β=3e-4, seed 42) · 11 latents · ≈2,000 PySR
@@ -219,6 +221,56 @@ and record **G4b: FAIL** for EE (mass 0.79) as well as TT.
 
 ---
 
+## 5. One-stage MSE reconstruction (post-closure follow-up, 2026-08-26)
+
+**What**: ask whether *one* larger symbolic expression can reconstruct a latent
+directly — including the structure the two-stage hierarchy recovers only via
+`f2` — by changing the objective rather than the inputs. Same six raw
+parameters, same 5000 T0 samples, same ni200/pop15, seeds 0–4; what changes is
+the inner loss, the selector, and the budget ladder.
+
+**This is a reconstruction and compression study, not a discovery result.** MSE
+is calibration-sensitive by construction: it rewards the scale, offset and shape
+that reproduce μ_k, so it leaves the bijection-invariance class that makes
+stages 1–4 blind. It changes no card, no status and no frozen threshold.
+
+Methods added for it, all reusable:
+
+| addition | what it does |
+|---|---|
+| Loss/selection dispatch | explicit registry over `{gmm_mi, mse}`; `--inner-loss`, `--selection-metric`, `--posthoc-mi`. GMM-MI goes through PySR's `loss_function`, MSE through an explicit elementwise `(pred − target)²` via `elementwise_loss` — never both. Existing GMM-MI invocations keep their previous behaviour exactly |
+| Fit-only target standardisation | μ_k standardised with T0-fit statistics only, inverted before any native-unit metric; equivalent to raw-latent MSE up to a fixed per-latent factor, with better conditioning |
+| Lifted budget ladder | fixed `maxsize ∈ {20, 30, 40}` for every latent, no data-dependent escalation; **budget-saturated** flagged when ≥3/5 `mse40` winners reach complexity ≥38 |
+| Three-stage immutable consolidation | `select` (T0 only) → `calibrate` (T1 only) → `confirm` (T2, once). Each stage hashes its output; the next verifies that digest before running, so no equation or budget can be re-chosen in light of a later tier |
+| Cross-seed one-standard-error readout | mean envelope `E_s(c)` over seeds, then the smallest complexity within `sd(E_s(c_min))/√5` of the minimum — a parsimony readout, never a success criterion |
+| Two-leg known-`f2` absorption test | five-fold 64-bin monotone `q(f2)` cross-fit on T1 and refit on all T1, then on T2 both `R²_f2 ≤ 0.05` **and** `MI(e_direct; f2)` ≤ its own 97.5th-percentile 39-permutation null. No map or threshold fitted on T2. Under amendment A2 this is the experiment's only newly computed MI |
+| MSE shuffled-target controls | protocol-identical searches on independently permuted targets at both endpoint budgets — the GMM-MI-era controls cannot stand in for an MSE search |
+| Scheduler-free execution | `scripts/run_mse_one_stage_pool.py` runs the frozen task matrix in persistent Julia/PySR workers (startup amortised once per worker, not once per task), skipping only reports that validate against their own task. The Slurm launchers remain the definition of task identity via `PRINT_MATRIX=1` |
+
+**Results** (`docs/mse_one_stage_results.md`; 165 searches + 12 controls, zero
+failures):
+
+* **The known `f2` is absorbed in 0/11 latents**, and the two legs disagree
+  systematically: the variance leg passes 32/55 latent–seed audits, the MI leg
+  2/55, with observed MI running 10×–140× its permutation null. A single large
+  expression *launders* the second stage — removing `f2`'s monotone-predictable
+  contribution — rather than absorbing it. No latent reached
+  `one-stage replacement`.
+* **Capacity helps 6/11** under the paired rule; **EE z0 is the one latent
+  where a larger budget actively hurts**, consistent with its standing
+  unresolved status.
+* **The apparent objective win is mostly calibration.** Raw, `mi20-mse` scores
+  NMSE ≈ 1.0 — MI-selected expressions carry no numerical calibration by
+  construction. Given the *same* monotone T1 map, the MSE objective wins 9/11
+  rather than 11/11, and TT z1 and EE z4 reverse. MSE search finds
+  better-*calibrated* expressions, not uniformly better *coordinates*.
+* **Plain six-input OLS beats the maxsize-40 symbolic winner in 8/11 latents**,
+  sometimes by an order of magnitude. As pure reconstruction, direct symbolic
+  regression is not the right tool for these latents; the experiment's value is
+  the structural finding above, not reconstruction accuracy.
+
+---
+
 ## The −2, read three independent ways
 
 | # | Readout | Value |
@@ -243,7 +295,10 @@ by the independent interaction-aware rerun.
    retraining in the parent repo.
 2. **The hierarchy does not terminate at two symbolic levels**, under both
    additive and interaction-aware stage-2 ansätze. A statement about the
-   representation, not the instruments.
+   representation, not the instruments. The §5 follow-up adds the converse:
+   one stage does not *collapse* into two either — at `maxsize` 40 the direct
+   expression still leaves `f2`-dependence at 10×–140× its permutation null in
+   every latent.
 3. **EE z0 unresolved.**
 4. **Decoder triangulation of the amplitude pair is structurally unavailable
    in both models** — the (τ, lnA_s) templates are near-collinear (cond 70.2
@@ -255,5 +310,11 @@ by the independent interaction-aware rerun.
 6. Estimator caveats handled by design: η ratios rather than raw MI drive
    decisions; bootstrap SEs throughout; DPI sanity checks.
 
-Full record: `docs/results_compendium.md` · frozen rules:
-`docs/discovery_roadmap.md` §0.3 · deliverables: `experiments/`.
+7. **§5 is calibration-sensitive by design** and sits outside the blind
+   protocol; its numbers must never be quoted as discovery results. Its own
+   scope limits (unpaired hierarchy denominator, incomparable complexities, no
+   residual-completeness claim) are listed in `docs/mse_one_stage_results.md`.
+
+Full record: `docs/results_compendium.md` · one-stage MSE follow-up:
+`docs/mse_one_stage_results.md` · frozen rules: `docs/discovery_roadmap.md`
+§0.3 · deliverables: `experiments/`.

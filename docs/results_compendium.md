@@ -395,6 +395,50 @@ the per-rule verdicts in the roadmap "Outcome (2026-08-14)" section.
 
 ---
 
+### 6.14 Post-closure — one-stage MSE reconstruction (2026-08-26)
+
+A deliberately **non-blind** follow-up: can *one* larger expression reconstruct
+a latent directly, including what the hierarchy recovers only through `f2`?
+Same six raw inputs and search protocol; the inner loss becomes explicit
+elementwise squared error, selection becomes held-out MSE, and the budget
+ladder lifts to `maxsize ∈ {20, 30, 40}` (165 searches + 12 MSE shuffled
+controls, zero failures). Because MSE rewards scale and offset rather than a
+bijection class, this is a **reconstruction and compression** result and
+changes no card, status or frozen threshold.
+
+* **Known `f2` absorbed: 0/11 latents**, and the mechanism is the finding. The
+  pre-specified test has two legs; across all 55 latent–seed audits the
+  variance leg (`R²_f2 ≤ 0.05`, monotone cross-fit) passes **32/55** but the
+  information leg (`MI ≤` its 39-permutation 97.5th-percentile null) passes
+  **2/55**, with observed MI at **10×–140×** the null. The direct expression
+  *launders* the second stage — stripping `f2`'s monotone-predictable part —
+  rather than absorbing it. No latent reached `one-stage replacement`
+  (6 `partial absorption`, 5 `no capacity gain`).
+* **Capacity helps 6/11** under the paired rule (TT z1, z4; EE z1, z3, z4, z5);
+  **EE z0 is the one latent a larger budget actively hurts** (`U95` 1.505),
+  consistent with its standing unresolved status. Budget-saturated in 4/11;
+  reported, not escalated past 40.
+* **The objective's apparent landslide is mostly calibration.** Raw,
+  `mi20-mse` scores NMSE ≈ 1.0 — MI-selected expressions have no numerical
+  calibration by construction. Given the *same* monotone T1 map, MSE wins
+  **9/11 not 11/11**, and TT z1 (2.92) and EE z4 (1.48) reverse.
+* **Plain six-input OLS beats the maxsize-40 symbolic winner in 8/11 latents**,
+  at times by an order of magnitude (TT z2: 0.00099 vs 0.01195 T2 NMSE). As
+  pure reconstruction, direct symbolic regression is not the right tool for
+  these latents.
+* **Symbolic stability 11/11** (R_SR = 1.00 for ten latents, 0.80 for TT z2).
+
+Executed off-CSD3 on a Lightning AI CPU Studio after the account hit its CPU
+allowance; environment, per-task thread attribution and both recorded
+deviations are in the `lightning_execution` block of
+`experiments/mse_one_stage_execution_provenance.json`.
+
+Sources: `docs/mse_one_stage_results.md` (combined, both checkpoints) ·
+`experiments/mse_one_stage_sr_<run>.{json,md}` · protocol
+`experiments/mse_one_stage_sr_plan.md`.
+
+---
+
 ## 7. Controls (every null in one place)
 
 | Control | Result | Where |
@@ -409,6 +453,7 @@ the per-rule verdicts in the roadmap "Outcome (2026-08-14)" section.
 | Wrong-latent E_inv (specificity) | 0.2–2.8 across latents (amplitude cells are not invariant for other latents) | `levelset_audit_*`, `_joint_*` |
 | Subspace shuffled-probe | max R² ≈ 0.000; shuffled-f MI floors ≈ 0.001 nat | `subspace_probe_*` |
 | Positive control (G1) | machinery recovers the known amplitude answer *and* correctly reports its structured residual | `sufficiency_audit_*` |
+| MSE shuffled-target SR (one-stage follow-up) | all 12 controls within \|R²\| ≤ 0.006 of zero on T2 against **both** the true and their own shuffled target, at ms20 and ms40 alike — a lifted budget buys a shuffled target nothing | `mse_one_stage_sr_*` |
 
 ---
 
@@ -471,6 +516,7 @@ the per-rule verdicts in the roadmap "Outcome (2026-08-14)" section.
 | `latent_cards_<run>` | **the synthesis**: cards, gates, controls, deviations |
 | `residual_sr_ia_<run>`, `levelset_audit_joint_ia_<run>` | post-closure interaction-aware follow-up |
 | `subsets_full_<run>`, `sham_control_<run>` | post-closure R-P4: budget-matched exhaustive support + sham dilution control |
+| `mse_one_stage_sr_<run>`, `mse_one_stage_sr_plan.md`, `mse_one_stage_execution_provenance.json` | post-closure one-stage MSE reconstruction: ledger, frozen protocol, execution record (combined write-up: `docs/mse_one_stage_results.md`) |
 
 Narrative: `docs/method.md` (protocol + amplitude story + §9 full-study
 synthesis) · programme + closure: `docs/discovery_roadmap.md` (§0.3 frozen
