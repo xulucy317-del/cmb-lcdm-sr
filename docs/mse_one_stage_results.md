@@ -470,7 +470,8 @@ The ladder below takes, for every seed, the best equation by T0-validation NMSE
 at or below each complexity ceiling, pooled over the three budget families, and
 asks what kind of object it is. "Separable" means no product or quotient of two
 distinct parameters appears anywhere in the expression; "coupled" means one
-does. Counts are the number of seeds sharing the dominant answer.
+does. Counts are the number of seeds sharing the dominant answer. The
+expressions themselves, for every latent at every ceiling, are in §7.3.
 
 #### TM6 — Reconstruction against the complexity ceiling
 
@@ -590,6 +591,243 @@ and 84 % of the variance; the next five add $n_s$ and $\omega_{\mathrm{cdm}}$;
 ten more reach 0.999 and recruit $H_0$ and $A_s$. The MI programme reaches the same leading
 structure — the ratio $n_s/\omega_b$ — in three nodes, because it never has to
 pay for the scale.
+
+---
+
+### 7.3 The expression at each complexity ceiling
+
+For every ceiling, the best equation over all five seeds and all three budget
+families, by T0-validation NMSE — verbatim from the fronts, in PySR's own
+output form. Where a higher ceiling returns the same expression as the one
+below, the ceilings are merged. The seed and family that produced each form are
+given; the seed changes along a ladder, so these are the best available at each
+budget rather than one seed's nested progression. The MI-discovered coordinate
+for the same latent closes each block for comparison.
+
+
+**TT (temperature only)**
+
+**z0**
+
+```text
+c<=5       C=5   R2=0.840   seed 1, ms30
+   (0.38232777 / omega_b) + -17.44024
+c<=8       C=8   R2=0.921   seed 3, ms30
+   (0.0042373203 / square(omega_b)) + (-8.527707 / n_s)
+c<=10      C=10  R2=0.952   seed 2, ms30
+   (omega_b * -743.5626) + ((n_s * 19.000467) / exp(omega_cdm))
+c<=15      C=15  R2=0.995   seed 0, ms20
+   ((n_s * 11.181059) + 6.731357) - ((H0 + 1151.4515) * ((omega_cdm + 0.53684545) * omega_b))
+c<=20      C=20  R2=0.999   seed 2, ms30
+   ((omega_b * -1218.7023) * (omega_cdm + 0.53690153)) + ((106.06416 / H0) + (5.052643 - ((log(A_s) * n_s) * 0.5659249)))
+c<=30/40   C=27  R2=0.999   seed 2, ms30
+   (((neg(266.6253 / n_s) - 987.2135) * ((omega_b * (omega_cdm + 0.513893)) - -0.021953644)) + n_s) + ((30.16227 - (-101.35592 / H0)) - (log(A_s) * 0.63323146))
+
+MI f1:  n_s/omega_b  (C=3)
+```
+
+**z1**
+
+```text
+c<=5       C=5   R2=0.541   seed 3, ms20
+   (n_s / omega_cdm) + -8.428477
+c<=8       C=8   R2=0.818   seed 4, ms40
+   (-574.4501 / H0) + (square(n_s) / omega_cdm)
+c<=10      C=10  R2=0.855   seed 4, ms40
+   (square(n_s) / omega_cdm) + ((-12.580762 / omega_b) / H0)
+c<=15      C=15  R2=0.923   seed 4, ms40
+   (n_s / omega_cdm) + ((-5.8111134 - (-7.1743838e-9 / A_s)) - ((9.408182 / omega_b) / H0))
+c<=20      C=20  R2=0.978   seed 4, ms40
+   (((-5.009064 - (tau * 3.3042338)) + (square(n_s) / omega_cdm)) - ((9.532114 / omega_b) / H0)) - (-6.821436e-9 / A_s)
+c<=30/40   C=30  R2=0.987   seed 1, ms30
+   ((A_s + ((((omega_b + ((omega_cdm * -0.28042328) / square(n_s))) - (H0 * -0.00039702255)) * 238.71527) - (62.380535 - (log(A_s) * -2.9589946)))) - square(tau * -5.05323)) + -0.28306273
+
+MI f1:  H0^2*n_s^2*omega_b/(A_s*omega_cdm^2)  (C=10)
+```
+
+**z2**
+
+```text
+c<=5       C=5   R2=0.471   seed 3, ms40
+   (A_s * 4.0371412e9) + -8.471649
+c<=8       C=8   R2=0.795   seed 2, ms20
+   (log(A_s) * (tau + 8.401264)) + 169.30128
+c<=10      C=10  R2=0.870   seed 2, ms20
+   (log(A_s) * (tau + (omega_cdm + 8.273824))) + 169.05579
+c<=15      C=15  R2=0.953   seed 2, ms20
+   172.19373 + ((H0 * ((tau + omega_cdm) * -0.25354075)) - (-4.224578 * log(square(A_s))))
+c<=20      C=20  R2=0.990   seed 0, ms30
+   ((((log(A_s) + 20.562733) - tau) - tau) / omega_cdm) + ((-0.024492383 + (-0.0006186646 / omega_b)) / (n_s / H0))
+c<=30      C=29  R2=0.998   seed 0, ms30
+   square(omega_cdm + (0.75172263 + omega_cdm)) * (((-0.04588346 / omega_b) + (-0.055094004 / (n_s / H0))) + ((((log(A_s) - tau) + (20.5795 - tau)) / omega_cdm) - -2.1942966))
+c<=40      C=39  R2=0.999   seed 4, ms40
+   ((((omega_b * 18.793062) + n_s) * (tau + 4.351114)) + tau) + (-0.099188395 + neg(((((omega_cdm * -1.6578281) + (13.701953 / H0)) - ((log(A_s) + (log(A_s) + tau)) - -88.4316)) * log(A_s)) + (-963.6987 - tau)))
+
+MI f1:  A_s/log(H0*(omega_cdm+tau))  (C=8)
+```
+
+**z3**
+
+```text
+c<=5       C=5   R2=0.664   seed 1, ms40
+   (n_s * 31.859848) + -30.746515
+c<=8       C=8   R2=0.904   seed 4, ms20
+   log((omega_cdm + n_s) + -0.079809666) / 0.028854627
+c<=10      C=10  R2=0.968   seed 4, ms20
+   ((log(omega_cdm) * 6.8172555) / n_s) + (n_s * 15.854074)
+c<=15      C=15  R2=0.994   seed 3, ms20
+   ((H0 * -0.0005515066) / omega_b) + (((omega_cdm * 61.07346) - (n_s * -31.376673)) + -35.526848)
+c<=20      C=19  R2=0.998   seed 3, ms20
+   ((omega_cdm * 61.12067) + (((H0 * -0.00040654212) - 0.02610201) / omega_b)) + (-35.15177 - (n_s * (tau + -31.799374)))
+c<=30/40   C=29  R2=0.998   seed 4, ms30
+   (((-0.055441473 / omega_b) - (log(log(H0)) * 5.5555844)) + (((log(n_s) + (omega_cdm - (square(omega_b) + -0.15276726))) + omega_cdm) * 30.60156)) - square(tau * log(omega_cdm))
+
+MI f1:  n_s+omega_cdm  (C=3)
+```
+
+**z4**
+
+```text
+c<=5       C=5   R2=0.663   seed 4, ms20
+   8.177262 - (H0 * omega_cdm)
+c<=8       C=8   R2=0.756   seed 4, ms30
+   ((H0 * 0.030480761) + log(omega_cdm)) * -4.9139185
+c<=10      C=10  R2=0.825   seed 1, ms30
+   4.3153996 - (omega_cdm * neg((6.989825e-8 / A_s) - H0))
+c<=15      C=15  R2=0.938   seed 1, ms40
+   (((A_s * square(square(H0))) / omega_b) * -1.187426) + ((tau + 0.27244925) / omega_cdm)
+c<=20      C=19  R2=0.993   seed 4, ms40
+   ((((84.57614 / H0) + tau) + -0.73530585) / omega_cdm) - (8.87678 - ((omega_b * n_s) * (4.1565448e-7 / A_s)))
+c<=30/40   C=30  R2=1.000   seed 4, ms30
+   (((((((A_s + tau) / 0.51228356) - 0.54263794) + ((log(omega_cdm) + (((H0 * 0.034617472) + 16.172451) - log(omega_b))) / -0.98865634)) - log(A_s)) + n_s) / 0.2298292) - omega_cdm
+
+MI f1:  A_s*H0^2*omega_cdm*exp(-2*tau)  (C=9)
+```
+
+
+**EE (temperature + low-$\ell$ polarization)**
+
+**z0**
+
+```text
+c<=5       C=5   R2=0.532   seed 4, ms20
+   5.2530227 - (omega_cdm / omega_b)
+c<=8       C=7   R2=0.767   seed 0, ms20
+   (H0 * 0.07409914) - (omega_cdm / omega_b)
+c<=10      C=10  R2=0.878   seed 4, ms30
+   (omega_cdm * -55.70394) + square((omega_b * H0) + n_s)
+c<=15      C=15  R2=0.955   seed 0, ms40
+   (((H0 * 4.6741557) * omega_b) + ((n_s / omega_cdm) + -17.75083)) - (-4.2225654e-9 / A_s)
+c<=20      C=19  R2=0.961   seed 3, ms40
+   ((omega_cdm * -75.48971) - (-9.770476 - (-0.17575397 / omega_b))) + (((n_s * 0.13079788) + (A_s * -1.3575965e7)) * H0)
+c<=30/40   C=25  R2=0.962   seed 3, ms40
+   ((-73.519005 * omega_cdm) + (n_s * (((H0 * 5.546441) * ((A_s * -2.443743e6) + 0.022745635)) - (-10.005785 + (omega_cdm - (-0.17647429 / omega_b)))))) / n_s
+
+MI f1:  omega_cdm/(H0*n_s*omega_b)  (C=7)
+```
+
+**z1**
+
+```text
+c<=5       C=5   R2=0.871   seed 0, ms40
+   8.177283 - (H0 * omega_cdm)
+c<=8       C=8   R2=0.932   seed 4, ms40
+   ((H0 * 0.36557785) / log(omega_cdm)) + 12.009066
+c<=10      C=10  R2=0.951   seed 3, ms40
+   log(omega_b) + (((-12.558149 / H0) + omega_cdm) * -61.03679)
+c<=15      C=15  R2=0.979   seed 3, ms20
+   ((tau + 4.6441774) + (H0 * (((omega_cdm / -3.1083183) + -0.051321633) + omega_b))) / 0.40732908
+c<=20      C=20  R2=0.990   seed 2, ms30
+   ((((0.3178089 - (omega_cdm * 0.7922487)) + ((omega_b * 2.3013914) + (8.794496 / log(A_s)))) * H0) + 11.496486) + tau
+c<=30      C=29  R2=0.998   seed 2, ms30
+   (H0 * ((8.941077 / log(A_s)) + ((omega_b * 2.2830062) + ((omega_cdm * -0.77759147) + 0.32361785)))) + ((((tau * 3.2418492) + square(n_s)) + (10.518018 - omega_cdm)) + omega_b)
+c<=40      C=35  R2=0.998   seed 4, ms40
+   (((((H0 - (log(omega_cdm) * tau)) - 0.13133384) + (3.5641272e-9 * (n_s / A_s))) + ((exp(omega_b) + -0.94416696) * 155.3249)) + ((H0 + 14.153215) * (0.7039488 / log(square(omega_cdm))))) + (tau - H0)
+
+MI f1:  H0^2*omega_cdm  (C=4)
+```
+
+**z2**
+
+```text
+c<=5       C=5   R2=0.569   seed 1, ms40
+   (omega_b * 646.9943) - 14.222848
+c<=8       C=8   R2=0.931   seed 1, ms20
+   (square(n_s) * -13.765594) + (omega_b * 583.7985)
+c<=10      C=9   R2=0.963   seed 2, ms40
+   ((n_s - omega_cdm) + (omega_b * -38.65033)) * -18.735561
+c<=15      C=14  R2=0.998   seed 3, ms30
+   ((omega_b * 647.58685) + (log(A_s) - ((n_s - omega_cdm) * 24.016066))) + 26.160799
+c<=20      C=20  R2=0.998   seed 0, ms30
+   (((26.180275 * omega_cdm) - -25.534649) + (643.94214 * omega_b)) + (log(A_s) + (23.784016 * ((0.69232523 / H0) - n_s)))
+c<=30      C=29  R2=0.998   seed 2, ms40
+   (omega_cdm + omega_cdm) + (5.222128 - ((((n_s + (omega_b * -27.18802)) - omega_cdm) * 23.820364) - square(square((-535.50134 / H0) / (H0 + -28.545479)) + (A_s * 3.3754237e8))))
+c<=40      C=33  R2=0.998   seed 2, ms40
+   (omega_cdm + 0.8767359) * ((omega_cdm + (5.247814 - ((((n_s + (omega_b * -27.213253)) - omega_cdm) * 23.995014) - square((A_s * 3.3754237e8) + square((-535.50037 / H0) / (H0 + -29.691576)))))) + omega_cdm)
+
+MI f1:  omega_b/n_s^2  (C=4)
+```
+
+**z3**
+
+```text
+c<=5       C=5   R2=0.510   seed 1, ms40
+   -27.26517 - (n_s * -28.252415)
+c<=8       C=8   R2=0.725   seed 1, ms40
+   ((exp(n_s) + -3.3457797) / omega_cdm) + 6.2880898
+c<=10      C=10  R2=0.978   seed 3, ms30
+   6.2404895 + (((3.2168102 * n_s) + log(omega_b)) / omega_cdm)
+c<=15      C=15  R2=0.995   seed 4, ms40
+   (-18.894423 + (((-0.016102629 / omega_cdm) - (H0 * 0.00058350794)) / omega_b)) + (n_s * 28.18494)
+c<=20      C=20  R2=0.998   seed 3, ms40
+   omega_b + ((((omega_cdm + -0.5343802) + ((0.4871451 + (2.182766 / H0)) * n_s)) * 54.384098) + (-0.0021144766 / square(omega_b)))
+c<=30/40   C=26  R2=0.998   seed 4, ms40
+   ((((n_s * 0.7710757) + ((omega_cdm * 3.0619059) - 0.76376617)) * 36.533466) - square((omega_cdm + omega_cdm) * 7.9031477)) + (((H0 * -0.000504265) - 0.15781781) / omega_b)
+
+MI f1:  log(omega_b)/(n_s+omega_cdm)  (C=6)
+```
+
+**z4**
+
+```text
+c<=5       C=5   R2=0.541   seed 4, ms20
+   (tau * -21.524557) + 1.5057741
+c<=8       C=8   R2=0.956   seed 3, ms40
+   (log(A_s) * (tau + -7.7803397)) - 154.09563
+c<=10      C=10  R2=0.958   seed 3, ms40
+   (tau * -21.407675) - ((log(A_s) * 7.7120457) + 152.63124)
+c<=15      C=15  R2=0.965   seed 0, ms30
+   (((0.008557925 / tau) + -3.7975433) / (0.57230425 - tau)) + ((1.4931322e-8 / A_s) - -0.070685156)
+c<=20      C=20  R2=0.978   seed 0, ms40
+   (((45.89842 + (tau * 142.21918)) * (((log(A_s) * -0.13870822) + -2.3975525) - tau)) + (0.021731824 / tau)) - 17.300495
+c<=30      C=29  R2=0.982   seed 2, ms40
+   tau + ((log(square(square(log((exp(exp(tau * exp(tau * 21.871605)) * 0.12336833) * tau) * 0.054351967)) / exp(A_s * 1.3911286e9))) - n_s) * 1.3476927)
+c<=40      C=36  R2=0.983   seed 2, ms40
+   (log(tau + square(square(log(exp(0.10209014 * exp(exp(omega_cdm + (21.810305 * tau)) * tau)) * (0.054009993 * tau))) / exp(A_s * 1.3911286e9))) - n_s) * ((1.3318044 - neg(tau)) - omega_b)
+
+MI f1:  -A_s/(tau-0.4454238)  (C=5)
+```
+
+**z5**
+
+```text
+c<=5       C=5   R2=0.530   seed 4, ms40
+   (-1.8491493e-8 / A_s) - -8.873762
+c<=8       C=8   R2=0.904   seed 0, ms20
+   (log(A_s) * (tau + 8.869331)) - -178.6559
+c<=10      C=10  R2=0.957   seed 1, ms40
+   ((tau - (-8.742959 - omega_cdm)) * log(A_s)) + 178.43175
+c<=15      C=15  R2=0.983   seed 0, ms20
+   (square(omega_cdm - 13.487473) + ((tau + 8.778358) * log(A_s))) - (H0 * 0.027911885)
+c<=20      C=19  R2=0.993   seed 0, ms20
+   ((tau + (square(omega_cdm - 13.487473) + ((tau + 8.778358) * log(A_s)))) * n_s) - (H0 * 0.027911885)
+c<=30      C=29  R2=0.999   seed 1, ms40
+   (((((-16.323364 / H0) - log(A_s)) * -8.931066) + square(((omega_b * 18.410038) * n_s) + n_s)) + ((tau * -17.826727) + 25.635181)) - ((omega_cdm * 26.235544) + -153.22232)
+c<=40      C=40  R2=0.999   seed 1, ms40
+   (((square(((omega_b + omega_b) * 9.58764) + n_s) - ((omega_b + ((26.341993 * omega_cdm) - (14.661722 + n_s))) + -137.57384)) + ((-17.866625 - log(n_s)) * tau)) + (25.612156 - omega_b)) + (((-16.348486 / H0) - log(A_s)) * -8.930415)
+
+MI f1:  A_s*exp(-2*tau)  (C=5)
+```
 
 ---
 
