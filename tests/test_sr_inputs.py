@@ -4,8 +4,10 @@ import pytest
 
 from cmb_lcdm_sr.sr import (
     INPUT_ALIASES,
+    INPUT_CONFIGS,
     JULIA_LOSS_GMM_MI,
     build_inputs,
+    resolve_input_config,
 )
 
 
@@ -37,6 +39,45 @@ def test_build_inputs_As_tau():
 def test_build_inputs_unknown_name():
     with pytest.raises(ValueError, match="Unknown input name"):
         build_inputs(_fake_theta(8), ["sigma_8"])
+
+
+def test_named_float64_input_configs_are_exact_and_isolated():
+    theta = _fake_theta(32)
+    expected = {
+        "raw64": np.column_stack([
+            theta[:, 0], theta[:, 1], theta[:, 2], theta[:, 3],
+            np.exp(theta[:, 4]) * 1e-10, theta[:, 5],
+        ]),
+        "physical_o1_64": np.column_stack([
+            100.0 * theta[:, 0], 10.0 * theta[:, 1], theta[:, 2] / 100.0,
+            theta[:, 3], np.exp(theta[:, 4]) / 10.0, theta[:, 5],
+        ]),
+        "logamp64": theta[:, [0, 1, 2, 3, 4, 5]],
+    }
+    expected_labels = {
+        "raw64": ["omega_b", "omega_cdm", "H0", "tau", "A_s", "n_s"],
+        "physical_o1_64": ["wb100", "wc10", "h", "tau", "A9", "n_s"],
+        "logamp64": ["omega_b", "omega_cdm", "H0", "tau", "ln10As", "n_s"],
+    }
+    assert set(INPUT_CONFIGS) == set(expected)
+    for name in expected:
+        spec = resolve_input_config(name)
+        X, labels = build_inputs(theta, spec["inputs"])
+        assert labels == expected_labels[name]
+        np.testing.assert_allclose(X, expected[name], rtol=1e-14, atol=0.0)
+        assert spec["pysr_kwargs"] == {
+            "precision": 64, "print_precision": 17}
+        assert list(spec["sampled_expressions"]) == labels
+
+
+def test_input_config_resolution_is_defensive_and_rejects_unknown():
+    spec = resolve_input_config("raw64")
+    spec["inputs"][0] = "tau"
+    spec["pysr_kwargs"]["precision"] = 32
+    assert resolve_input_config("raw64")["inputs"][0] == "omega_b"
+    assert resolve_input_config("raw64")["pysr_kwargs"]["precision"] == 64
+    with pytest.raises(ValueError, match="Unknown input config"):
+        resolve_input_config("not_an_arm")
 
 
 def test_julia_loss_string_sanity():

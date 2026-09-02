@@ -32,6 +32,13 @@ def test_evaluate_matches_numpy(theta):
     assert np.allclose(vals, expected, rtol=1e-12)
 
 
+def test_order_one_symbols_rewrite_exactly_to_sampled_basis(theta):
+    vals = semantics.evaluate_on_theta("wb100 + wc10 + h + A9", theta)
+    expected = (100.0 * theta[:, 0] + 10.0 * theta[:, 1]
+                + theta[:, 2] / 100.0 + np.exp(theta[:, 4]) / 10.0)
+    np.testing.assert_allclose(vals, expected, rtol=1e-13, atol=0.0)
+
+
 def test_pysr_spellings_and_unknown_symbols(theta):
     sq = semantics.parse_expr("square(tau)")
     assert sq is not None and sq.equals(semantics.parse_expr("tau**2"))
@@ -59,6 +66,8 @@ def test_support_in_sampled_basis(theta, box):
 
 @pytest.mark.parametrize("expr", [
     "A_s*exp(-2*tau)",
+    "A9*exp(-2*tau)",
+    "ln10As - 2*tau",
     "log(A_s*exp(-2*tau))",
     "249.9*A_s*exp(-2*tau) + 0.118",
 ])
@@ -108,6 +117,18 @@ def test_amplitude_family_clusters_together(theta, box):
     assert labels[0] == labels[1] == labels[2] == labels[3]
     assert labels[4] != labels[0]
     assert labels[5] not in (labels[0], labels[4])       # all-NaN stays alone
+
+
+def test_positive_control_clusters_across_all_input_bases(theta, box):
+    exprs = [
+        "A_s*exp(-2*tau)",
+        "A9*exp(-2*tau)",
+        "ln10As - 2*tau",
+    ]
+    forms = [semantics.evaluate_form(e, theta, box[1]) for e in exprs]
+    assert all(f is not None for f in forms)
+    assert all(f.support == ["tau", "ln10As"] for f in forms)
+    assert len(set(semantics.cluster_forms(forms))) == 1
 
 
 # --- Sobol -------------------------------------------------------------------

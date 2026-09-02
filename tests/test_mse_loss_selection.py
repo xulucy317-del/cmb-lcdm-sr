@@ -67,6 +67,9 @@ def test_loss_specific_default_output_namespace():
         "demo/symbolic_regression_gmm_mi_seed2")
     assert str(default_out_dir(run, 2, "z1", "mse")).endswith(
         "demo/symbolic_regression_mse_seed2_z1")
+    assert str(default_out_dir(
+        run, 2, "z1", "mse", "raw64")).endswith(
+            "demo/symbolic_regression_mse_raw64_seed2_z1")
 
 
 class _StubPySR:
@@ -78,11 +81,12 @@ class _StubPySR:
     def fit(self, X, y, variable_names=None):
         import pandas as pd
 
+        self._variable_name = variable_names[0]
         self._coef = np.polyfit(X[:, 0], y, 1)
         self.equations_ = pd.DataFrame({
             "complexity": [1, 2],
             "loss": [1.0, 0.0],
-            "equation": ["0.0", "omega_b"],
+            "equation": ["0.0", self._variable_name],
         })
         return self
 
@@ -94,7 +98,8 @@ class _StubPySR:
     def sympy(self, index=0):
         import sympy
 
-        return sympy.Float(0.0) if index == 0 else sympy.Symbol("omega_b")
+        return (sympy.Float(0.0) if index == 0
+                else sympy.Symbol(self._variable_name))
 
 
 def test_runner_mse_path_and_report(tmp_path, monkeypatch):
@@ -161,6 +166,90 @@ def test_runner_mse_path_and_report(tmp_path, monkeypatch):
     assert report["best_mi_val"] is None
     assert all(row["mi_val"] is None and row["mi_val_err"] is None
                for row in report["all_equations"])
+
+
+def test_runner_named_input_config_enforces_precision_and_reports_basis(
+        tmp_path, monkeypatch):
+    import cmb_lcdm_sr.mi as mi_mod
+    import run_blind_sr as runner
+
+    rng = np.random.default_rng(12)
+    n_all, n_test = 160, 120
+    data = tmp_path / "data"
+    data.mkdir()
+    theta = rng.normal(size=(n_all, 6))
+    theta[:, 4] = rng.uniform(2.90, 3.18, n_all)
+    np.save(data / "theta.npy", theta)
+    split_id = np.zeros(n_all, dtype=np.int64)
+    split_id[:n_test] = 2
+    np.savez(data / "splits_v1.npz", split_id=split_id)
+
+    run = tmp_path / "models" / "demo"
+    (run / "analysis").mkdir(parents=True)
+    means = np.column_stack([theta[:n_test, 0], theta[:n_test, 1]])
+    np.save(run / "analysis" / "encoder_means_test.npy", means)
+
+    pysr = types.ModuleType("pysr")
+    pysr.__version__ = "stub"
+    pysr.PySRRegressor = _StubPySR
+    monkeypatch.setitem(sys.modules, "pysr", pysr)
+    monkeypatch.setattr(
+        mi_mod, "mutual_information_gmm",
+        lambda *a, **k: (_ for _ in ()).throw(
+            AssertionError("MSE selection must skip post-hoc MI")))
+    monkeypatch.setattr(
+        runner.np.linalg, "lstsq",
+        lambda *a, **k: (_ for _ in ()).throw(
+            AssertionError("--skip-ols-baseline must not call np.linalg.lstsq")))
+
+    out = tmp_path / "profile"
+    base_argv = [
+        "run_blind_sr.py",
+        "--run-dir", str(run),
+        "--dataset-dir", str(data),
+        "--latent-index", "0",
+        "--input-config", "physical_o1_64",
+        "--n-samples", str(n_test),
+        "--inner-loss", "mse",
+        "--selection-metric", "mse",
+        "--skip-ols-baseline",
+        "--parallelism", "serial",
+        "--out-dir", str(out),
+    ]
+    monkeypatch.setattr(sys, "argv", base_argv)
+    runner.main()
+
+    kwargs = _StubPySR.last_kwargs
+    assert kwargs["precision"] == 64
+    assert kwargs["print_precision"] == 17
+    report = json.loads((out / "report.json").read_text())
+    assert report["input_config"] == "physical_o1_64"
+    assert report["input_names"] == [
+        "wb100", "wc10", "h", "tau", "A9", "n_s"]
+    assert report["input_labels"] == report["input_names"]
+    assert report["input_sampled_expressions"] == {
+        "wb100": "100*omega_b",
+        "wc10": "10*omega_cdm",
+        "h": "H0/100",
+        "tau": "tau",
+        "A9": "exp(ln10As)/10",
+        "n_s": "n_s",
+    }
+    assert report["pysr_kwargs"]["precision"] == 64
+    assert report["pysr_kwargs"]["print_precision"] == 17
+    assert report["all_equations"][1]["support"] == ["wb100"]
+    assert report["ols_baseline"] == {
+        "status": "skipped",
+        "reason": "fixed_old_ols_reused_downstream",
+    }
+
+    conflict_out = tmp_path / "conflict"
+    monkeypatch.setattr(sys, "argv", [
+        *base_argv[:-1], str(conflict_out),
+        "--pysr-extra", '{"precision": 32}',
+    ])
+    with pytest.raises(SystemExit, match="precision"):
+        runner.main()
 
 
 class _ControlStubPySR:

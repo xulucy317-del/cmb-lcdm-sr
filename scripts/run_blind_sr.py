@@ -54,10 +54,12 @@ import numpy as np
 from cmb_lcdm_sr.sr import (
     INNER_LOSS_NAME,
     INPUT_ALIASES,
+    INPUT_CONFIGS,
     LOSS_SPECS,
     build_inputs,
     pysr_loss_kwargs,
     rank_front,
+    resolve_input_config,
     resolve_loss,
     resolve_posthoc_mi,
 )
@@ -81,9 +83,11 @@ def _with_timeout(seconds, fn, *args, **kwargs):
 
 
 def default_out_dir(run_dir: Path, seed: int, tag: str,
-                    inner_loss: str = INNER_LOSS_NAME) -> Path:
+                    inner_loss: str = INNER_LOSS_NAME,
+                    input_config: str | None = None) -> Path:
     """Loss-isolated default result directory (GMM-MI name is unchanged)."""
-    name = f"symbolic_regression_{inner_loss}_seed{seed}"
+    config_part = f"_{input_config}" if input_config else ""
+    name = f"symbolic_regression_{inner_loss}{config_part}_seed{seed}"
     if tag:
         name = f"{name}_{tag}"
     return Path("results") / run_dir.name / name
@@ -156,8 +160,14 @@ def main() -> None:
                         "50k test split (e.g. analysis/residual_z2_v1.npy).")
     p.add_argument("--target-label", default=None,
                    help="Label for --target-npy outputs (default: file stem).")
-    p.add_argument("--inputs", nargs="+", required=True,
-                   help=f"Input names. One or more of: {list(INPUT_ALIASES)}")
+    input_group = p.add_mutually_exclusive_group(required=True)
+    input_group.add_argument(
+        "--inputs", nargs="+",
+        help=f"Input names. One or more of: {list(INPUT_ALIASES)}")
+    input_group.add_argument(
+        "--input-config", choices=list(INPUT_CONFIGS),
+        help="Named input/precision profile. Profiles fix the six input "
+             "coordinates and enforce PySR precision=64, print_precision=17.")
     p.add_argument("--extra-input-npy", action="append", default=[],
                    metavar="LABEL=PATH",
                    help="Additional SR input column: 'label=path.npy', a 1-D "
@@ -182,6 +192,10 @@ def main() -> None:
                    help="Full GMM-MI evaluation of every validation-front "
                         "member. auto computes it only for MI selection; "
                         "default: auto.")
+    p.add_argument(
+        "--skip-ols-baseline", action="store_true",
+        help="Do not refit the diagnostic OLS baseline. Campaigns that reuse "
+             "the frozen historical OLS baseline should set this flag.")
     p.add_argument("--parallelism", choices=["serial", "multithreading", "multiprocessing"],
                    default="multithreading")
     p.add_argument("--unary-operators", nargs="*", default=["exp", "log", "neg", "square"])
@@ -200,6 +214,17 @@ def main() -> None:
     p.add_argument("--tag", default="", help="Optional suffix on the default out-dir.")
     args = p.parse_args()
 
+    if args.input_config:
+        input_spec = resolve_input_config(args.input_config)
+        input_names = input_spec["inputs"]
+        input_sampled_expressions = input_spec["sampled_expressions"]
+        input_config_pysr_kwargs = input_spec["pysr_kwargs"]
+    else:
+        # Keep the legacy explicit-input path unchanged.
+        input_names = list(args.inputs)
+        input_sampled_expressions = None
+        input_config_pysr_kwargs = {}
+
     run_dir = Path(args.run_dir)
     theta_path = Path(args.dataset_dir) / "theta.npy"
     splits_path = Path(args.dataset_dir) / "splits_v1.npz"
@@ -215,7 +240,8 @@ def main() -> None:
 
     tag = args.tag or (target_label if args.target_npy else "")
     out_dir = (Path(args.out_dir) if args.out_dir else
-               default_out_dir(run_dir, args.seed, tag, args.inner_loss))
+               default_out_dir(run_dir, args.seed, tag, args.inner_loss,
+                               args.input_config))
     out_dir.mkdir(parents=True, exist_ok=True)
     print(f"[setup] out_dir={out_dir}  target={target_label}")
 
@@ -234,7 +260,7 @@ def main() -> None:
     print(f"[load] using first {n} test indices")
 
     y_raw = y_full[:n]
-    X_raw, input_labels = build_inputs(theta[test_idx], args.inputs)
+    X_raw, input_labels = build_inputs(theta[test_idx], input_names)
     if extra_labels:
         clash = sorted(set(extra_labels) & set(input_labels))
         if clash:
@@ -261,11 +287,23 @@ def main() -> None:
     y_val_s = (y_val - y_mean) / y_std
 
     # --- OLS baseline (data-driven only) -------------------------------------
-    X_fit_aug = np.column_stack([X_fit, np.ones(n_fit)])
-    beta_ols, *_ = np.linalg.lstsq(X_fit_aug, y_fit_s, rcond=None)
-    yhat_ols_val = np.column_stack([X_val, np.ones(n_val)]) @ beta_ols
-    mse_ols = float(np.mean((yhat_ols_val - y_val_s) ** 2))
-    print(f"[baseline OLS] MSE_val={mse_ols:.4f}  beta={beta_ols}")
+    if args.skip_ols_baseline:
+        ols_baseline = {
+            "status": "skipped",
+            "reason": "fixed_old_ols_reused_downstream",
+        }
+        print("[baseline OLS] skipped (fixed old OLS reused downstream)")
+    else:
+        X_fit_aug = np.column_stack([X_fit, np.ones(n_fit)])
+        beta_ols, *_ = np.linalg.lstsq(X_fit_aug, y_fit_s, rcond=None)
+        yhat_ols_val = np.column_stack([X_val, np.ones(n_val)]) @ beta_ols
+        mse_ols = float(np.mean((yhat_ols_val - y_val_s) ** 2))
+        ols_baseline = {
+            "coefs": beta_ols.tolist(),
+            "var_names": input_labels + ["bias"],
+            "mse_val": mse_ols,
+        }
+        print(f"[baseline OLS] MSE_val={mse_ols:.4f}  beta={beta_ols}")
 
     # --- PySR fit -------------------------------------------------------------
     from pysr import PySRRegressor
@@ -282,6 +320,7 @@ def main() -> None:
         output_directory=str(out_dir / "pysr_state"),
         run_id=args.pysr_run_id,
     )
+    sr_kwargs.update(input_config_pysr_kwargs)
     sr_kwargs.update(pysr_loss_kwargs(args.inner_loss))
     # Keep mini-batching disabled for parity across objectives (and because it
     # would bias the batch-level GMM-MI estimator on tiny sub-batches).
@@ -513,13 +552,10 @@ def main() -> None:
             "run_id": args.pysr_run_id,
             "loss_kind": loss_spec["kind_label"],
             "pysr_version": __import__("pysr").__version__,
+            **input_config_pysr_kwargs,
             **pysr_extra,
         },
-        "ols_baseline": {
-            "coefs": beta_ols.tolist(),
-            "var_names": input_labels + ["bias"],
-            "mse_val": mse_ols,
-        },
+        "ols_baseline": ols_baseline,
         "fit_seconds": t_fit,
         "n_equations": len(eqs),
         "all_equations": rows,
@@ -531,6 +567,12 @@ def main() -> None:
         "best_mse_val_native": top_k[0].get("mse_val_native"),
         "best_mi_val": top_k[0].get("mi_val"),
     }
+    if args.input_config:
+        report.update({
+            "input_config": args.input_config,
+            "input_names": input_names,
+            "input_sampled_expressions": input_sampled_expressions,
+        })
     out_json = out_dir / "report.json"
     save_json(report, out_json)
     print(f"[done] -> {out_json}")

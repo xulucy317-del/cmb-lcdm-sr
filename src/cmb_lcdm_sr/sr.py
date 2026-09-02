@@ -44,7 +44,60 @@ INPUT_ALIASES = {
     "ln10As":    ("ln10As",    lambda t: t[:, 4]),
     "n_s":       ("n_s",       lambda t: t[:, 5]),
     "A_s":       ("A_s",       lambda t: np.exp(t[:, 4]) * 1e-10),
+    # Order-one physical-unit aliases. Distinct emitted labels keep stored
+    # expressions unambiguous in downstream physical-coordinate evaluation.
+    "wb100":      ("wb100",      lambda t: 100.0 * t[:, 0]),
+    "wc10":       ("wc10",       lambda t: 10.0 * t[:, 1]),
+    "h":          ("h",          lambda t: t[:, 2] / 100.0),
+    "A9":         ("A9",         lambda t: np.exp(t[:, 4]) / 10.0),
 }
+
+
+# Named sensitivity arms bind the coordinate system to numeric precision, so
+# an arm called ``raw64`` cannot silently inherit PySR's Float32 default.
+_FLOAT64_PYSR_KWARGS = {"precision": 64, "print_precision": 17}
+INPUT_CONFIGS = {
+    "raw64": {
+        "inputs": ("omega_b", "omega_cdm", "H0", "tau", "A_s", "n_s"),
+        "sampled_expressions": {
+            "omega_b": "omega_b", "omega_cdm": "omega_cdm", "H0": "H0",
+            "tau": "tau", "A_s": "exp(ln10As)*1e-10", "n_s": "n_s",
+        },
+        "pysr_kwargs": dict(_FLOAT64_PYSR_KWARGS),
+    },
+    "physical_o1_64": {
+        "inputs": ("wb100", "wc10", "h", "tau", "A9", "n_s"),
+        "sampled_expressions": {
+            "wb100": "100*omega_b", "wc10": "10*omega_cdm",
+            "h": "H0/100", "tau": "tau", "A9": "exp(ln10As)/10",
+            "n_s": "n_s",
+        },
+        "pysr_kwargs": dict(_FLOAT64_PYSR_KWARGS),
+    },
+    "logamp64": {
+        "inputs": ("omega_b", "omega_cdm", "H0", "tau", "ln10As", "n_s"),
+        "sampled_expressions": {
+            "omega_b": "omega_b", "omega_cdm": "omega_cdm", "H0": "H0",
+            "tau": "tau", "ln10As": "ln10As", "n_s": "n_s",
+        },
+        "pysr_kwargs": dict(_FLOAT64_PYSR_KWARGS),
+    },
+}
+
+
+def resolve_input_config(name: str) -> dict:
+    """Return a defensive copy of one named SR input/precision profile."""
+    try:
+        config = INPUT_CONFIGS[name]
+    except KeyError as exc:
+        raise ValueError(
+            f"Unknown input config '{name}'. Choices: {list(INPUT_CONFIGS)}"
+        ) from exc
+    return {
+        "inputs": list(config["inputs"]),
+        "sampled_expressions": dict(config["sampled_expressions"]),
+        "pysr_kwargs": dict(config["pysr_kwargs"]),
+    }
 
 
 def build_inputs(theta: np.ndarray, names: list[str]) -> tuple[np.ndarray, list[str]]:

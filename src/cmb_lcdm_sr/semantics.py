@@ -42,12 +42,25 @@ from .tiers import SAMPLED_LABELS
 
 SAMPLED_SYMBOLS = tuple(sympy.Symbol(name) for name in SAMPLED_LABELS)
 A_S = sympy.Symbol("A_s")
+WB100 = sympy.Symbol("wb100")
+WC10 = sympy.Symbol("wc10")
+H_SCALED = sympy.Symbol("h")
+A9 = sympy.Symbol("A9")
 _LN10AS = SAMPLED_SYMBOLS[SAMPLED_LABELS.index("ln10As")]
 _A_S_REWRITE = {A_S: sympy.exp(_LN10AS) * sympy.Float(1e-10)}
-KNOWN_SYMBOLS = set(SAMPLED_SYMBOLS) | {A_S}
+_INPUT_REWRITE = {
+    **_A_S_REWRITE,
+    WB100: sympy.Integer(100) * SAMPLED_SYMBOLS[0],
+    WC10: sympy.Integer(10) * SAMPLED_SYMBOLS[1],
+    H_SCALED: SAMPLED_SYMBOLS[2] / sympy.Integer(100),
+    A9: sympy.exp(_LN10AS) / sympy.Integer(10),
+}
+TRANSFORMED_INPUT_SYMBOLS = {WB100, WC10, H_SCALED, A9}
+KNOWN_SYMBOLS = set(SAMPLED_SYMBOLS) | {A_S} | TRANSFORMED_INPUT_SYMBOLS
 
 _PARSE_LOCALS = {s.name: s for s in SAMPLED_SYMBOLS}
 _PARSE_LOCALS["A_s"] = A_S
+_PARSE_LOCALS.update({s.name: s for s in TRANSFORMED_INPUT_SYMBOLS})
 # PySR raw-expression operator spellings not native to sympy.
 _PARSE_LOCALS["square"] = lambda x: x**2
 _PARSE_LOCALS["neg"] = lambda x: -x
@@ -125,8 +138,8 @@ def canonical_form(expr: sympy.Expr | str) -> str:
 # --- evaluation with masking -------------------------------------------------
 
 def _sampledify(expr: sympy.Expr) -> sympy.Expr:
-    """Rewrite to the sampled basis (A_s → exp(ln10As)·1e-10)."""
-    return expr.xreplace(_A_S_REWRITE)
+    """Rewrite raw and rescaled SR symbols to the sampled theta basis."""
+    return expr.xreplace(_INPUT_REWRITE)
 
 
 def _eval_sampled(expr: sympy.Expr, theta: np.ndarray) -> np.ndarray:
