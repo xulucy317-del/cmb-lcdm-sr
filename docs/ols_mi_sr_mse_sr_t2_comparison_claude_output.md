@@ -912,6 +912,8 @@ preprocessing arms: `src/cmb_lcdm_sr/sr.py` `INPUT_CONFIGS`,
 `scripts/audit_coordinate_matched_ols.py`,
 `experiments/coordinate_matched_ols_v1.{json,md}`,
 `results/<run>/coordinate_matched_ols_v1/<arm>/{fit,calibration,confirmation}.json`
+· discussion record (what SR was for; verified repo status; the eight
+questions of 2026-09-02): `docs/sr_objective_discussion_2026-09-02.md`
 · write-up state: `report.md`, `paper/main.tex`, `docs/report_content.md`
 · original three-way snapshot: `docs/ols_mi_sr_mse_sr_t2_comparison.md.orig`
 (embedded verbatim in `docs/ols_mi_sr_mse_sr_t2_comparison_codex_output.md`,
