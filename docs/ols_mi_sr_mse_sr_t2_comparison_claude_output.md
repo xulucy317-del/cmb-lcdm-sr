@@ -18,7 +18,16 @@ quadratic pilot — and renumbered the final two sections to §7/§8. Later
 same-day/next-day additions carry their own dates in place: §6.6 (the Step-2
 hybrid campaign), the tightened §6.2 trust-scope argument, the W3
 absence-claims retraction, §7 item 9 (PySR v2.0 assessment), and §0.1
-(the four-step storyline). "T2" throughout means the confirmatory tier
+(the four-step storyline). A 2026-09-03 pass worked through the open-items
+list and added four things, each backed by a committed script and artifact:
+**§2.7** (the η̂_post column for the OLS index), **§6.7** (the
+capacity/noise-floor readouts), **§6.8** (the three encoder-side
+interpretability instruments), and a correction to the §6.1 amplitude bullet —
+the retracted 13×-τ-range argument, stated in place rather than deleted. That
+pass also made §2.5's injection diagnostic reproducible
+(`scripts/replay_ols_injection.py`) and re-verified §7 items 1, 3 and 7 against
+the repository; their status notes are inline. "T2" throughout means the
+confirmatory tier
 (test rows 25k–50k, `src/cmb_lcdm_sr/tiers.py`), as everywhere in the repo.*
 
 ---
@@ -336,7 +345,12 @@ fitting, or front retention — which of the three cannot be separated from
 stored artifacts alone (§7 item 4 is the test that separates them) — and not
 to any surprise created on T2.
 
-**Injection, selection-level (computed 2026-08-31 for this file).** Placing
+**Injection, selection-level (computed 2026-08-31 for this file; scripted
+2026-09-03 as `scripts/replay_ols_injection.py` →
+`experiments/ols_injection_replay_v1.json`, which reproduces every count,
+list and ratio below exactly, and reproduces each report's frozen
+`ols_baseline` to 0 relative error rather than the < 10⁻⁶ claimed above).**
+Placing
 the exact T0-fit OLS expression into each frozen `mse40` candidate set at its
 true complexity (25) and applying the unchanged rules: it would be *retained*
 on the Pareto front in **43/55** runs (lower fit MSE than every stored member
@@ -364,6 +378,53 @@ paired contrast (that cell has 54, not 55, direct verdicts) — and EE
 estimate.
 
 ---
+
+### 2.7 The ceiling column for the OLS index (measured 2026-09-03)
+
+§7 item 2, closed. Every "fraction of what the latent stores" number in this
+file was quoted for the *discovered* coordinates and never for the affine
+baseline that beats them on reconstruction. `scripts/eta_post_ols_index.py` →
+`experiments/eta_post_ols_index_v1.json` adds that column, recomputing
+MI(Z_k; w·θ) on the **same** fresh T2 posterior draw the ceiling study used
+(same rng seeding, same GMM-MI settings, same 5000-row cap), and dividing by
+the stored same-estimator proxy MI(Z;μ). The audit's `ols_mi` could not be
+reused: it is MI against the encoder *mean*, a different quantity whose
+normalisation gives ratios up to 2.55.
+
+| latent | MI(Z; w·θ) | η_post | **η̂_post** | canonical f₁ η̂ | f₁+f₂ η̂ | DPI |
+|---|---:|---:|---:|---:|---:|---|
+| TT z0 | 1.964 | 0.990 | **0.964** | 0.531 | 0.903 | ok |
+| TT z1 | 0.866 | 0.942 | **0.953** | 0.770 | 0.957 | ok |
+| TT z2 | 3.766 | 0.875 | **0.875** | 0.347 | 0.601 | ok |
+| TT z3 | 2.480 | 0.937 | **0.933** | 0.447 | 0.838 | ok |
+| TT z4 | 3.324 | 0.966 | **0.968** | 0.371 | 0.758 | ok |
+| EE z0 | 1.123 | 0.837 | **0.858** | 0.756 | 0.842 | ok |
+| EE z1 | 3.388 | 0.883 | **0.873** | 0.348 | 0.663 | ok |
+| EE z2 | 2.114 | 0.970 | **0.967** | 0.574 | 0.963 | ok |
+| EE z3 | 2.466 | 0.905 | **0.906** | 0.493 | 0.864 | ok |
+| EE z4 | 1.234 | 0.804 | **0.835** | 0.842 | 0.842 | ok |
+| EE z5 | 3.731 | 0.893 | **0.893** | 0.289 | 0.590 | ok |
+
+**The plain affine index beats the canonical coordinate f₁ on η̂_post in
+10 of 11 latents, and beats the full hierarchical f₁+f₂ composite in
+9 of 11** — carrying 80–97% of what the estimator can see of each
+latent, with **no DPI violation anywhere**. This is exactly the outcome §7
+item 2 named as the one that would harden **W2** and **W4** from prose into
+table rows, and it does: the affine map is not merely a better *reconstructor*
+than the discovered coordinates, it is a better *statistic* of the latent on
+the bijection-invariant criterion the discovery protocol itself selected on.
+
+The single latent that resists is **EE z4**, which loses on both comparisons
+(0.835 against 0.842 for f₁ and for f₁+f₂) — the one latent where §6.6 found a
+genuine beyond-polynomial coordinate (`A_s/τ`, unanimous, complexity 3). The
+information criterion and the nonlinearity ladder pick out the same latent
+independently. TT z1 is the only other case where the composite edges the
+index (0.9574 vs 0.9531), and it is the latent with the largest affine
+residual in TT.
+
+Status: post-hoc on T2 rows the ceiling study had already opened, and a
+diagnostic column rather than a gate — the same standing as the audit's own
+confirmation numbers.
 
 ## 3. Per-latent ledger
 
@@ -568,8 +629,19 @@ The targets are compressions of log₁₀ D_ℓ, and in the log basis the leadin
 
 * **Amplitude sector.** C_ℓ ∝ A_s e^{−2τ} above the reionization regime, so
   log₁₀C_ℓ picks up (lnA_s − 2τ)·log₁₀e — *exactly* linear in the sampled
-  basis (τ, ln10¹⁰A_s). This is why `logamp64` OLS reads the −2 directly and
-  why F5.7 found e^{−2τ} 99.9%-linear even over the 13× τ range.
+  basis (τ, ln10¹⁰A_s), at any prior width. This is why `logamp64` OLS reads
+  the −2 directly, and the linearity here needs no defence from the box: it is
+  an identity in the sampled coordinates, not a Taylor approximation.
+  *(Corrected 2026-09-03: this bullet previously cited F5.7's "e^{−2τ}
+  99.9%-linear even over the 13× τ range" as evidence that the near-linearity
+  is not a narrow-box artifact. That argument does not work — 13× is the
+  ratio 0.13/0.01, while the accuracy of a linear fit to e^{−2τ} is set by the
+  absolute exponent span 2Δτ = 0.24, which is small; the 99.9% is a
+  restatement of the box being narrow, not evidence against it. The
+  range-independent version above is the one §0.1 already states, and it is
+  strictly stronger, so nothing downstream depends on the retracted clause.
+  The separate use of the 13× ratio in the fourth bullet is sound: there the
+  physics is a power of τ, where the ratio is the right measure.)*
 * **Tilt.** (n_s − 1)·ln(ℓ/ℓ*) per bin — linear in n_s at leading order.
 * **Shape sector.** ω_b, ω_cdm, H0 vary ±9–13%; peak-height and
   acoustic-scale responses are smooth, with curvature entering at
@@ -808,6 +880,171 @@ Five readings:
 
 ---
 
+### 6.7 Capacity, the noise floor, and what actually decays (measured 2026-09-03)
+
+Two readouts the campaign stored the inputs for and never reported. Both are
+now computed by `scripts/capacity_and_noise_floor.py` →
+`experiments/capacity_and_noise_floor_v1.{json,md}`, and tabulated as **TM10**
+and **TM11** in `docs/mse_one_stage_results.md` §9.1.
+
+**There is no overfitting knee anywhere in the explored range.** Pooling every
+valid front member of all 165 MSE runs — 3234 equations — the ratio
+`mse_val / mse_fit_eval` has median 0.98–1.02 at every complexity from c=1 to
+c=40, p90 ≤ 1.10, worst single equation 1.128. With `n_val = 1000` the
+validation MSE carries √(2/1000) ≈ 4.5% relative standard error, so that spread
+is the sampling noise; the measurement bounds overfitting at ≲5% of fit error
+everywhere and resolves nothing smaller. The shuffled controls give the
+complementary number: on a permuted target the best expression moves fit MSE
+from 1.000 only to 0.9955 by c ≈ 39, so a size-40 tree absorbs **0.45%** of
+pure-noise variance on 4,000 rows — against a signal of 96–99.8%, about 200:1.
+The MI arm agrees (shuffled-target MI 0.004–0.060 nat at maxsize 20 against
+3.83 nat real).
+
+**And there is essentially no noise to fit.** The training spectra are noiseless
+CLASS D_ℓ, so θ → D_ℓ → encoder mean is deterministic, and two independent
+measurements now bound it: the six-input HistGBM floor beneath the OLS residual
+sits at 4.1×10⁻⁶ – 9.3×10⁻⁴ of Var(μ) across the 11 latents (reproducing the
+97–99% figure of §2.4 exactly, 97.1–99.1%); and a difference-based variance
+estimate over the 50k nearest-neighbour pairs in standardised θ returns a
+zero-separation intercept that is ≤ 4.3×10⁻⁴ of Var(μ) or negative for all
+eleven — consistent with zero — with the pure-d² model explaining 97.1–99.8% of
+the pair-gap profile, i.e. no white-noise pedestal. This is the measurement
+behind every "the residual is structure, not noise" statement in §2.4, §6.5,
+§6.6 and E4, which until now were asserted.
+
+**The consequence, read against TM8.** What decays with capacity is not
+generalisation but *agreement*: the gap stays flat while the dominant form
+family falls from 5/5 seeds at c≤5 to 2–3/5 at c≤40. Those high-complexity
+forms are therefore **not overfitted — they are non-identified**, and held-out
+MSE is structurally blind to that. The standard defence in SR-for-science —
+"we validated on held-out data" — passes here at every complexity and buys
+nothing. `R_SR` is the instrument that sees the failure, and the protocol gated
+on it before it knew it would need to. That strengthens **E6** and is the
+sharpest single argument for the methods-paper framing of §7 item 8.
+
+**Scope.** This bounds overfitting with respect to θ. It says nothing about
+overfitting to one trained checkpoint — that is R_model / Phase 9, still not
+run (E8).
+
+
+### 6.8 Encoder-side attribution: gradients, the trunk, and steering (2026-09-03)
+
+The three LLM-interpretability transfers of §0.1 item 4, all three now run.
+`scripts/encoder_gradient_attribution.py` and `scripts/encoder_trunk_probe.py`
+(two modes) → `experiments/encoder_{gradient_attribution,trunk_probe,input_optimisation}_<run>.{json,npz}`.
+
+**A necessary qualification, measured first.** The encoder input is ~5000
+multipole bins and the data manifold is 6-dimensional, so almost every input
+direction is one training never constrained. Projecting ∂μ_k/∂x onto the span
+of the six physical response templates t_j(ℓ)/σ_ℓ, only **0.03–1.3%** of the
+squared gradient norm survives. The raw per-ℓ gradient is therefore *not* a
+safe fine-grained attribution — "latent k cares about bin ℓ" is not a claim
+this instrument can carry. The primary readout is the **projected** gradient:
+the component of the sensitivity that an actual change of cosmology can
+excite. Both curves are stored; they agree on band structure.
+
+**The structural test passes.** The TT encoder's input begins at ℓ = 30 and
+the TT+EE model's EE channel at ℓ = 2, so the low-ℓ EE reionization bump is the
+only place in either model where the A_s–τ degeneracy can be broken — and TT
+cannot see it. Fraction of each latent's projected gradient mass falling in
+ℓ ∈ [2, 30), 64 T1 anchors:
+
+| latent | on-manifold frac | TT ℓ<30 | **EE ℓ<30** | EE channel share |
+|---|---:|---:|---:|---:|
+| TT z0 | 0.0044 | 0.0000 | 0.0000 | 0.000 |
+| TT z1 | 0.0041 | 0.0000 | 0.0000 | 0.000 |
+| TT z2 | 0.0003 | 0.0000 | 0.0000 | 0.000 |
+| TT z3 | 0.0042 | 0.0000 | 0.0000 | 0.000 |
+| TT z4 | 0.0021 | 0.0000 | 0.0000 | 0.000 |
+| EE z0 | 0.0013 | 0.0000 | 0.0094 | 0.330 |
+| EE z1 | 0.0010 | 0.0000 | 0.0033 | 0.322 |
+| EE z2 | 0.0013 | 0.0000 | 0.0100 | 0.188 |
+| EE z3 | 0.0008 | 0.0000 | 0.0061 | 0.190 |
+| EE z4 | 0.0134 | 0.0000 | 0.2410 | 0.366 |
+| EE z5 | 0.0002 | 0.0000 | 0.0052 | 0.218 |
+
+**EE z4 puts 24.1% of its on-manifold gradient mass on 28 bins**, against
+0.3–1.0% for every other latent — a factor of 24–73. Those 28 bins are 0.56%
+of the 4,970 the model sees, so z4 over-weights the reionization window ~43×
+while every other latent sits at or below uniform. Every TT entry is exactly
+zero, structurally. EE z4 also carries the largest EE-channel share (0.366)
+and the largest on-manifold fraction (0.0134, 10× the median).
+
+This is a sixth, fully independent instrument agreeing with **E3**: the TT+EE
+model splits the amplitude sector into two latents because one of them can
+see the bump, and the TT model cannot. It also **refines** the prediction that
+motivated it — it is z4 (τ) alone that reads the bump, not z4 *and* z5, which
+is the right physics: the bump constrains τ, and A_s then follows from the
+high-ℓ amplitude. Note what this does *not* do: projecting back onto a
+τ-versus-lnA_s split re-enters the collinearity that failed G4b. The claim is
+about multipoles, not coefficients.
+
+**Where the degeneracy is created — the trunk probe.** Held-out ridge-probe
+R² (dual ridge, α by 5-fold CV on the train rows, 2500 T1 rows split 80/20) at
+the standardised input, each of the three Conv→CPAct→BatchNorm blocks, and μ:
+
+**TT (5 latents)**
+
+| target | input | block 1 | block 2 | block 3 | **μ** |
+|---|---:|---:|---:|---:|---:|
+| **lnA_s − 2τ** | 1.0000 | 1.0000 | 1.0000 | 1.0000 | 0.9973 |
+| lnA_s | 0.9956 | 0.9998 | 0.9999 | 0.9999 | 0.6337 |
+| τ | 0.9937 | 0.9997 | 0.9998 | 0.9999 | 0.4096 |
+| ω_b | 1.0000 | 1.0000 | 1.0000 | 1.0000 | 0.9965 |
+| ω_cdm | 0.9999 | 1.0000 | 1.0000 | 1.0000 | 0.9571 |
+| H₀ | 1.0000 | 1.0000 | 1.0000 | 1.0000 | 0.9769 |
+| n_s | 0.9999 | 1.0000 | 1.0000 | 1.0000 | 0.9798 |
+
+**TT+EE (6 latents)**
+
+| target | input | block 1 | block 2 | block 3 | **μ** |
+|---|---:|---:|---:|---:|---:|
+| **lnA_s − 2τ** | 1.0000 | 1.0000 | 1.0000 | 1.0000 | 0.9987 |
+| lnA_s | 1.0000 | 1.0000 | 1.0000 | 0.9999 | 0.9846 |
+| τ | 1.0000 | 1.0000 | 1.0000 | 0.9998 | 0.9769 |
+| ω_b | 1.0000 | 1.0000 | 1.0000 | 1.0000 | 0.9922 |
+| ω_cdm | 1.0000 | 1.0000 | 1.0000 | 1.0000 | 0.9753 |
+| H₀ | 1.0000 | 1.0000 | 1.0000 | 1.0000 | 0.9842 |
+| n_s | 1.0000 | 1.0000 | 1.0000 | 1.0000 | 0.9969 |
+
+§0.1 asked where (lnA_s − 2τ) *first* becomes linearly decodable. The answer is
+that the question was posed at the wrong end of the network. **Everything is
+already decodable from the raw standardised input** — the combination and both
+of its constituents, in both models — and stays so through every convolutional
+block. The trunk is essentially lossless for this purpose. What separates the
+two models happens entirely at μ:
+
+* **TT**: τ collapses to **0.41** and lnA_s to **0.63**, while lnA_s − 2τ
+  survives at **0.9973**. The bottleneck keeps the degenerate combination and
+  throws away the direction orthogonal to it.
+* **TT+EE**: τ **0.977** and lnA_s **0.985** both survive, alongside the
+  combination at 0.9987. The split is retained.
+
+So the degeneracy is **not built up through the trunk — it is created by the
+bottleneck**, and only in the model whose inputs cannot break it. Together with
+the band table above this closes a loop: EE z4 reads the ℓ < 30 window that TT
+structurally cannot see, and that is exactly the difference between a
+bottleneck that must discard the amplitude split and one that can afford to
+keep it. **E3, measured in the representation** rather than inferred from the
+outputs — a third independent route to it, and the one circuits question this
+programme had never opened.
+
+**Encoder input optimisation — a clean negative worth reporting.** A
+trust-region sweep over 44 latent x budget cells (11 latents, budgets 0.1, 0.3,
+1 and 3 in units of one prior half-width along the amplitude template, 32 T1
+anchors, 150 steps): the direction that maximally moves one latent while
+holding the others stays **essentially orthogonal to every physical response
+template at every budget — max |cos| 0.011–0.133, median 0.051** — while moving
+the target latent by between 2.7 and 789 units. Unconstrained encoder input
+optimisation finds **adversarial** directions, not physical ones, and shrinking
+the step does not help: the smallest budget is not systematically more aligned
+than the largest. This is the same fact as the 0.03-1.3% on-manifold fraction
+above, seen from the other side — the encoder's input sensitivity lives almost
+entirely in directions no cosmology can produce. The instrument that works here
+is the projected gradient at a data point; steering would need an explicit
+manifold constraint to say anything, and that is a different experiment.
+
+
 ## 7. Open items before any write-up freeze
 
 1. **Staged nonlinearity ladder (§6.4) — Steps 1 and 2 both run.** The
@@ -817,12 +1054,31 @@ Five readings:
    `A_s/τ` at z4; recurrent non-monotone shape-sector curvature at z0).
    Remaining: promote both to frozen deliverables under the audit's
    staging; joint level sets for the (OLS index, f₂_new) pairs; a second
-   residual round at z0.
-2. **η̂_post for the OLS index** — MI(Z_k; w·θ) on T2. Cheap, and decisive for
-   every "fraction of what the latent stores" statement: if OLS beats
-   f₁+f₂ on η̂_post for most latents, W2/W4 harden into table rows.
+   residual round at z0. **Status re-verified 2026-09-03**: the §6.5 table
+   reproduces exactly from disk on an independent recomputation (all 11
+   rows, gap-closed percentages and leading second-order terms), so its
+   numbers are sound — but it still has no committed script and no
+   `results/` or `experiments/` artifact, and §6.5's own "post-hoc,
+   unregistered, T2 reused" caveat stands. Step 2 has raw run directories
+   (`results/lcdm_tt_ee_lowl/residual_sr_ols/`, plus
+   `analysis_summary.json`) and no rendered deliverable. The joint level
+   sets and the second z0 round have not been started.
+2. **η̂_post for the OLS index — DONE (2026-09-03), and it landed the way
+   this item anticipated.** `scripts/eta_post_ols_index.py` →
+   `experiments/eta_post_ols_index_v1.json`, tabulated in §2.7: the affine
+   index beats canonical f₁ in **10/11** latents and the full f₁+f₂
+   composite in **9/11**, at η̂_post 0.80–0.97 with no DPI violation. W2 and
+   W4 are now table rows. The lone resistant latent is EE z4, the same one
+   §6.6 found genuinely beyond-polynomial.
 3. **Level-set audit of the OLS index** — turn the §2.4 prediction into a
-   measurement (the machinery exists; one consolidator pass).
+   measurement. **Confirmed open 2026-09-03**: no artifact mentions it, and
+   "one consolidator pass" is optimistic — `scripts/levelset_audit.py` takes
+   its coordinate from the Phase-2 semantics registry (`--semantic-json`),
+   not from an arbitrary expression, so feeding it w·θ needs a plumbing
+   flag first. Now that §2.7 exists this is the remaining half of the
+   affine-index case: η̂_post says the index is informationally competitive;
+   the level-set audit would say whether the *interventional* instrument, as
+   frozen, also certifies it.
 4. **OLS-injection diagnostic — selection level now done** (result in §2.5:
    retained 43/55, wins selection 39/55; front retention and selection are
    *not* the failure modes). Remaining: separate candidate-discovery failure
@@ -830,16 +1086,32 @@ Five readings:
    affine scaffold, or hand PySR the affine tree and let only its constants
    be optimised), and, if wanted as a frozen deliverable, the staged
    calibrate/confirm legs. No new search campaign needed for the first part.
+   **The selection-level half is now reproducible**:
+   `scripts/replay_ols_injection.py` →
+   `experiments/ols_injection_replay_v1.json` (2026-09-03) regenerates every
+   count, exception list and ratio in §2.5 from the stored fronts.
 5. **Consolidate and commit.** The campaign's own deliverable
    (`docs/precision_preprocess_v1_comparison.md`,
    `experiments/precision_preprocess_v1_comparison.json`) was recovered from
-   the Lightning studio to CSD3 on 2026-09-01, closing that gap; the campaign
-   + audit + Step-2 code, tests, and these docs remain uncommitted. Freeze
-   them before further analysis.
+   the Lightning studio to CSD3 on 2026-09-01, and **the 330 raw searches
+   behind it followed on 2026-09-03** — `results/*/precision_preprocess_v1/`,
+   verified: all 330 `report.json` parse, the six `confirmation.json` are
+   byte-identical to the studio's digests, and rebuilding the comparison from
+   the CSD3 copies reproduces the frozen payload and rendered Markdown exactly
+   (19 upstream files hash-checked, zero mismatches). The campaign is no
+   longer single-copy. **A provenance defect surfaced in the process and is
+   worth fixing before any freeze**: `source_files` in the render artifact and
+   in every `confirmation.json` stores absolute `/teamspace/studios/...`
+   paths, so `verify_artifact` cannot run on CSD3 — the artifacts are pinned
+   to a machine that no longer holds them; repo-relative paths would make them
+   self-verifying anywhere. The campaign + audit + Step-2 code, tests, and
+   these docs remain uncommitted. Freeze them before further analysis.
 6. **Pre-existing opens, unchanged**: EE z0 three-coordinate account; R_model
    (Phase 9, GPU, parent repo); the hierarchy's third level (recorded, not
    pursued).
-7. **Beyond this box.** The near-affinity that powers OLS is prior-box-local,
+7. **Beyond this box.** *(Confirmed open 2026-09-03: none of the three has
+   any artifact or script in the repository.)* The near-affinity that powers
+   OLS is prior-box-local,
    so three tests could still change the verdict's *scope* (not its on-box
    content): a wider-prior campaign, where Taylor linearisation degrades; a
    preregistered OLS vs nonlinear-baseline vs SR comparison evaluated once on

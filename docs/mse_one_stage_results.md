@@ -896,6 +896,91 @@ are diagnostics only; three permutations do not estimate any threshold.
   winners up to 40, so most of the achievable accuracy is available well below
   the budget ceiling. Per-latent envelopes are in the per-checkpoint reports.
 
+### 9.1 The overfitting readout the plan asked for (added 2026-09-03)
+
+§10 risk 2 of `experiments/mse_one_stage_sr_plan.md` reads *"Larger trees
+overfit 4000 rows. Select on held-out T0 validation, **inspect train/validation
+gaps**, use shuffled controls, and confirm only once on T2."* The first and
+third were done; the gap itself was stored per equation and never reported.
+TM10 and TM11 close that, from
+`scripts/capacity_and_noise_floor.py` →
+`experiments/capacity_and_noise_floor_v1.{json,md}`.
+
+#### TM10 — Train/validation gap against the complexity ceiling
+
+**Real targets** — 3234 front members over 11 latents × 5 seeds × 3 budgets,
+standardized units.
+
+| $c$ | $n$ | med fit MSE | med val MSE | med val/fit | p90 | max |
+|---:|---:|---:|---:|---:|---:|---:|
+| 1 | 165 | 1.000 | 1.017 | 1.017 | 1.040 | 1.064 |
+| 5 | 165 | 0.4476 | 0.4440 | 1.005 | 1.044 | 1.058 |
+| 10 | 80 | 0.1435 | 0.1497 | 0.999 | 1.066 | 1.077 |
+| 15 | 119 | 0.03165 | 0.03090 | 1.006 | 1.058 | 1.127 |
+| 20 | 101 | 0.02137 | 0.02101 | 0.990 | 1.059 | 1.101 |
+| 25 | 57 | 0.005097 | 0.004983 | 0.999 | 1.070 | 1.099 |
+| 30 | 54 | 0.005943 | 0.006048 | 0.988 | 1.048 | 1.091 |
+| 35 | 22 | 0.002882 | 0.002980 | 0.992 | 1.047 | 1.093 |
+| 40 | 12 | 0.003067 | 0.003209 | 0.992 | 1.068 | 1.092 |
+
+**Shuffled-target controls** — 221 front members, same units.
+
+| $c$ | $n$ | med fit MSE | med val MSE | med val/fit | p90 | max |
+|---:|---:|---:|---:|---:|---:|---:|
+| 1 | 12 | 1.000 | 0.9923 | 0.992 | 1.025 | 1.025 |
+| 5 | 12 | 0.9988 | 0.9939 | 0.996 | 1.028 | 1.028 |
+| 10 | 11 | 0.9969 | 0.9934 | 0.996 | 1.030 | 1.030 |
+| 20 | 10 | 0.9959 | 0.9939 | 0.997 | 1.030 | 1.030 |
+| 30 | 2 | 0.9957 | 0.9910 | 0.995 | 1.007 | 1.007 |
+| 39 | 1 | 0.9954 | 0.9794 | 0.984 | 0.984 | 0.984 |
+
+**Table TM10.** Held-out error against fit error for every valid front member,
+pooled over latents, seeds and budgets. **There is no overfitting knee**: the
+median ratio never leaves 0.98–1.02 from $c=1$ to $c=40$, p90 stays $\le 1.10$,
+and the worst single equation among 3234 is 1.128. With `n_val = 1000` the
+validation MSE carries $\sqrt{2/1000} \approx 4.5\%$ relative standard error, so
+that p90 spread *is* the sampling noise — the measurement bounds overfitting at
+$\lesssim 5\%$ of fit error at every complexity and resolves nothing smaller.
+The controls give the complementary number: on a permuted target the best
+expression moves fit MSE from 1.000 only to 0.9955 by $c \approx 39$, so a
+size-40 tree absorbs **0.45%** of pure-noise variance on 4,000 rows — against a
+signal of 96–99.8%, about 200:1. T0-fit vs T0-validation.
+
+#### TM11 — How deterministic the target is
+
+| latent | OLS NMSE | GBM floor | ratio | nonlinear rms (% of $\sigma_\mu$) | floor rms | NN intercept / Var | $d^2$ fit $R^2$ |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| TT z0 | 1.81e-3 | 2.39e-5 | 75x | 4.25% | 0.49% | −5.16e-04 | 0.9951 |
+| TT z1 | 1.37e-2 | 2.29e-4 | 60x | 11.68% | 1.51% | −7.12e-05 | 0.9952 |
+| TT z2 | 4.52e-4 | 8.44e-6 | 54x | 2.13% | 0.29% | −2.51e-04 | 0.9984 |
+| TT z3 | 2.16e-3 | 2.33e-5 | 93x | 4.65% | 0.48% | −3.62e-04 | 0.9947 |
+| TT z4 | 3.87e-4 | 4.12e-6 | 94x | 1.97% | 0.20% | +4.29e-04 | 0.9963 |
+| EE z0 | 4.02e-2 | 9.34e-4 | 43x | 20.05% | 3.06% | −9.63e-04 | 0.9890 |
+| EE z1 | 9.07e-4 | 7.93e-6 | 114x | 3.01% | 0.28% | +1.21e-04 | 0.9958 |
+| EE z2 | 1.69e-3 | 3.40e-5 | 50x | 4.12% | 0.58% | −6.83e-04 | 0.9949 |
+| EE z3 | 3.11e-3 | 5.16e-5 | 60x | 5.57% | 0.72% | −5.31e-04 | 0.9949 |
+| EE z4 | 4.27e-2 | 4.31e-4 | 99x | 20.67% | 2.07% | −4.10e-03 | 0.9708 |
+| EE z5 | 4.51e-4 | 1.31e-5 | 34x | 2.12% | 0.36% | −2.80e-04 | 0.9977 |
+
+**Table TM11.** The exact six-input affine map in the sampled basis (T0-fit
+coefficients), the floor a six-input HistGBM reaches beneath it (fit
+T1[5000:15000], scored T1[15000:25000]), and a difference-based variance
+estimate: over the 50k nearest-neighbour pairs in standardized $\theta$
+(distances min 0.094, median 0.425, max 0.836),
+$E[(\mu_i-\mu_j)^2/2] = a + b\,d^2$ is fitted and $a/\mathrm{Var}(\mu)$ read off.
+A negative intercept is unphysical for a variance and only says the
+linear-in-$d^2$ extrapolation slightly overshoots: **every latent is consistent
+with zero irreducible noise**, and the pure-$d^2$ model explains 97.1–99.8% of
+the pair-gap profile — what a smooth deterministic map gives, with no
+white-noise pedestal. EE z4 is the loosest fit, as expected for the one latent
+with a pole in $\tau$.
+
+Read together with TM8: **what decays with capacity is not generalisation but
+agreement.** The gap is flat while the dominant form family falls from 5/5 to
+2–3/5 seeds, so those high-complexity forms are not overfitted — they are
+non-identified. Held-out MSE is structurally blind to that failure mode;
+$R_{\mathrm{SR}}$ is the instrument that sees it.
+
 ## 10. Limitations
 
 1. **Calibration replaces coordinate discovery** — expected under MSE, and §5.1
@@ -921,6 +1006,7 @@ are diagnostics only; three permutations do not estimate any threshold.
 | T1 calibration contract | `results/<run>/mse_one_stage_calibration.json` |
 | searches / controls | `results/<run>/mse_one_stage_ms{20,30,40}/`, `mse_one_stage_control_ms{20,40}/` |
 | protocol | `experiments/mse_one_stage_sr_plan.md` |
+| capacity / noise floor (TM10, TM11) | `scripts/capacity_and_noise_floor.py` → `experiments/capacity_and_noise_floor_v1.{json,md}` |
 | execution record | `lightning_execution` in `experiments/mse_one_stage_execution_provenance.json` |
 | per-task ledger | `logs/mse_one_stage_pool_ledger_lightning.jsonl` |
 
