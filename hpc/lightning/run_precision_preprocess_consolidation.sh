@@ -36,7 +36,6 @@ fail() {
     exit 2
 }
 
-[[ -x "${PYTHON}" ]] || fail "missing interpreter ${PYTHON}; run bootstrap_env.sh first"
 export OMP_NUM_THREADS=1
 export OPENBLAS_NUM_THREADS=1
 export MKL_NUM_THREADS=1
@@ -67,6 +66,11 @@ if [[ "${PRINT_CELLS:-0}" == "1" ]]; then
     done
     exit 0
 fi
+
+# Checked here, not at the top: PRINT_CELLS above is a static listing of the
+# cell matrix and needs no interpreter, so it stays runnable on any machine
+# (CSD3 included, where .venv-lightning does not exist).
+[[ -x "${PYTHON}" ]] || fail "missing interpreter ${PYTHON}; run bootstrap_env.sh first"
 
 USAGE="usage: $0 {select|calibrate|confirm} <cell 0-5> | render"
 MODE="${1:?${USAGE}}"
