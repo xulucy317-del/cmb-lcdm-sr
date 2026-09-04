@@ -173,6 +173,7 @@ search protocol (PySR, GMM-MI inner loss, 5000 T0 samples, ni200/pop15/ms20,
 | 9 | Precision/preprocessing campaign (three float64 arms) | 08-28 → 08-31 (Lightning/Mac, scheduler-free pool) | 330 searches (3 arms × 2 objectives × 11 latents × 5 seeds) | arm profiles in `src/cmb_lcdm_sr/sr.py` (`raw64`, `physical_o1_64`, `logamp64`); campaign deliverable `docs/precision_preprocess_v1_comparison.md` + `experiments/precision_preprocess_v1_comparison.json` (recovered from the studio to CSD3, 2026-09-01); raw run artifacts off-CSD3 | reruns both objectives at precision 64 with (a) raw inputs, (b) order-one physical rescalings, (c) `ln10¹⁰A_s` in place of `A_s`; its own *unmatched* readout (frozen OLS vs each arm's SR) gave mixed winners 9/2 → 6/5 → 5/6, the only SR majority ever observed (§2.2) |
 | 10 | Coordinate-matched OLS audit of the campaign | rendered 08-31 | fit(T0) → calibrate(T1) → confirm(T2) | `experiments/coordinate_matched_ols_v1.{json,md}`, `results/*/coordinate_matched_ols_v1/` | the pivot result of §2 below |
 | 11 | Write-up state | 08-14 → 08-26 | — | `report.md` (§1–10), `paper/main.tex` (7 pp, incl. R-P4), `docs/report_content.md` (16 built figures), `docs/results_compendium.md` | none of these yet contains the OLS-parity result; compendium §9's claim menu C1–C8 predates it |
+| 12 | Conclusive report | 09-04 | — | `report_conclusive.md` (root; F12.1/F13.1/F14.1 added under `paper/figs/`) | the write-up of record: four-stage storyline, affine parity and the ladder load-bearing, SR verdict table; supersedes `report.md` |
 
 Working-tree note: the campaign/audit infrastructure is currently
 **uncommitted** (modified `src/cmb_lcdm_sr/{sr,semantics}.py`,
@@ -1136,7 +1137,12 @@ manifold constraint to say anything, and that is a different experiment.
    carries which physical component, plus where genuinely beyond-polynomial
    curvature lives — i.e. shape (a) with the additive-physics reading as its
    spine and the affine→quadratic→SR ladder as the identifiability
-   instrument.
+   instrument. **Decided 2026-09-04, and written**: `report_conclusive.md`
+   (repository root) — the four-step storyline of §0.1 as the structure,
+   §2 and §6 of this file as its stages 2–3, §6.8 as stage 4, three new
+   figures (F12.1, F13.1, F14.1 in `paper/figs/`). The two campaigns parked
+   behind this decision in the discussion record (§5.2 B/C — the
+   template-hybrid / seeded arm, and Phase 9 for TT) are dropped.
 9. **PySR v2.0.0 (assessed 2026-09-02, from the release notes).** Unusually
    relevant to the measured failure modes — as a *new registered arm*,
    never a drop-in:
@@ -1186,7 +1192,8 @@ preprocessing arms: `src/cmb_lcdm_sr/sr.py` `INPUT_CONFIGS`,
 `results/<run>/coordinate_matched_ols_v1/<arm>/{fit,calibration,confirmation}.json`
 · discussion record (what SR was for; verified repo status; the eight
 questions of 2026-09-02): `docs/sr_objective_discussion_2026-09-02.md`
-· write-up state: `report.md`, `paper/main.tex`, `docs/report_content.md`
+· write-up of record: `report_conclusive.md` (2026-09-04; earlier state:
+`report.md`, `paper/main.tex`, `docs/report_content.md`)
 · original three-way snapshot: `docs/ols_mi_sr_mse_sr_t2_comparison.md.orig`
 (embedded verbatim in `docs/ols_mi_sr_mse_sr_t2_comparison_codex_output.md`,
 the decision-checkpoint companion to this file) · §2.5 mechanism diagnostics:

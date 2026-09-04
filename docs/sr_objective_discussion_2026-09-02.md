@@ -6,11 +6,12 @@ the **record**. This file is the **discussion** — kept separate so the record
 stays a record. Questions are quoted verbatim; answers are the worked replies.
 Where an answer is reasoning rather than a repo artifact, it says so.*
 
-**To resume:** §4 is the live thread — which paper this is. **§5.1 is closed:
-all 10 items were worked through on 2026-09-03, including the rsync, which is
-recovered and verified.** §5.2 is still parked behind the paper-shape decision,
-which is now the only thing gating the write-up. §6 is the follow-up discussion
-that generated items 5, 6 and 9.
+**To resume:** nothing is open here any more. §5.1 was closed on 2026-09-03
+(all 10 items, including the rsync). **§5.2 was closed on 2026-09-04**: the
+paper-shape decision (A) was taken and the two parked campaigns (B, C) were
+dropped; the write-up is `report_conclusive.md` at the repository root. §4 Q8
+is the reasoning behind the decision; §6 is the follow-up discussion that
+generated §5.1 items 5, 6 and 9.
 
 ---
 
@@ -414,11 +415,22 @@ pass: all 10 done.** Each item now carries what came of it.*
       constraint**, and the instrument that works is the projected gradient at
       the data point.
 
-### 5.2 Parked
+### 5.2 Parked — closed 2026-09-04
 
 *Moved out of the working order on 2026-09-03: one decision, and the two
 campaigns whose value depends on how it goes. Sequencing them before the
 decision would be guessing, and nothing in §5.1 waits on any of them.*
+
+**Resolution (2026-09-04).** A is decided: the write-up is a report about the
+latents whose spine is the audit — the four-step storyline of §0.1 of the
+record, with the affine baseline load-bearing and SR kept for the three roles
+§4 Q8 identified (basis discovery, beyond-polynomial localisation, the
+methodological subject). It is written as `report_conclusive.md`, which
+supersedes `report.md` and adds three figures (F12.1 affine parity, F13.1 the
+nonlinearity ladder, F14.1 encoder-side attribution). **B and C are dropped,
+not deferred.** What that leaves unclaimed is stated in the report's §7:
+the discovery-versus-constant-tuning split of the generative failure stays
+unseparated, and every claim stays per-checkpoint.
 
 A. **Decide the paper's shape** (§4 Q8). Not a task but a judgment call, and the
    live thread of this file. Everything about the write-up — which figures,
