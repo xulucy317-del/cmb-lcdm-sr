@@ -21,6 +21,9 @@ logs/
 # theta.npy + splits_v1.npz in data/ ARE tracked; spectra shards are not.
 data/shards_*
 
+# Figure-script caches (regenerable: run the make_fig_ script that writes them)
+paper/figs/_cache_*.npz
+
 # LaTeX build artifacts
 paper/*.aux
 paper/*.log

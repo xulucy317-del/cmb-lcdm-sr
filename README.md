@@ -19,6 +19,39 @@ extensions — the **all-params experiment** (all 6 parameters → every latent)
 and an automated **PySR hyperparameter sweep** — plus their consolidated
 results; see *Where the project stands* below.
 
+## Status: closed (2026-09-09) — start here
+
+The project ran to completion in **four stages**, and the discovery search
+described below is only the first of them. Two documents are the write-ups
+of record; read one of these before anything else in this repo:
+
+* [**`report_conclusive.md`**](report_conclusive.md) — the full report,
+  written for a reader who has not followed the project. All four stages,
+  every number traced to an artifact, glossary and reproduction table.
+* [**`docs/findings_atlas.html`**](docs/findings_atlas.html) — the same
+  findings as an interactive page (open it in a browser); the text-only
+  companion is [`docs/findings_atlas.md`](docs/findings_atlas.md).
+
+The four stages in one line each:
+
+1. **Discovery search** — a recurring formula per latent, the −2 exponent
+   found five ways, polarization shown to *split* amplitude information
+   rather than duplicate it. 10/11 latents reach "primarily interpreted".
+   *This is the stage documented in the rest of this README.*
+2. **A pre-registered linear baseline** — a plain seven-number linear fit
+   matches or beats the discovered formulas on most latents, on
+   reconstruction and on information alike; the search never generated the
+   linear candidate.
+3. **Searching the linear residual** — an exact quadratic closes most of the
+   remainder for nine latents; on the other two the search finds a pole in
+   τ and a rational curvature no polynomial expresses.
+4. **Inside the encoder** — gradient attribution, a trunk probe, and input
+   optimisation, as a check on stages 1–3 from the network side.
+
+`report.md` is the stage-1-only draft and is **superseded** by
+`report_conclusive.md`. `paper/main.tex` is an earlier partial draft on the
+same material.
+
 ## The result being reproduced
 
 Two regimes, one combination (5 PySR seeds each, 200 iterations, 5000 samples):
@@ -37,7 +70,11 @@ discovered forms themselves: the first-order Taylor direction `A_s·(τ−c)`
 with c ≈ τ̄ + ½, and (TT+EE) the literal `A_s·e⁻²ᵗ`. Full protocol,
 per-seed tables, and the negative control: [`docs/method.md`](docs/method.md).
 
-## Where the project stands (2026-08-09 — wrapped up)
+## Where the project stands — stage 1 (2026-08-09)
+
+*Everything from here on describes the discovery search (stage 1) and
+the roadmap that executed it. Stages 2–4 ran afterwards and are covered
+only in `report_conclusive.md` and the findings atlas.*
 
 Six layers, protocol-identical throughout (gmm_mi pure-Julia inner loss,
 5000 samples, post-hoc held-out GMM-MI ranking), each consolidated into
@@ -204,10 +241,16 @@ cmb-lcdm-sr/
 ├── hpc/                         SLURM wrappers (CSD3/icelake, 16 CPU); sweeps/ = sweep specs
 ├── experiments/                 consolidated deliverables (one .md + .json per experiment)
 ├── tests/                       pytest — model shapes, checkpoint loads, MI, sweep planner
+├── report_conclusive.md         ★ the write-up of record — all four stages
+├── report.md                    stage-1-only draft, superseded
+├── paper/                       earlier partial LaTeX draft + figure scripts
 └── docs/
+    ├── findings_atlas.html      ★ interactive closing report (+ .md companion)
     ├── method.md                distilled protocol + results + controls
-    ├── results_compendium.md    ★ every result in one digest (for the write-up)
-    └── discovery_roadmap.md     the executed phase programme + Closure
+    ├── results_compendium.md    every stage-1 result in one digest
+    ├── discovery_roadmap.md     the executed phase programme + Closure
+    └── ols_mi_sr_mse_sr_t2_comparison_claude_output.md
+                                 the stage-2/3 evidence record
 ```
 
 ★ = the heart of the repo.

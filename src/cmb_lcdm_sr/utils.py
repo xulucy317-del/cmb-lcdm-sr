@@ -1,28 +1,13 @@
-"""Small shared utilities: seeding, device selection, JSON I/O."""
+"""Small shared utilities: device selection and atomic JSON/text output."""
 from __future__ import annotations
 
 import json
 import os
-import random
 import uuid
 from pathlib import Path
 from typing import Any
 
 import numpy as np
-
-
-def set_seed(seed: int) -> None:
-    """Seed Python, NumPy and (if available) torch for reproducible runs."""
-    random.seed(seed)
-    np.random.seed(seed)
-    os.environ["PYTHONHASHSEED"] = str(seed)
-    try:
-        import torch
-
-        torch.manual_seed(seed)
-        torch.cuda.manual_seed_all(seed)
-    except ImportError:
-        pass
 
 
 def get_device(prefer: str = "auto") -> str:
@@ -67,11 +52,6 @@ def save_text(text: str, path: str | Path) -> None:
         os.replace(temporary, path)
     finally:
         temporary.unlink(missing_ok=True)
-
-
-def load_json(path: str | Path) -> Any:
-    with open(path, "r") as f:
-        return json.load(f)
 
 
 def _json_default(o: Any):
