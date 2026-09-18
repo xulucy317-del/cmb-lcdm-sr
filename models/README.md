@@ -19,7 +19,7 @@ Each directory holds:
 | `best_model.pt` | `model_cfg` + state dict (`cmb_lcdm_sr.encoder.load_checkpoint`) |
 | `scaler.npz` | per-channel reference spectrum and per-multipole mean/σ of the standardised log-ratio (`cmb_lcdm_sr.scaler.ShardedScaler`) |
 | `config_used.json` | the training configuration as recorded by the training run, verbatim — including the cluster paths of its data and outputs, which are provenance, not paths this repository reads |
-| `analysis/` (git-ignored) | derived caches: `encoder_means_test.npy` and `encoder_logvars_test.npy` `(50000, L)` from the encoder pass, then the per-latent residual caches (`residual_z<k>_v1.npy`, `f1hat_z<k>_v1.npy`, `residual_ols_z<k>_v1.npy`) the stage-1 and stage-3 scripts add |
+| `analysis/` | the caches every later stage starts from — meant to be committed (≈15 MB; `docs/inputs_checklist.md` tracks which are in yet): `encoder_means_test.npy` and `encoder_logvars_test.npy` `(50000, L)` from the encoder pass, then the per-latent residual caches (`residual_z<k>_v1.npy`, `f1hat_z<k>_v1.npy`, `residual_ols_z<k>_v1.npy`) the stage-1 and stage-3 scripts add |
 
 The encoder caches are the target every search and audit starts from and
 are regenerated with `scripts/encode_latents.py --run-dir models/<run>

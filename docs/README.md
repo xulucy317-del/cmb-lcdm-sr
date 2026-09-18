@@ -21,6 +21,7 @@ later records cite them by section.
 | [`ols_mi_sr_mse_sr_t2_comparison.md`](ols_mi_sr_mse_sr_t2_comparison.md) | the original three-way T2 snapshot (OLS vs MI-selected SR vs MSE-selected SR) that the two assessments below were both built on; also embedded verbatim in the decision checkpoint | frozen input |
 | [`sr_vs_ols_decision_checkpoint.md`](sr_vs_ols_decision_checkpoint.md) | the decision checkpoint on symbolic regression versus the linear baseline, frozen 2026-08-31 — one of two independently drafted assessments. The precision-campaign consolidator reads its frozen OLS table cells (`scripts/consolidate_precision_preprocess.py --baseline-report`) | frozen input |
 | [`evidence_record.md`](evidence_record.md) | **the record** for stages 2–4: what each claim rests on after the linear-baseline audit, the per-latent ledger, what stands and what is weakened, the additive-physics reading and the linear → quadratic → SR ladder, the open items and their closure. Drafted independently of the checkpoint above, then completed against it | current |
+| [`inputs_checklist.md`](inputs_checklist.md) | the inputs the public repository does not yet hold (caches, manifest, spectra shards, raw fronts): file by file, with canonical hashes, source paths, and the check that ticks each item | current |
 | [`sr_objective_discussion_2026-09-02.md`](sr_objective_discussion_2026-09-02.md) | the discussion behind the record: what the symbolic search was for, the four-step storyline, and the decision to write `report_conclusive.md` | current |
 
 ## Superseded

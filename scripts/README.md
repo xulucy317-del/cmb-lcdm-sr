@@ -17,6 +17,7 @@ docstrings follow `docs/discovery_roadmap.md`.
 | `run_shuffled_control.py` | the negative control: the identical search against a row-permuted target |
 | `pool_sr_runs.py` | pools per-seed `report.json` files by canonical form and ranks by cross-seed MI |
 | `verify_phase0.py` | gate G0: the encoder caches exist, have the right shape, are finite, and a stored front re-parses end to end |
+| `check_inputs.py` | what this checkout can run: reports the encoder caches, derived caches, spectra shards and raw fronts, verifies sha256 against `data/inputs_manifest.json` (or the pinned state file), and writes that manifest with `--write-manifest` |
 
 ## Stage 1 — discovery and validation (writes `experiments/<name>_<run>.*`)
 

@@ -22,3 +22,9 @@ AI Studio, a Mac). What the repository commits instead is the consolidated
 form of every campaign, under [`experiments/`](../experiments/README.md),
 which is what the reports and figures are built from. The `consolidate_*`
 scripts read this directory and write those files.
+
+To re-consolidate a published campaign, extract the raw-fronts archive (see
+`data/README.md`, "Publishing the inputs") at the repository root so that it
+recreates this layout, then run `python scripts/check_inputs.py --full` to
+verify it against `data/inputs_manifest.json` before running the
+`consolidate_*` script.

@@ -14,9 +14,24 @@ __pycache__/
 results/*
 !results/README.md
 
-# Encoder-pass caches and per-latent residual caches (regenerable from
-# models/ + the spectra shards; see README "Data and models").
-models/*/analysis/
+# Caches under models/<run>/analysis/. The encoder-pass caches are the input
+# every search and audit starts from, and the per-latent residual caches
+# (residual_z*, f1hat_z*, residual_ols_z*) are the entry points of phases
+# 5-8 and stages 2-3 that can only be rebuilt from the raw fronts. Both sets
+# ARE meant to be committed (~15 MB; canonical sha256 in
+# experiments/mse_one_stage_state_csd3.json and data/inputs_manifest.json;
+# check with scripts/check_inputs.py). Everything else there is scratch.
+models/*/analysis/*
+!models/*/analysis/encoder_means_test.npy
+!models/*/analysis/encoder_logvars_test.npy
+!models/*/analysis/residual_z*_v1.npy
+!models/*/analysis/f1hat_z*_v1.npy
+!models/*/analysis/residual_ols_z*_v1.npy
+!models/*/analysis/residual_ols_v1_fit.json
+
+# Site configuration for hpc/submit.sh and hpc/run_tasks.sh (copy from
+# hpc/site.env.example; contains your account/partition/paths)
+hpc/site.env
 
 # Logs / OS noise
 logs/

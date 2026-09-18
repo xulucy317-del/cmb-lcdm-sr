@@ -89,7 +89,7 @@ cmb-lcdm-sr/
 ├── data/                  parameter table, splits, priors, sham inputs, templates → data/README.md
 ├── models/                the two stored β-VAE checkpoints                     → models/README.md
 ├── results/               raw run outputs (git-ignored)                       → results/README.md
-└── tests/                 pytest suite (333 tests)
+└── tests/                 pytest suite (347 tests)
 ```
 
 Each directory README indexes its contents by pipeline stage. The
@@ -111,6 +111,7 @@ git clone https://github.com/xulucy317-del/cmb-lcdm-sr.git && cd cmb-lcdm-sr
 python3.12 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt        # or: pip install -e .[dev]
 pytest -q                              # ~8 min; needs nothing beyond the repo
+python scripts/check_inputs.py         # what this checkout can run, and what it is missing
 ```
 
 The scripts run from the repository root without installing the package
@@ -122,29 +123,49 @@ stage and the stage-4 attribution scripts.
 
 ## Data and models
 
-Everything the pipeline needs is in the repository **except two kinds of
-large or derived input**:
+A clone holds the code, both checkpoints, the parameter table and every
+consolidated result. What it can *run* depends on three groups of inputs
+that are too large or too derived for git. `python scripts/check_inputs.py`
+prints exactly this table for your checkout, verifies every file that has a
+canonical sha256, and names what each missing group blocks.
 
-| in the repo | not in the repo |
-|---|---|
-| `models/<run>/best_model.pt`, `scaler.npz`, `config_used.json` — the two trained checkpoints, their per-multipole normalisation and training configs | the 500,000 CLASS spectra (`shards_global_lhs*/`, ~3.4 GB per channel), which are read only by the one-off encoder pass |
-| `data/theta.npy` (500,000 × 6 parameter table), `data/splits_v1.npz` (400k/50k/50k split), `data/meta.json` (priors) | `models/<run>/analysis/encoder_means_test.npy` and `encoder_logvars_test.npy` — the encoder posterior means/log-variances over the 50,000 test rows, **the target every search and audit starts from** |
-| `data/sham_v1_*.npy`, `data/spectral_templates_v1.npz` — the sham-input columns and the data-driven parameter templates (both derived, both small) | per-latent residual caches under `models/<run>/analysis/` (derived from the means by the stage-1 scripts) |
+| to run … | you need | in a clone? |
+|---|---|---|
+| the tests; every figure built from `experiments/*.json` | nothing beyond the clone | yes |
+| **any SR search or audit** — stages 1–3, the MSE and precision campaigns, the four figure scripts marked † in `figures/README.md` | the caches under `models/<run>/analysis/`: the encoder posterior means and log-variances over the 50,000 test rows (4 files, ≈4 MB), which every search targets, and the per-latent residual caches the later phases start from (≈11 MB) | see below |
+| the encoder pass, the spectral templates, stage 4 (encoder attribution) | the 500,000 CLASS spectra: `shards_global_lhs/` and `shards_global_lhs_ee_lowl/`, 100 `spectra_*.npz` each, ≈3.4 GB per channel | no |
+| re-consolidating a published campaign without re-running its searches | the raw fronts, `results/<run>/<campaign>/…/report.json` (≈5,100 searches) | no |
 
-To regenerate the encoder caches you need the spectra shards:
+**Encoder caches.** They are the pipeline's entry point, and the repository
+is set up to carry them together with the per-latent residual caches next
+to them (`residual_z<k>`, `f1hat_z<k>`: 22 files that phases 5–8 and stage 2
+start from and that can only be rebuilt from the raw fronts; plus the
+stage-3 `residual_ols_z<k>` targets where that search ran). `.gitignore`
+admits exactly those files (≈15 MB); the canonical sha256 are pinned in
+`experiments/mse_one_stage_state_csd3.json`.
+The item-by-item status of what is still to be added is
+[`docs/inputs_checklist.md`](docs/inputs_checklist.md). Until the encoder
+caches are committed, regenerate them from the shards:
 
 ```bash
 python scripts/encode_latents.py --run-dir models/lcdm_tt_beta3e-4 --shards-root /path/to/shards
 python scripts/encode_latents.py --run-dir models/lcdm_tt_ee_lowl  --shards-root /path/to/shards
-python scripts/verify_phase0.py            # shapes, finiteness, clamp range
+python scripts/check_inputs.py --shards-root /path/to/shards
 ```
 
-The sha256 of the canonical encoder-means caches behind every reported
-number is recorded in `experiments/mse_one_stage_state_csd3.json`
-(`inputs_sha256`); a cache regenerated on different hardware agrees to
-float32 precision but is not byte-identical. The checkpoints were trained in
-a separate reproduction of Piras, Herold, Lucie-Smith & Komatsu (2025);
-`config_used.json` records that training run verbatim, including its
+A cache regenerated on different hardware agrees with the canonical one to
+float32 precision but is not byte-identical; `check_inputs.py` says which
+you have.
+
+**Shards and raw fronts.** Both are read-only inputs of the published
+numbers: the shards feed one encoder pass, one template fit and the stage-4
+scripts; the fronts are what the `consolidate_*` scripts turn into
+`experiments/`. `data/inputs_manifest.json`, once written with
+`scripts/check_inputs.py --write-manifest` on a machine holding everything,
+records their sha256 so an archive obtained from anywhere can be verified
+(`data/README.md` gives the maintainers' procedure). The checkpoints were
+trained in a separate reproduction of Piras, Herold, Lucie-Smith & Komatsu
+(2025); `config_used.json` records that training run verbatim, including its
 cluster paths.
 
 ## Running the pipeline
@@ -181,6 +202,13 @@ is laid out stage by stage in [`scripts/README.md`](scripts/README.md)
 [`hpc/README.md`](hpc/README.md) (the launchers that ran it). The reproduction
 table in `report_conclusive.md` §9 maps every stage to its scripts and
 artifacts.
+
+**On your own cluster.** The launchers ran on CSD3 and are kept as they ran;
+`hpc/submit.sh` submits any of them on another SLURM cluster with your site's
+account, partition and paths from `hpc/site.env`, and `hpc/run_tasks.sh`
+runs any launcher's task matrix under PBS/LSF/SGE or with no scheduler at
+all. See [`hpc/README.md`](hpc/README.md), "Running them somewhere other
+than CSD3".
 
 **The GMM-MI inner loss** (`src/cmb_lcdm_sr/sr.py::JULIA_LOSS_GMM_MI`) is a
 custom PySR `loss_function`: a pure-Julia two-dimensional Gaussian-mixture MI
