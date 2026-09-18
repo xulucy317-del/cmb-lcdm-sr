@@ -135,7 +135,7 @@ def test_confirm_argv_and_frozen_inputs(tmp_path):
     root = _root(run, arm)
     manifest = f"{root}/selection_manifest.json"
     calibration = f"{root}/calibration.json"
-    baseline = "docs/ols_mi_sr_mse_sr_t2_comparison_codex_output.md"
+    baseline = "docs/sr_vs_ols_decision_checkpoint.md"
     argv = _run(
         tmp_path, "confirm", 5,
         required=[manifest, calibration, baseline],

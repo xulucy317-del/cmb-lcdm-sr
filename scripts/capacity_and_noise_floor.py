@@ -2,7 +2,7 @@
 """Capacity and noise-floor readouts for the MSE one-stage study.
 
 Closes two gaps in the record
-(docs/ols_mi_sr_mse_sr_t2_comparison_claude_output.md §6.7,
+(docs/evidence_record.md §6.7,
 docs/sr_objective_discussion_2026-09-02.md §5.1 items 5-6). Both were
 pre-specified and neither was ever reported:
 

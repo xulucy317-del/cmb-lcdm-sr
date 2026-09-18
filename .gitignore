@@ -3,28 +3,38 @@ __pycache__/
 *.py[cod]
 *.egg-info/
 .pytest_cache/
-# no trailing slash: .venv here is a symlink (-> ../cmbvae/.venv)
-.venv
+.venv/
+# scheduler-free environment built by hpc/lightning/bootstrap_env.sh
+.venv-lightning/
+# local Julia install used by hpc/mac/
+.julia-bin/
 
-# Generated outputs (SR runs, pooled tables, figures)
+# Raw run outputs (SR runs, pooled tables, manifests). Consolidated
+# deliverables are committed under experiments/; the raw fronts are not.
 results/*
-!results/.gitkeep
+!results/README.md
 
-# Encoder-pass caches (regenerable from models/ + shards)
+# Encoder-pass caches and per-latent residual caches (regenerable from
+# models/ + the spectra shards; see README "Data and models").
 models/*/analysis/
 
 # Logs / OS noise
 logs/
 .DS_Store
 
-# Large external inputs are never vendored here (see README: data provenance).
-# theta.npy + splits_v1.npz in data/ ARE tracked; spectra shards are not.
+# Large external inputs are never vendored here (see README "Data and models").
+# theta.npy + splits_v1.npz in data/ ARE tracked; the spectra shards are not.
 data/shards_*
 
-# Figure-script caches (regenerable: run the make_fig_ script that writes them)
-paper/figs/_cache_*.npz
+# Transfer bundles written by hpc/lightning/make_transfer_bundle.sh
+*.tar.gz
+*.tar.gz.sha256
+*.manifest.txt
 
-# LaTeX build artifacts
-paper/*.aux
-paper/*.log
-paper/*.out
+# Figure-script caches (regenerable: run the make_fig_ script that writes them)
+figures/_cache_*.npz
+
+# LaTeX build artifacts of the archived draft
+docs/archive/paper_draft/*.aux
+docs/archive/paper_draft/*.log
+docs/archive/paper_draft/*.out

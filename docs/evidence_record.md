@@ -2,7 +2,7 @@
 
 *Written 2026-08-31 from the repository's own artifacts (`experiments/`,
 `docs/`, `results/`, git history). Provenance note: this file was drafted
-**without consulting** `docs/ols_mi_sr_mse_sr_t2_comparison_codex_output.md`,
+**without consulting** `docs/sr_vs_ols_decision_checkpoint.md`,
 per instruction; any agreement or disagreement with that file is independent.
 An additive completion pass the same day — after the codex checkpoint was
 read — folded in the fresh-experiment record it covered and this draft had
@@ -169,11 +169,11 @@ search protocol (PySR, GMM-MI inner loss, 5000 T0 samples, ni200/pop15/ms20,
 | 5 | Interaction-aware stage 2 (f1hat as 7th input) | 08-09 | 55 + 6 controls, 98 core-h | `experiments/residual_sr_ia_*`, `levelset_audit_joint_ia_*` | D-DoD-z2 is real structure; 8/11 return the identical f₂; EE z0 upgrades to a unanimous interaction form yet stays unresolved; no status changes |
 | 6 | R-P4: exhaustive 63-support grid at full protocol + sham control | 08-13/14 | 3,465 cells (2,425 fresh) + 165 sham, ≈5,800 core-h | `experiments/subsets_full_*`, `sham_control_*` | crossed result: TT has the dilution mechanism (Δ_sham −0.040 ± 0.013, 3 SE) but almost no confirmed subset advantage; EE has five confirmations (four substantive, +0.09 to +0.13 nat) but a null sham; 0.0% of best forms use the sham symbol; all three N-G2 flags dispositioned, no status flips |
 | 7 | One-stage MSE reconstruction | 08-26 (Lightning AI) | 165 searches + 12 controls | `docs/mse_one_stage_results.md`, `experiments/mse_one_stage_sr_*` | no `one-stage replacement`; known f₂ absorbed **0/11** (variance leg 32/55, MI leg 2/55 — "laundering"); calibration explains most of the apparent MSE-objective landslide (9/11, not 11/11); **plain 6-input OLS beats the ms40 winner 8/11** |
-| 8 | Primary three-way T2 snapshot: frozen physical-basis OLS vs T1-calibrated MI-SR (`mi20-mi`) vs raw MSE-SR (`mse40`) | 08-26 → 08-31 | replay of the stored fronts, no new search | `docs/ols_mi_sr_mse_sr_t2_comparison.md.orig` (preserved verbatim inside the codex checkpoint) | mixed winners by median T2 NMSE: **OLS 7 · MI-SR 2 (TT z0, EE z4) · MSE-SR 2 (EE z2, EE z3)**; seedwise, MSE-SR beats OLS NMSE in only 17/55 runs |
+| 8 | Primary three-way T2 snapshot: frozen physical-basis OLS vs T1-calibrated MI-SR (`mi20-mi`) vs raw MSE-SR (`mse40`) | 08-26 → 08-31 | replay of the stored fronts, no new search | `docs/ols_mi_sr_mse_sr_t2_comparison.md` (preserved verbatim inside the codex checkpoint) | mixed winners by median T2 NMSE: **OLS 7 · MI-SR 2 (TT z0, EE z4) · MSE-SR 2 (EE z2, EE z3)**; seedwise, MSE-SR beats OLS NMSE in only 17/55 runs |
 | 9 | Precision/preprocessing campaign (three float64 arms) | 08-28 → 08-31 (Lightning/Mac, scheduler-free pool) | 330 searches (3 arms × 2 objectives × 11 latents × 5 seeds) | arm profiles in `src/cmb_lcdm_sr/sr.py` (`raw64`, `physical_o1_64`, `logamp64`); campaign deliverable `docs/precision_preprocess_v1_comparison.md` + `experiments/precision_preprocess_v1_comparison.json` (recovered from the studio to CSD3, 2026-09-01); raw run artifacts off-CSD3 | reruns both objectives at precision 64 with (a) raw inputs, (b) order-one physical rescalings, (c) `ln10¹⁰A_s` in place of `A_s`; its own *unmatched* readout (frozen OLS vs each arm's SR) gave mixed winners 9/2 → 6/5 → 5/6, the only SR majority ever observed (§2.2) |
 | 10 | Coordinate-matched OLS audit of the campaign | rendered 08-31 | fit(T0) → calibrate(T1) → confirm(T2) | `experiments/coordinate_matched_ols_v1.{json,md}`, `results/*/coordinate_matched_ols_v1/` | the pivot result of §2 below |
-| 11 | Write-up state | 08-14 → 08-26 | — | `report.md` (§1–10), `paper/main.tex` (7 pp, incl. R-P4), `docs/report_content.md` (16 built figures), `docs/results_compendium.md` | none of these yet contains the OLS-parity result; compendium §9's claim menu C1–C8 predates it |
-| 12 | Conclusive report | 09-04 | — | `report_conclusive.md` (root; F12.1/F13.1/F14.1 added under `paper/figs/`) | the write-up of record: four-stage storyline, affine parity and the ladder load-bearing, SR verdict table; supersedes `report.md` |
+| 11 | Write-up state | 08-14 → 08-26 | — | `docs/archive/report_stage1.md` (§1–10), `docs/archive/paper_draft/main.tex` (7 pp, incl. R-P4), `docs/report_content.md` (16 built figures), `docs/results_compendium.md` | none of these yet contains the OLS-parity result; compendium §9's claim menu C1–C8 predates it |
+| 12 | Conclusive report | 09-04 | — | `report_conclusive.md` (root; F12.1/F13.1/F14.1 added under `figures/`) | the write-up of record: four-stage storyline, affine parity and the ladder load-bearing, SR verdict table; supersedes `docs/archive/report_stage1.md` |
 
 Working-tree note: the campaign/audit infrastructure is currently
 **uncommitted** (modified `src/cmb_lcdm_sr/{sr,semantics}.py`,
@@ -207,7 +207,7 @@ calibrate T1 only → confirm T2 once) but **post-hoc as a study** — T2 had
 already been read by the earlier comparisons — so it is a fairness audit on
 frozen artifacts, not a preregistered fresh holdout.
 
-### 2.2 Headline counts (from `experiments/coordinate_matched_ols_v1.md`)
+### 2.2 Headline counts (from `docs/coordinate_matched_ols_v1.md`)
 
 | Arm | Direct raw NMSE | Coordinate calibrated NMSE | Median MI-SR MI > matched OLS | Mixed-pipeline winner |
 |---|---|---|---|---|
@@ -430,7 +430,7 @@ confirmation numbers.
 ## 3. Per-latent ledger
 
 Synthesis over the three arms and three endpoints (sources: the three tables
-of `experiments/coordinate_matched_ols_v1.md`; TM4/TM5 of
+of `docs/coordinate_matched_ols_v1.md`; TM4/TM5 of
 `docs/mse_one_stage_results.md`). "SR value-added" asks: does *any* SR
 pipeline beat matched OLS consistently across arms on at least one endpoint,
 with margins above seed scatter?
@@ -1130,7 +1130,7 @@ manifold constraint to say anything, and that is a different experiment.
    linear baseline" (the crossed/negative results and E6 become central,
    EE z4 and the amplitude-basis story are the SR exhibits); or (b) a
    methods paper centred on the pipeline and its honesty machinery, with the
-   atlas as the worked example. The current `report.md` §1–10 and compendium
+   atlas as the worked example. The current `docs/archive/report_stage1.md` §1–10 and compendium
    §9 menu predate affine parity and would over-claim if published as-is;
    whichever shape is chosen, §2 of this file needs to be in it. **Working
    direction (2026-09-01): the §6 attribution framing** — which latent
@@ -1140,7 +1140,7 @@ manifold constraint to say anything, and that is a different experiment.
    instrument. **Decided 2026-09-04, and written**: `report_conclusive.md`
    (repository root) — the four-step storyline of §0.1 as the structure,
    §2 and §6 of this file as its stages 2–3, §6.8 as stage 4, three new
-   figures (F12.1, F13.1, F14.1 in `paper/figs/`). The two campaigns parked
+   figures (F12.1, F13.1, F14.1 in `figures/`). The two campaigns parked
    behind this decision in the discussion record (§5.2 B/C — the
    template-hybrid / seeded arm, and Phase 9 for TT) are dropped.
 9. **PySR v2.0.0 (assessed 2026-09-02, from the release notes).** Unusually
@@ -1193,9 +1193,9 @@ preprocessing arms: `src/cmb_lcdm_sr/sr.py` `INPUT_CONFIGS`,
 · discussion record (what SR was for; verified repo status; the eight
 questions of 2026-09-02): `docs/sr_objective_discussion_2026-09-02.md`
 · write-up of record: `report_conclusive.md` (2026-09-04; earlier state:
-`report.md`, `paper/main.tex`, `docs/report_content.md`)
-· original three-way snapshot: `docs/ols_mi_sr_mse_sr_t2_comparison.md.orig`
-(embedded verbatim in `docs/ols_mi_sr_mse_sr_t2_comparison_codex_output.md`,
+`docs/archive/report_stage1.md`, `docs/archive/paper_draft/main.tex`, `docs/report_content.md`)
+· original three-way snapshot: `docs/ols_mi_sr_mse_sr_t2_comparison.md`
+(embedded verbatim in `docs/sr_vs_ols_decision_checkpoint.md`,
 the decision-checkpoint companion to this file) · §2.5 mechanism diagnostics:
 the `ols_baseline.{coefs,mse_val}`, `best_mse_val`, and
 `all_equations[].mse_fit_eval` fields of

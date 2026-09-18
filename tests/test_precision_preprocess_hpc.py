@@ -155,7 +155,9 @@ def test_launcher_resources_and_profile_only_cli_contract():
     assert 'DEFAULT_ACCOUNT="MPHIL-DIS-SL2-CPU"' in text
     assert 'ACCOUNT="${ACCOUNT:-${DEFAULT_ACCOUNT}}"' in text
     assert "^[A-Za-z0-9_.-]+$" in text
-    assert '"${SLURM_JOB_ACCOUNT,,}" != "${ACCOUNT,,}"' in text
+    # case-insensitive account guard, spelled portably (bash 3.2 has no ${var,,})
+    assert ("\"$(printf '%s' \"${SLURM_JOB_ACCOUNT}\" | tr '[:upper:]' '[:lower:]')\" != \\\n"
+            "      \"$(printf '%s' \"${ACCOUNT}\" | tr '[:upper:]' '[:lower:]')\"") in text
     assert 'account=${ACCOUNT}' in text
     assert "#SBATCH --qos" not in text
     assert "source ~/.bashrc" not in text

@@ -2,7 +2,7 @@
 """Build OLS-stage-1 residual caches for the hybrid (affine + SR) account.
 
 Step 2 of the staged nonlinearity plan
-(docs/ols_mi_sr_mse_sr_t2_comparison_claude_output.md §6.4): fit the exact
+(docs/evidence_record.md §6.4): fit the exact
 six-input affine map in the *sampled* basis (omega_b, omega_cdm, H0, tau,
 ln10^10 A_s, n_s) on the 4,000 T0-fit rows only — inputs centred/scaled with
 T0-fit statistics, full-rank lstsq, identical conventions to the

@@ -1,10 +1,10 @@
 # Can the latents of a CMB autoencoder be read as physics? — conclusive report
 
 *Written 2026-09-04 for a reader who has not followed the project. It is the
-write-up of record; the earlier `report.md` covered only the first of the
+write-up of record; the earlier `docs/archive/report_stage1.md` covered only the first of the
 four stages below and is superseded. Every number traces to an artifact in
 the repository; the detailed evidence is in
-`docs/ols_mi_sr_mse_sr_t2_comparison_claude_output.md` (the record) and
+`docs/evidence_record.md` (the record) and
 `docs/sr_objective_discussion_2026-09-02.md` (the discussion). Figure
 identifiers F1–F11 are the earlier programme's; F12–F14 were built for this
 report. Terms are defined where they first appear and collected in the
@@ -193,7 +193,7 @@ control (3,465 cells plus 165 sham runs, about 5,800 core-hours).
 
 ### 2.1 The roles are visible before any search
 
-![F2.2](paper/figs/F2_2_audit_heatmap.png)
+![F2.2](figures/F2_2_audit_heatmap.png)
 
 **F2.2.** Mutual information between each latent's mean and each raw
 parameter, in nats (darker is more), for both networks. Read along a row to
@@ -205,7 +205,7 @@ and $z_5$ to the combination. §2.6 returns to this.
 
 ### 2.2 Every latent has a recurring formula, but the sectors do not separate
 
-![F4.1](paper/figs/F4_1_envelopes.png)
+![F4.1](figures/F4_1_envelopes.png)
 
 **F4.1.** For each latent, the MI of the best formula found as a function of
 the formula's size limit (heavy line; the faint lines are the three
@@ -232,14 +232,14 @@ dominates each latent, all eleven times.
 
 ### 2.3 The physics check: the exponent −2, recovered blind
 
-![F5.5](paper/figs/amplitude_scatter.png)
+![F5.5](figures/amplitude_scatter.png)
 
 **F5.5.** The amplitude latent of each network plotted against the textbook
 combination $\ln(A_s e^{-2\tau})$. The tight, monotone curve is the result.
 The combination is computed here only to draw the plot; the search never saw
 it.
 
-![F5.6](paper/figs/F5_6_ratio_readout.png)
+![F5.6](figures/F5_6_ratio_readout.png)
 
 **F5.6.** A quantity that is the same for every member of a formula family:
 the ratio of the formula's sensitivity to $\tau$ and to $\ln A_s$, evaluated
@@ -278,7 +278,7 @@ a formula's MI divided by a ceiling:
   **physically transmits**, measured from its noisy version $Z_k$. What
   fraction of what the latent stores does the formula carry?
 
-![F5.1](paper/figs/F5_1_eta_ladder.png)
+![F5.1](figures/F5_1_eta_ladder.png)
 
 **F5.1.** The three ratios per latent. The light circles ($\eta_S$) sit on
 the dashed line at 1 for every latent: each formula exhausts its own inputs.
@@ -295,7 +295,7 @@ nulls of about ±0.002. The frozen rule required $R^2 \le 0.05$, so the
 outcome: the amplitude latents have signal-to-noise of several thousand, so
 their leftover is stored information, not noise.
 
-![F6.1](paper/figs/F6_1_stage2_gain.png)
+![F6.1](figures/F6_1_stage2_gain.png)
 
 **F6.1.** A second blind search was run on the leftover of each first
 formula, giving a second formula $f_2$ per latent. The segments show the
@@ -318,7 +318,7 @@ moves. Pairs of parameter settings with equal formula value are drawn; the
 scaled so that randomly matched pairs score 1. The frozen rule requires
 $\le 0.05$.
 
-![F7.1](paper/figs/F7_1_invariance_ledger.png)
+![F7.1](figures/F7_1_invariance_ledger.png)
 
 **F7.1.** Invariance error on a log axis. The first formula alone (open
 circles) fails the rule for every latent, at 0.05–0.23. Holding the pair
@@ -427,7 +427,7 @@ discovered formula.
 
 ### 3.1 The result: linear parity on both endpoints
 
-![F12.1](paper/figs/F12_1_affine_parity.png)
+![F12.1](figures/F12_1_affine_parity.png)
 
 **F12.1.** (a) The fraction of each latent's variance left unexplained on
 the confirmation rows, on a log axis; further left is better. Black dot: the
@@ -558,7 +558,7 @@ latent, about 35 core-hours). The logic: exhaust what exact solvers can
 express, so that when the unreliable stochastic search is finally spent it is
 pointed at a target already proven to be beyond every cheaper class.
 
-![F13.1](paper/figs/F13_1_nonlinearity_ladder.png)
+![F13.1](figures/F13_1_nonlinearity_ladder.png)
 
 **F13.1.** Unexplained variance on the confirmation rows, per latent, log
 axis. Black dot: linear. Blue square: quadratic; the blue bar joins the two
@@ -657,7 +657,7 @@ $\ell$" is not a claim it supports). The readout used is the gradient
 **projected** onto the six physical directions, the part an actual change of
 cosmology could excite.
 
-![F14.1](paper/figs/F14_1_encoder_attribution.png)
+![F14.1](figures/F14_1_encoder_attribution.png)
 
 **F14.1.** (a) The share of each latent's projected gradient that falls in
 the reionization window $\ell < 30$ of the EE spectrum, for the TT+EE-lowl
@@ -836,14 +836,14 @@ over-reading.
 |---|---|---|
 | 1 discovery & validation | `scripts/run_blind_sr.py`, `sweep_blind_sr.py`, `knee_readout.py`, `semantic_recurrence.py`, `sufficiency_audit.py`, `posterior_ceiling.py`, `consolidate_residual_sr.py`, `levelset_audit*.py`, `decoder_effect.py`, `subspace_probe.py`, `build_latent_cards.py`, `consolidate_subsets_full.py`, `consolidate_sham_control.py` | `experiments/{allparams_blind_sr,hpsweep_hp_v1,knee_readout,semantic_recurrence,sufficiency_audit,posterior_ceiling,residual_sr,residual_sr_ia,levelset_audit*,decoder_effect,subspace_probe,latent_cards,subsets_full,sham_control}_*`; rules and closure in `docs/discovery_roadmap.md`; digest `docs/results_compendium.md` |
 | 2 linear baseline | `scripts/run_mse_one_stage_pool.py`, `consolidate_mse_one_stage.py`, `run_precision_preprocess_pool.py`, `consolidate_precision_preprocess.py`, `audit_coordinate_matched_ols.py`, `replay_ols_injection.py`, `eta_post_ols_index.py`, `capacity_and_noise_floor.py` | `docs/mse_one_stage_results.md`, `experiments/mse_one_stage_sr_*`; `docs/precision_preprocess_v1_comparison.md`; `experiments/coordinate_matched_ols_v1.json` + `docs/coordinate_matched_ols_v1.md`; `experiments/{ols_injection_replay_v1,eta_post_ols_index_v1,capacity_and_noise_floor_v1}.json`; raw fronts `results/*/{mse_one_stage_ms*,precision_preprocess_v1}/` |
-| 3 the ladder | `scripts/build_ols_residual_cache.py`, `run_blind_sr.py --target-npy`, `run_shuffled_control.py --target-npy`, `analyze_residual_sr_ols.py`; the quadratic rung is recomputed by `paper/figs/make_fig_F13_1_nonlinearity_ladder.py` | `models/lcdm_tt_ee_lowl/analysis/residual_ols_*`, `results/lcdm_tt_ee_lowl/residual_sr_ols/` (+ `analysis_summary.json`); record §6.5–§6.6 |
+| 3 the ladder | `scripts/build_ols_residual_cache.py`, `run_blind_sr.py --target-npy`, `run_shuffled_control.py --target-npy`, `analyze_residual_sr_ols.py`; the quadratic rung is recomputed by `figures/make_fig_F13_1_nonlinearity_ladder.py` | `models/lcdm_tt_ee_lowl/analysis/residual_ols_*`, `results/lcdm_tt_ee_lowl/residual_sr_ols/` (+ `analysis_summary.json`); record §6.5–§6.6 |
 | 4 encoder attribution | `scripts/encoder_gradient_attribution.py`, `encoder_trunk_probe.py` (`--mode probe` and `--mode steer`) | `experiments/encoder_{gradient_attribution,trunk_probe,input_optimisation}_<run>.{json,npz}` |
 
-**Figures.** F1–F11 are built by `paper/figs/make_fig_F*.py` per
+**Figures.** F1–F11 are built by `figures/make_fig_F*.py` per
 `docs/report_content.md`; F12.1, F13.1 and F14.1 by the correspondingly named
 scripts beside them, from the consolidated JSONs (F13.1 also refits the linear
 and quadratic rungs from `data/` and `models/*/analysis/` and asserts
-agreement with the audit's values). Shared style `paper/figs/figstyle.py`.
+agreement with the audit's values). Shared style `figures/figstyle.py`.
 Run with `.venv/bin/python` and `OMP_NUM_THREADS=1` on a login node.
 
 **Search counts.** About 5,100 PySR searches in all: about 4,600 through the

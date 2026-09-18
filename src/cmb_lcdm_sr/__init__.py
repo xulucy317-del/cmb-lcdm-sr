@@ -1,12 +1,14 @@
-"""cmb-lcdm-sr — blind symbolic regression of β-VAE CMB amplitude latents.
+"""cmb-lcdm-sr — blind symbolic interpretation of β-VAE CMB latents.
 
-A distilled, standalone extraction of the blind-SR study from the parent
-``cmbvae`` reproducibility project (Piras et al. 2025, arXiv:2502.09810
-reproduction). This package keeps exactly one search configuration: PySR with
-the pure-Julia GMM-MI inner loss, selected post hoc by held-out GMM-MI. The
-question it answers: can symbolic regression rediscover the textbook TT
-amplitude combination ln(A_s·e^{−2τ}) from a trained encoder alone, with no
-hand-coded reference to the answer anywhere in the pipeline?
+The library behind the study: loading the two stored β-VAE checkpoints
+(trained in a separate reproduction of Piras et al. 2025, arXiv:2502.09810),
+the encoder pass, the pure-Julia GMM-MI inner loss for PySR with post-hoc
+held-out GMM-MI selection, the T0/T1/T2 data-hygiene tiers, and the semantic
+and calibration machinery of the validation programme. The question it was
+built to answer: can symbolic regression rediscover what a latent computes —
+for the amplitude sector, the textbook combination ln(A_s·e^{−2τ}) — from a
+trained encoder alone, with no hand-coded reference to the answer anywhere
+in the pipeline?
 
 Modules:
     model    — PirasCVAE / DualEncoderCVAE (needed to load stored checkpoints)
@@ -20,6 +22,6 @@ Modules:
     calibrate— cross-fitted calibration h + residual diagnostics (roadmap M4)
 """
 
-__version__ = "0.1.0"
+__version__ = "1.0.0"
 
 from .sr import JULIA_LOSS_GMM_MI, INPUT_ALIASES, build_inputs  # noqa: F401

@@ -24,7 +24,7 @@ Examples:
 
     # Anywhere else, pointing at a synced copy of the shards:
     python scripts/encode_latents.py --run-dir models/lcdm_tt_ee_lowl \
-        --shards-root /path/to/cmbvae/data
+        --shards-root /path/to/shards
 """
 import argparse
 import time

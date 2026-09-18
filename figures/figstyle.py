@@ -20,15 +20,15 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
-# Repo root: derived from this file's location (<repo>/paper/figs/figstyle.py) so
+# Repo root: derived from this file's location (<repo>/figures/figstyle.py) so
 # the scripts run unchanged on CSD3 and on a local checkout. CMB_LCDM_SR_REPO
 # overrides if the figures ever need to read a different tree.
 import os
 
 REPO = Path(os.environ.get("CMB_LCDM_SR_REPO",
-                           Path(__file__).resolve().parents[2]))
+                           Path(__file__).resolve().parents[1]))
 EXP = REPO / "experiments"
-OUT = REPO / "paper" / "figs"
+OUT = REPO / "figures"
 
 # ---------------------------------------------------------------- ink & chrome
 INK = "#0b0b0b"

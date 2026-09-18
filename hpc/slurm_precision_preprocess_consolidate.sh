@@ -69,8 +69,10 @@ fail() {
 
 [[ "${ACCOUNT}" =~ ^[A-Za-z0-9_.-]+$ ]] || \
     fail "unsafe ACCOUNT value '${ACCOUNT}'"
+# Case-insensitive account comparison via tr (works on bash 3.2 as well as 4+).
 if [[ -n "${SLURM_JOB_ACCOUNT:-}" && \
-      "${SLURM_JOB_ACCOUNT,,}" != "${ACCOUNT,,}" ]]; then
+      "$(printf '%s' "${SLURM_JOB_ACCOUNT}" | tr '[:upper:]' '[:lower:]')" != \
+      "$(printf '%s' "${ACCOUNT}" | tr '[:upper:]' '[:lower:]')" ]]; then
     fail "ACCOUNT=${ACCOUNT} does not match SLURM_JOB_ACCOUNT=${SLURM_JOB_ACCOUNT}"
 fi
 
@@ -162,14 +164,14 @@ case "${MODE}" in
     confirm)
         require_file "${MANIFEST}"
         require_file "${CALIBRATION}"
-        require_file docs/ols_mi_sr_mse_sr_t2_comparison_codex_output.md
+        require_file docs/sr_vs_ols_decision_checkpoint.md
         "${PYTHON}" scripts/consolidate_precision_preprocess.py confirm \
             --manifest "${MANIFEST}" \
             --calibration "${CALIBRATION}" \
             --dataset-dir data \
             --models-root models \
             --experiments-dir experiments \
-            --baseline-report docs/ols_mi_sr_mse_sr_t2_comparison_codex_output.md \
+            --baseline-report docs/sr_vs_ols_decision_checkpoint.md \
             --out "${CONFIRMATION}"
         ;;
     render)

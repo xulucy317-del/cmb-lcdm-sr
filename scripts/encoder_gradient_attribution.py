@@ -2,7 +2,7 @@
 """Encoder-side gradient attribution — which multipoles does latent k read?
 
 The first of the three LLM-interpretability transfers listed in §0.1 item 4 of
-`docs/ols_mi_sr_mse_sr_t2_comparison_claude_output.md`, and item 9 of §5.1 of
+`docs/evidence_record.md`, and item 9 of §5.1 of
 `docs/sr_objective_discussion_2026-09-02.md`. One backward pass per latent:
 
     g_k(ell) = d mu_k / d x_ell

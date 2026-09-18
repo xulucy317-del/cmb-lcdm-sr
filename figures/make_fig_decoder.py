@@ -11,8 +11,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-REPO = Path("/rds/user/zx332/hpc-work/cmb-lcdm-sr")
-OUT = REPO / "paper" / "figs"
+from figstyle import REPO, OUT  # noqa: E402  (repo root derived from this file's location)
 
 BLUE = "#2a78d6"
 BAND = "#9ec5f4"

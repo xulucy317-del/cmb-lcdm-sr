@@ -28,7 +28,7 @@ Reads:  data/theta.npy + data/splits_v1.npz (train split = split_id 0),
 Writes: data/spectral_templates_v1.npz  (small; checked in)
 
     python scripts/spectral_templates.py                 # on CSD3
-    python scripts/spectral_templates.py --shards-root /path/to/cmbvae/data
+    python scripts/spectral_templates.py --shards-root /path/to/shards
 """
 import argparse
 import json

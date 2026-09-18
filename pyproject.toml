@@ -4,12 +4,18 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cmb-lcdm-sr"
-version = "0.1.0"
-description = "Blind symbolic regression of beta-VAE CMB amplitude latents with a pure-Julia GMM-MI inner loss (distilled from the cmbvae reproducibility study)."
+version = "1.0.0"
+description = "Blind symbolic interpretation of CMB beta-VAE latents: MI-scored symbolic regression with a pure-Julia GMM-MI inner loss, a pre-registered validation programme, and a linear baseline."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
-authors = [{ name = "MPhil dissertation project" }]
+authors = [{ name = "Ziyu Xu", email = "zx332@cam.ac.uk" }]
+keywords = ["cosmology", "CMB", "variational autoencoder", "symbolic regression", "mutual information", "interpretability"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Astronomy",
+]
 dependencies = [
     "numpy",
     "scipy",
@@ -24,6 +30,10 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest"]
+
+[project.urls]
+Repository = "https://github.com/xulucy317-del/cmb-lcdm-sr"
+"Write-up of record" = "https://github.com/xulucy317-del/cmb-lcdm-sr/blob/main/report_conclusive.md"
 
 [tool.setuptools.packages.find]
 where = ["src"]

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Replay the §2.5 OLS-injection diagnostic from the stored `mse40` fronts.
 
-`docs/ols_mi_sr_mse_sr_t2_comparison_claude_output.md` §2.5 reports, from a
+`docs/evidence_record.md` §2.5 reports, from a
 2026-08-31 pass whose code was never committed, that placing the exact T0-fit
 OLS expression into each frozen `mse40` candidate set at its true complexity
 and applying the unchanged rules would retain it in 43/55 runs and win the

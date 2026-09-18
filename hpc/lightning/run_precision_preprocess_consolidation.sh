@@ -113,14 +113,14 @@ case "${MODE}" in
     confirm)
         require_file "${MANIFEST}"
         require_file "${CALIBRATION}"
-        require_file docs/ols_mi_sr_mse_sr_t2_comparison_codex_output.md
+        require_file docs/sr_vs_ols_decision_checkpoint.md
         "${PYTHON}" "${CONSOLIDATOR}" confirm \
             --manifest "${MANIFEST}" \
             --calibration "${CALIBRATION}" \
             --dataset-dir data \
             --models-root models \
             --experiments-dir experiments \
-            --baseline-report docs/ols_mi_sr_mse_sr_t2_comparison_codex_output.md \
+            --baseline-report docs/sr_vs_ols_decision_checkpoint.md \
             --out "${CONFIRMATION}"
         ;;
     render)

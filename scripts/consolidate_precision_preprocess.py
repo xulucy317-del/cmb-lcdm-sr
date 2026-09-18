@@ -752,7 +752,7 @@ def build_confirmation_artifact(
         dataset_dir: str | Path = "data", models_root: str | Path = "models",
         experiments_dir: str | Path = "experiments",
         baseline_report: str | Path =
-        "docs/ols_mi_sr_mse_sr_t2_comparison_codex_output.md",
+        "docs/sr_vs_ols_decision_checkpoint.md",
         mi_estimator: Callable = mutual_information_gmm) -> dict:
     """Verify frozen T0/T1 artifacts, then score once on matched T2 rows."""
     manifest = verify_selection(manifest_path)
@@ -1303,7 +1303,7 @@ def main() -> None:
     confirm.add_argument("--experiments-dir", default="experiments")
     confirm.add_argument(
         "--baseline-report",
-        default="docs/ols_mi_sr_mse_sr_t2_comparison_codex_output.md")
+        default="docs/sr_vs_ols_decision_checkpoint.md")
     confirm.add_argument("--out", default=None)
 
     render = sub.add_parser("render", help="render the three final tables")

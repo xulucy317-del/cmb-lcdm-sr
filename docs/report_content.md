@@ -19,7 +19,7 @@ result: the decoder stage, now §8.
 **How to read the IDs.** F⟨sec⟩.⟨n⟩ / T⟨sec⟩.⟨n⟩, numbered through the
 ⟨sec⟩.x subsections; gaps left by dropped items are not renumbered, so IDs
 stay stable against the built files. Figures render from
-`paper/figs/F<id>_*.png` (PDF twins beside them for print), one script per ID
+`figures/F<id>_*.png` (PDF twins beside them for print), one script per ID
 (`make_fig_F*.py`, shared style in `figstyle.py`). Optional items are marked
 *(optional — not built)* and nothing in the argument depends on them.
 
@@ -93,7 +93,7 @@ above.
 
 #### F2.2 — The raw disentanglement audit fixes the expected roles before any SR
 
-![F2.2 — MI(μ_k; θ_j) heatmap, both checkpoints](../paper/figs/F2_2_audit_heatmap.png)
+![F2.2 — MI(μ_k; θ_j) heatmap, both checkpoints](../figures/F2_2_audit_heatmap.png)
 
 MI between each latent's posterior mean and each raw parameter, all 11
 latents × 6 parameters, both checkpoints side by side. This fixes the
@@ -104,7 +104,7 @@ loads on the amplitude pair in TT-only, **two** in TT+EE-lowl (z4
 readable from raw parameter MI alone, before any symbolic search has run, so
 it is a model-level fact rather than a discovery artifact. Recomputed (KSG)
 from `models/*/analysis/encoder_means_test.npy` + `data/theta.npy` on T1
-rows, cached in `paper/figs/_cache_audit_mi.npz`. Per-checkpoint scope.
+rows, cached in `figures/_cache_audit_mi.npz`. Per-checkpoint scope.
 
 ### 3. Blind symbolic interpretation and pre-registered inference
 
@@ -200,7 +200,7 @@ direction already appears in the unrestricted search.
 
 #### F4.1 — Cumulative Pareto envelopes, both checkpoints, with the null in-panel
 
-![F4.1 — cumulative Pareto envelopes with shuffled-target null](../paper/figs/F4_1_envelopes.png)
+![F4.1 — cumulative Pareto envelopes with shuffled-target null](../figures/F4_1_envelopes.png)
 
 Validation MI against expression complexity per latent: the combined
 envelope (heavy line) over the per-family means (ms10/20/30, faint), the
@@ -314,7 +314,7 @@ sufficiency.
 
 #### F5.1 — The η ladder, per latent: saturation of own support, not of the latent
 
-![F5.1 — the η ladder for all 11 latents](../paper/figs/F5_1_eta_ladder.png)
+![F5.1 — the η ladder for all 11 latents](../figures/F5_1_eta_ladder.png)
 
 The report's central quantitative figure. For each of the 11 latents, three
 aligned markers: η_S (light circle, essentially pinned at the dashed
@@ -331,7 +331,7 @@ scope.
 
 #### F5.2 — Subset-campaign staircases, with the amplitude panels as positive control
 
-![F5.2 — support-restricted ceiling vs support size, all latents](../paper/figs/F5_2_staircases.png)
+![F5.2 — support-restricted ceiling vs support size, all latents](../figures/F5_2_staircases.png)
 
 Small multiples, one per latent: the best support-restricted ceiling against
 support size |S| over the complete 63-support × 5-seed full-protocol grid
@@ -352,7 +352,7 @@ three are dispositioned in §11. Source: `experiments/subsets_full_*.json`
 
 #### F5.3 — The stage-1 residual's structure, seen
 
-![F5.3 — EE z5 residual against its leading parameter](../paper/figs/F5_3_residual_structure.png)
+![F5.3 — EE z5 residual against its leading parameter](../figures/F5_3_residual_structure.png)
 
 The EE amplitude latent's residual e₁ = μ − h(f₁) against ω_cdm, its leading
 residual direction, with the binned mean overlaid (|ρ_S| = 0.78) on a T1
@@ -400,7 +400,7 @@ reports as *total* insufficiency. Source:
 
 #### F5.4 — Sensitivity signatures: what each discovered form actually depends on
 
-![F5.4 — normalised sensitivity signatures g_j, both checkpoints](../paper/figs/F5_4_signatures.png)
+![F5.4 — normalised sensitivity signatures g_j, both checkpoints](../figures/F5_4_signatures.png)
 
 Heatmap of the normalised signature g_j = E|∂f/∂u_j| of each canonical f₁
 over the six parameters, both checkpoints. This is the object the
@@ -443,12 +443,12 @@ readouts are methodologically independent, and the two checkpoints agree.
 
 ##### F5.5 — The amplitude latent against the textbook combination
 
-![F5.5 — μ_amp against ln(A_s·e^{−2τ}), both checkpoints](../paper/figs/amplitude_scatter.png)
+![F5.5 — μ_amp against ln(A_s·e^{−2τ}), both checkpoints](../figures/amplitude_scatter.png)
 
 μ_amp plotted against ln(A_s·e^{−2τ}) for both checkpoints: tight monotone
 curves. The textbook combination is drawn here only to *display* the result —
 it is computed nowhere inside the pipeline. Built by
-`paper/figs/make_fig_amplitude.py`.
+`figures/make_fig_amplitude.py`.
 
 ##### T5.2 — Every blind readout of the −2
 
@@ -496,7 +496,7 @@ still organises as `A_s·e^{−2τ}`).
 
 ##### F5.7 — Why TT reports an affine form and EE the literal exponential
 
-![F5.7 — exp(−2τ) over the prior with its best affine fit](../paper/figs/F5_7_affine_vs_literal.png)
+![F5.7 — exp(−2τ) over the prior with its best affine fit](../figures/F5_7_affine_vs_literal.png)
 
 exp(−2τ) over the prior range τ ∈ [0.01, 0.13] with its best affine fit; the
 deviation panel below shows a maximum of 0.52%. The two forms therefore tie
@@ -522,7 +522,7 @@ the additive ansatz?
 
 #### F6.1 — What the second coordinate buys
 
-![F6.1 — stage-2 gain in η̂_post](../paper/figs/F6_1_stage2_gain.png)
+![F6.1 — stage-2 gain in η̂_post](../figures/F6_1_stage2_gain.png)
 
 Per latent, a dumbbell from η̂_post(f₁) to η̂_post(f₁+f₂): 0.29–0.84 lifted to
 0.59–0.96, against the dashed saturation line at 1.0. Every latent gains, and
@@ -663,7 +663,7 @@ are 1-D at spline R² 0.91–1.00 throughout. Sources:
 
 #### F7.2 — The level-set failure *is* the calibrated residual
 
-![F7.2 — E_inv(f₁) against 1 − R²_cal with the predicted band](../paper/figs/F7_2_audit_vs_calibration.png)
+![F7.2 — E_inv(f₁) against 1 − R²_cal with the predicted band](../figures/F7_2_audit_vs_calibration.png)
 
 Scatter of E_inv(f₁ alone) against 1 − R²_cal for all 11 latents, with the
 predicted band [1−R², 2(1−R²)] shaded. Six points sit inside the band; five
@@ -710,7 +710,7 @@ from the twin `_curves.npz` when the figure goes to layout.
 
 #### F8.2 — Cross-domain agreement, honestly weighted
 
-![F8.2 — cos(a*, g_j) per latent](../paper/figs/F8_2_agreement.png)
+![F8.2 — cos(a*, g_j) per latent](../figures/F8_2_agreement.png)
 
 cos(a\*, g_j) per latent, 0.77–1.00: the decoder-side loading vector against
 the symbolic signature of F5.4. Shape-sector points are solid; the
@@ -720,7 +720,7 @@ components that drift along the ridge of F8.3 — the honest weakening behind
 
 #### F8.3 — The ridge: why there is no fourth readout
 
-![F8.3 — template collinearity and the drifting amplitude split](../paper/figs/F8_3_ridge.png)
+![F8.3 — template collinearity and the drifting amplitude split](../figures/F8_3_ridge.png)
 
 (a) t_τ(ℓ) and −t_lnAs(ℓ) overlaid after scaling, per channel: they lie on
 top of each other — uncentered cos = −0.9996 (TT channel), −0.9770 (EE
@@ -866,7 +866,7 @@ zero information, with dilution declared demonstrated only if the pooled
 
 #### F11.2 — Subset advantages and the sham mechanism, crossed
 
-![F11.2 — subset advantages on T2 and the sham-input control](../paper/figs/F11_2_rp4_sham.png)
+![F11.2 — subset advantages on T2 and the sham-input control](../figures/F11_2_rp4_sham.png)
 
 (a) Per latent, the seed-paired T2 contrast M_{S⁺} − M_{all-6} at c ≤ 10 with
 ±SE; filled = confirmed under the frozen rule, open = not confirmed, each
@@ -963,7 +963,7 @@ and re-rendered locally (PDF + PNG both current). `figstyle.REPO` now derives
 the repo root from the script location instead of a hardcoded CSD3 path, with
 `CMB_LCDM_SR_REPO` as an override, so the scripts run on either machine.
 
-**Withdrawn from the report** (scripts and renders remain in `paper/figs/`,
+**Withdrawn from the report** (scripts and renders remain in `figures/`,
 and nothing cites them): F1.1 pipeline schematic, F3.1 invariance schematic
 (now a prose passage in §3), F4.2 capacity dial, F5.6 ratio readout, F7.1
 invariance ledger, F9.1 count fingerprint, F9.2 split-not-duplicated.
@@ -1011,5 +1011,5 @@ what it would show; nothing in the argument depends on any of them.
 **Sources of truth.** Consolidated `experiments/*.json` are canonical; raw
 run dirs under `results/<run>/…` only for F3.2 and appendix panels;
 `models/*/analysis/*.npy` + `data/theta.npy` for anything needing rows. The
-`paper/figs/make_fig_*.py` scripts are the pattern to extend; new figure
+`figures/make_fig_*.py` scripts are the pattern to extend; new figure
 scripts should live beside them, one script per figure ID.

@@ -1,3 +1,10 @@
+> **Superseded (archived).** This is the stage-1 write-up (drafted 2026-08-26,
+> when the project consisted of the discovery search alone). The write-up of
+> record is [`report_conclusive.md`](../../report_conclusive.md) at the
+> repository root, whose §3.5 restates what the stage-1 claims below license
+> after the linear-baseline audit. Kept verbatim for the record; figure paths
+> were updated when the file moved here from the repository root.
+
 # Blind symbolic interpretation of CMB β-VAE latents
 
 *Figure and table identifiers are stable project identifiers. Where material is not included in this version, the numbering is not contiguous.*
@@ -54,7 +61,7 @@ with $\mathrm{mid}_j$ and $w_j$ the box midpoint and half-width. One convention 
 
 #### F2.2 — The raw disentanglement audit reveals the expected roles before symbolic search
 
-![F2.2 — MI(mu_k; theta_j) heatmap, both checkpoints](paper/figs/F2_2_audit_heatmap.png)
+![F2.2 — MI(mu_k; theta_j) heatmap, both checkpoints](../../figures/F2_2_audit_heatmap.png)
 
 **Figure F2.2.** Mutual information between each latent's posterior mean and each raw parameter, for all 11 latents and 6 parameters, with the two checkpoints side by side (Kraskov–Stögbauer–Grassberger $k$-nearest-neighbour estimates [3] on T1 rows). This audit fixes the *expected role* of each latent, which is used everywhere downstream. The boxed $(\tau, \ln A_s)$ columns already show a structural result to which §9 returns: **one** latent loads on the amplitude pair in TT, but **two** do in EE. There, $z_4$ is anchored to $\tau$ (0.5 and 0.3 nat on $\tau$ and $\ln A_s$ respectively), while $z_5$ carries the damped combination (0.3 and 0.4 nat).
 
@@ -102,7 +109,7 @@ Clusters are formed by union-find over these pairwise tests. **R_SR** is the fra
 
 #### F4.1 — Cumulative Pareto envelopes, both checkpoints, with the null in-panel
 
-![F4.1 — cumulative Pareto envelopes with shuffled-target null](paper/figs/F4_1_envelopes.png)
+![F4.1 — cumulative Pareto envelopes with shuffled-target null](../../figures/F4_1_envelopes.png)
 
 **Figure F4.1.** Validation MI against expression complexity for each latent: the combined envelope (heavy line) over the per-family means (maximum sizes 10/20/30, faint), the plateau band (mean ± SE), and the saturation point $c^{*}$ marked. The **shuffled-target control**, in which the same search is run against a row-shuffled latent, is drawn in the same axes at the bottom of each row. It reaches at most 0.06 nat, against real plateaus of 1.79 to 4.31 nat, so the null result is displayed directly beside the measurement it controls. T0-validation fronts, per-checkpoint scope.
 
@@ -157,13 +164,13 @@ Subset minimality is defined as follows: $S^{*}$ is the smallest support (with t
 
 #### F5.1 — The η ladder, per latent: saturation of own support, not of the latent
 
-![F5.1 — the eta ladder for all 11 latents](paper/figs/F5_1_eta_ladder.png)
+![F5.1 — the eta ladder for all 11 latents](../../figures/F5_1_eta_ladder.png)
 
 **Figure F5.1.** The report's central quantitative figure. For each of the 11 latents, three aligned markers are shown: $\eta_S$ (light circle, essentially at the dashed saturation line), $\eta_{\mathrm{plat}}$ at the saturation-point slice (square), and $\hat\eta_{\mathrm{post}}(f_1)$ (diamond). The visible gap between $\eta_S \approx 1$ and $\hat\eta_{\mathrm{post}} < 1$ is precisely the claim in the section title. EE $z_4$ sits slightly above 1.0, at $\eta_S = 1.068 \pm 0.026$: its canonical coordinate scores above the cross-seed mean ceiling of its own minimal support $\{\omega_b, \tau, A_s\}$. Because $\hat I_S$ is an empirical front maximum rather than an analytic bound, a ratio slightly above 1 reflects uncertainty in the ceiling estimate, not genuine super-saturation. Latents are shown in the same order as the summary tables, for both checkpoints, and the plotted ratios are confirmed on T2. Per-checkpoint scope.
 
 #### F5.3 — The structure of the stage-1 residual, shown directly
 
-![F5.3 — EE z5 residual against its leading parameter](paper/figs/F5_3_residual_structure.png)
+![F5.3 — EE z5 residual against its leading parameter](../../figures/F5_3_residual_structure.png)
 
 **Figure F5.3.** The EE amplitude latent's stage-1 residual $e_1 = \mu - h(f_1)$ against $\omega_{\mathrm{cdm}}$, its leading residual direction, with the binned mean overlaid ($|\rho_S| = 0.78$), on a T1 subsample. The residual is not noise, and it is worth *seeing* that rather than only scoring it.
 
@@ -222,7 +229,7 @@ so $(\tau, A_s)$ is degenerate in TT and the degeneracy is broken only by low-$\
 
 ##### F5.5 — The amplitude latent against the textbook combination
 
-![F5.5 — amplitude latent against ln(A_s e^{-2 tau}), both checkpoints](paper/figs/amplitude_scatter.png)
+![F5.5 — amplitude latent against ln(A_s e^{-2 tau}), both checkpoints](../../figures/amplitude_scatter.png)
 
 **Figure F5.5.** The amplitude latent's posterior mean against $\ln(A_s e^{-2\tau})$ for both checkpoints: tight monotone curves. The physical combination is computed here only to display the result. It is computed nowhere inside the pipeline.
 
@@ -250,7 +257,7 @@ Both regimes matter, and their agreement is the result. TT is the arm in which t
 
 ##### F5.7 — Why TT reports an affine form and EE the literal exponential
 
-![F5.7 — exp(-2 tau) over the prior with its best affine fit](paper/figs/F5_7_affine_vs_literal.png)
+![F5.7 — exp(-2 tau) over the prior with its best affine fit](../../figures/F5_7_affine_vs_literal.png)
 
 **Figure F5.7.** $e^{-2\tau}$ over the prior range $\tau\in[0.01, 0.13]$ with its best affine fit. The deviation panel shows a maximum deviation of 0.52%. Over this range the two forms are statistically indistinguishable, since they tie in MI, so the parsimony criterion deterministically prefers the cheaper affine form whenever nothing else separates them. The difference between the forms reported for TT and EE is therefore structural rather than an accident of the random seed. This is a pure function plot involving no data.
 
@@ -268,7 +275,7 @@ with $g$ a second cross-fitted monotone calibration fit to $e_1$. An interaction
 
 #### F6.1 — What the second coordinate buys
 
-![F6.1 — stage-2 gain in posterior fraction](paper/figs/F6_1_stage2_gain.png)
+![F6.1 — stage-2 gain in posterior fraction](../../figures/F6_1_stage2_gain.png)
 
 **Figure F6.1.** For each latent, a paired-marker segment connects $\hat\eta_{\mathrm{post}}(f_1)$ to $\hat\eta_{\mathrm{post}}(f_1{+}f_2)$: values of 0.29–0.84 rise to 0.59–0.96, against the dashed saturation line at 1.0. Every latent improves, and none reaches saturation. EE $z_4$ is the one latent that does not move (0.842 to 0.842): its $f_2$ is the bare parameter $\tau$, which a one-dimensional monotone recalibration cannot add to an account already built on $-A_s/(\tau - 0.445)$. Evaluated on T2.
 
@@ -345,21 +352,21 @@ and the loading vector $a^{*}_k$ is compared against the symbolic sensitivity si
 
 #### F8.1 — Decoder-effect atlas
 
-![F8.1 — decoder effect curves, TT-only](experiments/decoder_effect_lcdm_tt_beta3e-4_curves.png)
+![F8.1 — decoder effect curves, TT-only](../../experiments/decoder_effect_lcdm_tt_beta3e-4_curves.png)
 
-![F8.1 — decoder effect curves, TT+EE-lowl](experiments/decoder_effect_lcdm_tt_ee_lowl_curves.png)
+![F8.1 — decoder effect curves, TT+EE-lowl](../../experiments/decoder_effect_lcdm_tt_ee_lowl_curves.png)
 
 **Figure F8.1.** $d_k(\ell)$ for every latent of each checkpoint (anchor curve plus the mean ± spread over 64 T1 posterior-mean rows) with the template reconstruction overlaid.
 
 #### F8.2 — Cross-domain agreement, honestly weighted
 
-![F8.2 — cosine agreement per latent](paper/figs/F8_2_agreement.png)
+![F8.2 — cosine agreement per latent](../../figures/F8_2_agreement.png)
 
 **Figure F8.2.** $\cos(a^{*}, g)$ per latent, ranging from 0.77 to 1.00: the decoder-side loading vector compared against the symbolic sensitivity signature $g_j$ of §5. Shape-sector points are drawn solid. The amplitude-latent points are drawn hollow because their cosines rest partly on components that drift along the ridge of F8.3, which is the qualification behind the phrase "where identifiable" in the section title.
 
 #### F8.3 — The ridge: why the decoder provides no fourth measurement
 
-![F8.3 — template collinearity and the drifting amplitude split](paper/figs/F8_3_ridge.png)
+![F8.3 — template collinearity and the drifting amplitude split](../../figures/F8_3_ridge.png)
 
 **Figure F8.3.** (a) $t_\tau(\ell)$ and $-t_{\ln A_s}(\ell)$ overlaid after scaling, per channel. They lie on top of each other, with uncentered cosines of $-0.9996$ (TT channel), $-0.9770$ (EE channel), and $-0.9902$ for the EE concatenated design, at condition numbers 70.2 and 14.2. Moving $\theta$ along $(\delta\tau, \delta\ln A_s) \propto (1, 2)$, the direction that holds $A_s e^{-2\tau}$ fixed, leaves these spectra essentially unchanged. (b), (c): the fitted amplitude split for the amplitude latent of each checkpoint, in $b = a/w$ units, across four fit variants (ordinary least squares, $(2\ell{+}1)$-weighted, half-bandwidth templates, and anchor-point curve). Every variant lands on the same grey ridge line with essentially no change in the decomposition $R^2_W$, while the implied $r_{\mathrm{dec}}$ slides along the ridge: $-1.87$, $-1.67$, $-1.77$, and $-2.32$ for EE, and $+0.35$, $+0.60$, $+0.60$, and $-2.85$ for TT. The dashed line marks where $r_{\mathrm{dec}} = -2$ would sit. The panel works in the scaler-standardised design space ($T_{\mathrm{norm}} = T_{\mathrm{phys}}/\sigma$). Raw physical templates do not reproduce the quoted cosines.
 

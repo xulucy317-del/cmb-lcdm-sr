@@ -15,11 +15,11 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from scipy.stats import spearmanr
 
-REPO = Path("/rds/user/zx332/hpc-work/cmb-lcdm-sr")
+from figstyle import REPO, OUT  # noqa: E402  (repo root derived from this file's location)
+
 sys.path.insert(0, str(REPO / "src"))
 from cmb_lcdm_sr.tiers import T2, split_test_indices  # noqa: E402
 
-OUT = REPO / "paper" / "figs"
 OUT.mkdir(parents=True, exist_ok=True)
 
 # dataviz palette: categorical slot 1 (light-mode), sequential steps of same hue

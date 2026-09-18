@@ -1,7 +1,7 @@
 # Discussion record — what SR was for
 
 *Saved 2026-09-03 from the 2026-09-02 session; both sides of the conversation.
-Companion to `docs/ols_mi_sr_mse_sr_t2_comparison_claude_output.md`, which is
+Companion to `docs/evidence_record.md`, which is
 the **record**. This file is the **discussion** — kept separate so the record
 stays a record. Questions are quoted verbatim; answers are the worked replies.
 Where an answer is reasoning rather than a repo artifact, it says so.*
@@ -287,7 +287,9 @@ pass: all 10 done.** Each item now carries what came of it.*
    repo-relative paths would make these self-verifying anywhere. A second,
    smaller instance: the confirmations reference
    `docs/ols_mi_sr_mse_sr_t2_comparison.md`, which now lives at that path plus
-   `.orig` (digest `21ca5377…`, present and matching).
+   `.orig` (digest `21ca5377…`, present and matching). *[Public-release note:
+   the file was restored to `docs/ols_mi_sr_mse_sr_t2_comparison.md`, content
+   unchanged, so the recorded reference resolves again.]*
 2. **Test hygiene — DONE.** The failure was not the test's: `PRINT_CELLS=1` is
    a static listing of the six-cell matrix that needs no interpreter, but
    `hpc/lightning/run_precision_preprocess_consolidation.sh` checked
@@ -426,7 +428,7 @@ latents whose spine is the audit — the four-step storyline of §0.1 of the
 record, with the affine baseline load-bearing and SR kept for the three roles
 §4 Q8 identified (basis discovery, beyond-polynomial localisation, the
 methodological subject). It is written as `report_conclusive.md`, which
-supersedes `report.md` and adds three figures (F12.1 affine parity, F13.1 the
+supersedes `docs/archive/report_stage1.md` and adds three figures (F12.1 affine parity, F13.1 the
 nonlinearity ladder, F14.1 encoder-side attribution). **B and C are dropped,
 not deferred.** What that leaves unclaimed is stated in the report's §7:
 the discovery-versus-constant-tuning split of the generative failure stays

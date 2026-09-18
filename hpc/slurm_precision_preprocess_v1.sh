@@ -46,8 +46,10 @@ ACCOUNT="${ACCOUNT:-${DEFAULT_ACCOUNT}}"
     echo "[err] unsafe ACCOUNT value '${ACCOUNT}'" >&2
     exit 2
 }
+# Case-insensitive account comparison via tr (works on bash 3.2 as well as 4+).
 if [[ -n "${SLURM_JOB_ACCOUNT:-}" && \
-      "${SLURM_JOB_ACCOUNT,,}" != "${ACCOUNT,,}" ]]; then
+      "$(printf '%s' "${SLURM_JOB_ACCOUNT}" | tr '[:upper:]' '[:lower:]')" != \
+      "$(printf '%s' "${ACCOUNT}" | tr '[:upper:]' '[:lower:]')" ]]; then
     echo "[err] ACCOUNT=${ACCOUNT} does not match SLURM_JOB_ACCOUNT=${SLURM_JOB_ACCOUNT}" >&2
     exit 2
 fi

@@ -1,0 +1,29 @@
+cff-version: 1.2.0
+message: "If you use this code or these results, please cite the repository."
+type: software
+title: "cmb-lcdm-sr: blind symbolic interpretation of CMB beta-VAE latents"
+authors:
+  - family-names: Xu
+    given-names: Ziyu
+    email: zx332@cam.ac.uk
+    affiliation: University of Cambridge
+year: 2026
+version: 1.0.0
+repository-code: "https://github.com/xulucy317-del/cmb-lcdm-sr"
+license: MIT
+keywords:
+  - cosmic microwave background
+  - variational autoencoder
+  - symbolic regression
+  - mutual information
+  - interpretability
+abstract: >-
+  A pre-registered, fully blind symbolic-regression study of the latent
+  variables of two beta-VAE compressors of CMB power spectra. Both the search
+  loss and the selection metric are mutual-information estimators, so the
+  search is rewarded for functional dependence on the cosmological parameters
+  and never for matching the encoder's calibration. The repository holds the
+  stored checkpoints, the pipeline, the consolidated results of about 5,100
+  PySR searches, a pre-registered linear baseline that re-scopes the
+  discovery claims, and the encoder-side attribution study, together with
+  the write-up of record.

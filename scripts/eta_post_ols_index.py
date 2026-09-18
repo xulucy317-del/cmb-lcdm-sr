@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """eta_post for the plain six-input OLS index — the missing ceiling column.
 
-Open item 2 of §7 of `docs/ols_mi_sr_mse_sr_t2_comparison_claude_output.md`,
+Open item 2 of §7 of `docs/evidence_record.md`,
 item 7 of §5.1 of `docs/sr_objective_discussion_2026-09-02.md`. Every
 "fraction of what the latent stores" statement in the record is quoted for the
 discovered coordinates (canonical f1, the hierarchical f1+f2 composite, the

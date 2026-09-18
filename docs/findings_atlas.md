@@ -1,6 +1,7 @@
-<!-- Text of findings_atlas.html, kept in step with it.
-     Interactive charts appear as *[...]* placeholders; the one static figure
-     lives in findings_atlas_files/. -->
+<!-- Text of findings_atlas.html, kept in step with it (regenerate with
+     scripts/html_to_markdown.py). Interactive charts appear as *[...]*
+     placeholders; the one static figure is the report's F4.1 render in
+     figures/, referenced directly rather than duplicated here. -->
 
 # Symbolic regression on CMB β-VAE latents
 
@@ -62,13 +63,13 @@ Blind SR with all six inputs on every latent (143 searches over three size limit
 
 Mutual information between each latent’s mean and each raw parameter, in nats (darker is more). Read along a row to see what a latent responds to; the dominant parameter is that latent’s **role**, fixed here and used as the expectation for everything downstream. The boxed columns are the amplitude pair: in TT-only **one** latent (z_2) responds to it, in TT+EE-lowl **two** do, z_4 anchored to τ and z_5 to the combination. Calibration rows, 8,000-row subsample.
 
-*Source: report F2.2 · paper/figs/_cache_audit_mi.npz*
+*Source: report F2.2 · figures/_cache_audit_mi.npz*
 
 Every latent yields a formula that recurs across seeds. Two things were not expected. First, the hope that shape latents would be free of (A_s, τ) and amplitude latents free of the shape parameters did **not** materialise at the level of *which inputs appear*: every latent’s best formulas use at least five of the six parameters, and the TT H_0 latent’s formula, A_sH_0^2ω_{cdm}e^{−2τ}, carries the amplitude combination inside it. Second, the information keeps growing with formula size for every latent instead of saturating at a small formula. Separation did hold at the level of the *leading direction*: five independent instruments — the raw MI of Figure 1, the search’s sensitivity signatures, the first inputs a fit-error search recruits, the decoder analysis, and the dominant weights of the linear fit of Stage 2 — agree on which parameter dominates each latent, all eleven times.
 
 **Figure 2 — Information keeps growing with formula size, far above the null**
 
-![Per-latent curves of validation mutual information against formula complexity for both networks, with the shuffled-target null band near zero and a dashed marker at the one-standard-error knee.](findings_atlas_files/figure_01.png)
+![Per-latent curves of validation mutual information against formula complexity for both networks, with the shuffled-target null band near zero and a dashed marker at the one-standard-error knee.](../figures/F4_1_envelopes.png)
 
 For each latent, the MI of the best formula found as a function of the size limit (heavy line; faint lines are the three size-limit families it pools). The dashed vertical marks where more size stops adding information within one standard error. The grey band at the bottom is the null: the same search on a randomly permuted latent reaches at most 0.06 nat, against real values of 1.8–4.3 nat. Search rows.
 

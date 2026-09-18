@@ -2,7 +2,7 @@
 """Layer-wise linear probe of the encoder trunk, and encoder input optimisation.
 
 The remaining two of the three LLM-interpretability transfers in §0.1 item 4 of
-`docs/ols_mi_sr_mse_sr_t2_comparison_claude_output.md` (item 10 of §5.1 of
+`docs/evidence_record.md` (item 10 of §5.1 of
 `docs/sr_objective_discussion_2026-09-02.md`); the first, gradient attribution,
 is `scripts/encoder_gradient_attribution.py`.
 
