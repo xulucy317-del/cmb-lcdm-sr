@@ -89,4 +89,4 @@ bash "${CONSOLIDATION_SCRIPT}" render
 
 echo "[resume] complete"
 ls -l experiments/precision_preprocess_v1_comparison.json \
-      docs/precision_preprocess_v1_comparison.md 2>/dev/null || true
+      experiments/precision_preprocess_v1_comparison.md 2>/dev/null || true

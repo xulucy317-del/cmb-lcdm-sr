@@ -9,9 +9,10 @@ the temperature + low-ℓ polarization network (TT+EE-lowl, 6 latents). The
 every figure and report number is traced to. Campaign-level files
 (`*_v1.*`) cover both checkpoints in one file.
 
-The stage numbers follow `report_conclusive.md`; the "phase" numbers quoted
-inside the stage-1 files follow `docs/discovery_roadmap.md`, the
-pre-registered programme that produced them.
+The stage numbers follow the report (`index.html`); the "phase" numbers
+quoted inside the stage-1 files follow the pre-registered roadmap that
+produced them (part of the project's internal record, which is not in the
+public tree).
 
 ## Stage 1 — discovery and validation under frozen rules
 
@@ -38,9 +39,10 @@ pre-registered programme that produced them.
 |---|---|---|
 | `mse_one_stage_sr_<run>.{md,json}` | the one-stage MSE reconstruction study (165 searches at maxsize 20/30/40 + 12 controls) with its three-stage immutable consolidation, and the pre-registered six-input OLS control that turned out to matter | `scripts/consolidate_mse_one_stage.py` |
 | `mse_one_stage_sr_plan.md` | the pre-registered plan for that study, with its execution amendments A1/A2 | written before the runs |
-| `mse_one_stage_execution_provenance.json`, `mse_one_stage_state_csd3.json`, `mse_one_stage_state_lightning.json`, `mse_one_stage_lightning_runbook.md` | the execution record: sha256 of every input, source file and report, the CSD3 → Lightning AI hand-over, machine state on both sides. These pin file paths and commit IDs as they were at execution time; see `docs/README.md` for what was renamed since | `scripts/verify_mse_one_stage_state.py`, `hpc/lightning/` |
-| `precision_preprocess_v1_comparison.json` (summary: `docs/precision_preprocess_v1_comparison.md`) | the float64 precision / input-preprocessing campaign (330 searches in three input conventions) | `scripts/consolidate_precision_preprocess.py` |
-| `coordinate_matched_ols_v1.json` (summary: `docs/coordinate_matched_ols_v1.md`) | the coordinate-matched OLS audit: OLS refitted in each convention's own inputs and compared on three endpoints | `scripts/audit_coordinate_matched_ols.py` |
+| `mse_one_stage_execution_provenance.json`, `mse_one_stage_state_csd3.json`, `mse_one_stage_state_lightning.json`, `mse_one_stage_lightning_runbook.md` | the execution record: sha256 of every input, source file and report, the CSD3 → Lightning AI hand-over, machine state on both sides. These pin file paths and commit IDs as they were at execution time; `commit_id_map.md` here resolves the commit IDs, and the only pinned paths that moved are noted below | `scripts/verify_mse_one_stage_state.py`, `hpc/lightning/` |
+| `precision_preprocess_v1_comparison.{json,md}` | the float64 precision / input-preprocessing campaign (330 searches in three input conventions) | `scripts/consolidate_precision_preprocess.py` |
+| `coordinate_matched_ols_v1.{json,md}` | the coordinate-matched OLS audit: OLS refitted in each convention's own inputs and compared on three endpoints | `scripts/audit_coordinate_matched_ols.py` |
+| `ols_mi_sr_mse_sr_t2_comparison.md` | the frozen three-way T2 snapshot (OLS vs MI-selected SR vs MSE-selected SR) that the precision-campaign consolidator reads its OLS cells from (`consolidate_precision_preprocess.py --baseline-report`); content frozen 2026-08-31 | replay of the stored fronts |
 | `ols_injection_replay_v1.json` | replay of the stored maxsize-40 fronts with the exact OLS expression injected: the rules would have kept it in 43/55 runs — the search never generated it | `scripts/replay_ols_injection.py` |
 | `eta_post_ols_index_v1.json` | the stored-information fraction η̂_post of the OLS index, the ceiling column missing from the stage-1 tables | `scripts/eta_post_ols_index.py` |
 | `capacity_and_noise_floor_v1.{md,json}` | train/validation gap over every stored front (no overfitting anywhere), nearest-neighbour noise floor, and the gradient-boosting floor of Table 3.3 | `scripts/capacity_and_noise_floor.py` |
@@ -51,8 +53,8 @@ The quadratic rung is exact least squares and is recomputed inside
 `figures/make_fig_F13_1_nonlinearity_ladder.py`. The blind search on the
 OLS residual of EE z₀ and EE z₄ writes `results/lcdm_tt_ee_lowl/residual_sr_ols/`
 (`scripts/build_ols_residual_cache.py`, `scripts/run_blind_sr.py --target-npy`,
-`scripts/analyze_residual_sr_ols.py`); its numbers are recorded in
-`docs/evidence_record.md` §6.5–§6.6 and `report_conclusive.md` §4.
+`scripts/analyze_residual_sr_ols.py`); its numbers are in the report
+(`index.html`, stage 3).
 
 ## Stage 4 — inside the encoder
 
@@ -61,3 +63,17 @@ OLS residual of EE z₀ and EE z₄ writes `results/lcdm_tt_ee_lowl/residual_sr_
 | `encoder_gradient_attribution_<run>.{json,npz}` | ∂μ_k/∂x_ℓ at 64 anchor spectra, projected onto the six physical response directions; the reionization-window share per latent | `scripts/encoder_gradient_attribution.py` |
 | `encoder_trunk_probe_<run>.json` | layer-wise ridge probes for τ, ln A_s and ln A_s − 2τ from the input, each convolutional block and the latent means | `scripts/encoder_trunk_probe.py --mode probe` |
 | `encoder_input_optimisation_<run>.json` | the smallest input change that moves one latent while holding the others, compared with the physical responses (a clean negative) | `scripts/encoder_trunk_probe.py --mode steer` |
+
+## Provenance notes
+
+* `commit_id_map.md` maps the commit IDs quoted in the provenance records
+  (development history) to the published history; every research commit's
+  tree and dates were kept through the rewrite.
+* Paths renamed since the records were written: `paper/figs/` → `figures/`;
+  the frozen comparison table the precision consolidator reads moved from
+  `docs/ols_mi_sr_mse_sr_t2_comparison.md` to this directory (content and
+  sha256 unchanged); the campaign summaries `precision_preprocess_v1_comparison.md`
+  and `coordinate_matched_ols_v1.md` are written here instead of `docs/`.
+  The project's internal record (write-ups, roadmap, evidence record,
+  discussion) is not part of the public tree; the reports and the
+  deliverables here are self-contained.

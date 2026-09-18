@@ -11,7 +11,7 @@ is unchanged, and any old commit ID can be checked against its replacement
 by comparing tree hashes. Commit IDs quoted inside the provenance records
 (`experiments/mse_one_stage_execution_provenance.json`,
 `experiments/mse_one_stage_lightning_runbook.md`, the latent cards and
-`scripts/build_latent_cards.py`, the archived paper draft) are the
+`scripts/build_latent_cards.py`) are the
 development-history IDs in the first column; the second column is the
 ID under which the same commit was briefly published between the two
 rewrites; the third is the published history.

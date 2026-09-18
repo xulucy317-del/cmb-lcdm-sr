@@ -2,11 +2,78 @@
 
 Every script runs from the repository root (`python scripts/<name>.py --help`);
 `_bootstrap.py` puts `src/` on the path so nothing needs to be installed.
-Inputs are the stored checkpoints, `data/`, and the encoder caches under
-`models/<run>/analysis/` (see the top-level README, "Data and models");
-raw outputs go to `results/`, consolidated deliverables to `experiments/`.
-Stage numbers follow `report_conclusive.md`; the phase numbers in the
-docstrings follow `docs/discovery_roadmap.md`.
+Inputs are the stored checkpoints, `data/`, and the caches under
+`models/<run>/analysis/`; raw outputs go to `results/`, consolidated
+deliverables to `experiments/`. Stage numbers follow the report
+(`index.html`); the phase numbers in the docstrings follow the
+pre-registered roadmap that produced the stage-1 deliverables.
+
+## What a clone can run
+
+`python scripts/check_inputs.py` prints this for your checkout, verifies
+every input that has a canonical sha256, and names what a missing group
+blocks.
+
+| to run … | you need | in a clone? |
+|---|---|---|
+| the tests; every figure built from `experiments/*.json` | nothing beyond the clone | yes |
+| **any SR search or audit** — stages 1–3, the MSE and precision campaigns, the four figure scripts marked † in `figures/README.md` | the caches under `models/<run>/analysis/`: the encoder posterior means and log-variances over the 50,000 test rows (4 files), which every search targets, and the per-latent residual caches the later phases start from (25 files) | **yes** — committed, byte-identical to the copies every reported number came from (sha256 in `data/inputs_manifest.json`) |
+| the encoder pass, the spectral templates, stage 4 (encoder attribution) | the 500,000 CLASS spectra (`shards_global_lhs/`, `shards_global_lhs_ee_lowl/`, 100 `spectra_*.npz` each, 9.0 GB) | no — **not published**; the outputs of these three steps are committed, so they can be verified but not re-run |
+| re-consolidating a published campaign without re-running its searches | the raw fronts, `results/<run>/<campaign>/…/report.json` (5,836 files) | the 13 MB asset of release [`v1.0.0`](https://github.com/xulucy317-del/cmb-lcdm-sr/releases/tag/v1.0.0): `gh release download v1.0.0 -p 'cmb-lcdm-sr-results.tar.gz*'`, `shasum -a 256 -c …sha256`, `tar -xzf` at the repository root, `python scripts/check_inputs.py --full` → 35/35 campaigns `canonical` |
+
+A cache regenerated on different hardware agrees with the canonical one to
+float32 precision but is not byte-identical (the residual caches to
+≈10⁻¹⁵); `check_inputs.py` says which you have.
+
+## Environment
+
+```bash
+python3.12 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt        # or: pip install -e .[dev]
+pytest -q                              # ~8 min; needs nothing beyond the repo
+```
+
+PySR downloads its own Julia on first import (one-off, several minutes).
+All searches are CPU-only; the study ran with PySR 1.5.10 / Julia 1.11.9
+and 16 Julia threads (`JULIA_NUM_THREADS=16`). `torch` is needed only for
+the encoder pass, the decoder-effect stage and the stage-4 scripts.
+
+## The unit of work, and the smallest end-to-end run
+
+Everything is a matrix of `run_blind_sr.py` invocations — one target × one
+input set × one PySR seed, writing `report.json` (the whole Pareto front
+with per-equation held-out scores), `equations.csv` and `pareto.png` under
+`results/<run>/…` — plus a `consolidate_*` step that writes the committed
+`experiments/*.{md,json}`. The two-input amplitude study (about 5 min per
+seed at 16 threads):
+
+```bash
+for N in 0 1 2 3 4; do
+  python scripts/run_blind_sr.py --run-dir models/lcdm_tt_beta3e-4 --latent-index 2 --inputs A_s tau --seed $N --turbo
+  python scripts/run_blind_sr.py --run-dir models/lcdm_tt_ee_lowl  --latent-index 5 --inputs A_s tau --seed $N --turbo
+done
+python scripts/run_shuffled_control.py --run-dir models/lcdm_tt_beta3e-4 --target-index 2 --shuffle-seed 0 --pysr-seed 0 --turbo
+python scripts/pool_sr_runs.py --glob 'results/lcdm_tt_beta3e-4/symbolic_regression_gmm_mi_seed*/report.json' \
+                               --out results/lcdm_tt_beta3e-4/sr_pooled
+python scripts/consolidate_blind_sr.py
+```
+
+Two design points: the **GMM-MI inner loss** (`src/cmb_lcdm_sr/sr.py::JULIA_LOSS_GMM_MI`)
+is a pure-Julia two-dimensional Gaussian-mixture MI estimator (fixed K = 2,
+EM with regularised covariances, a strided 300-row sub-batch) returned as
+`exp(−MI)`, and post-hoc selection re-scores every front expression with the
+full Python `gmm-mi` estimator on held-out rows — inner loss and selection
+metric share one invariance class, which is what makes the protocol blind.
+**Data hygiene**: the 50,000 test rows are cut into three tiers that never
+mix (`src/cmb_lcdm_sr/tiers.py`): T0 = rows 0–4,999, the only rows any
+search sees; T1 = rows 5,000–24,999 for every calibration, audit and anchor
+set; T2 = rows 25,000–49,999, opened once for the reported numbers.
+
+**Naming.** `lcdm_tt_beta3e-4` is the temperature-only network ("TT",
+5 latents) and `lcdm_tt_ee_lowl` the temperature + low-ℓ polarization
+network ("EE", 6 latents); latents are `z0…z4` / `z0…z5`. Launchers for the
+full campaigns, and how to submit them on another cluster, are in
+`hpc/README.md`.
 
 ## Core: one search, one control, one encoder pass
 
@@ -74,4 +141,3 @@ docstrings follow `docs/discovery_roadmap.md`.
 | script | does |
 |---|---|
 | `_bootstrap.py` | adds `src/` to `sys.path` for the other scripts |
-| `html_to_markdown.py` | regenerates `docs/findings_atlas.md` from `docs/findings_atlas.html` |

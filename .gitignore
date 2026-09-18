@@ -53,3 +53,7 @@ figures/_cache_*.npz
 docs/archive/paper_draft/*.aux
 docs/archive/paper_draft/*.log
 docs/archive/paper_draft/*.out
+
+# The internal record (write-ups, roadmap, evidence record, discussion,
+# checklist, archived drafts) is kept out of the public tree.
+docs/

@@ -6,12 +6,13 @@
 | `splits_v1.npz` | `split_id` ∈ {0, 1, 2} per row — 400,000 train / 50,000 validation / 50,000 test (split seed 123; the LHS itself and the training runs use seed 42). Only the test rows are used here; `src/cmb_lcdm_sr/tiers.py` cuts them into T0 (search), T1 (calibration) and T2 (confirmation) |
 | `meta.json` | the prior box: parameter names and ranges (ω_b 0.020–0.024, ω_cdm 0.100–0.130, H₀ 62–80, τ 0.01–0.13, ln 10¹⁰A_s 2.90–3.18, n_s 0.92–1.01) |
 | `sham_v1_{ob,tau,ns}.npy`, `sham_v1.json` | the sham-input columns of the R-P4 dilution control: each is a row permutation of one real parameter column over the 50,000 test rows, so it has a genuine parameter's marginal and provably zero information about any latent (`scripts/build_sham_inputs.py`; the JSON records donor column, seed and the fraction of rows moved) |
-| `inputs_manifest.json` | the sha256 contract for every input the pipeline reads beyond the committed code — the encoder and residual caches, each spectra shard, and one aggregate per campaign of raw fronts. Written on a machine that holds everything (`scripts/check_inputs.py --write-manifest`); a clone verifies whatever it has obtained against it (`scripts/check_inputs.py`). Absent until the maintainers write it; the checker then falls back to the hashes pinned in `experiments/mse_one_stage_state_csd3.json` |
+| `inputs_manifest.json` | the sha256 contract for every input the pipeline reads beyond the committed code — the encoder and residual caches, each of the 200 spectra shards, and one aggregate per campaign of raw fronts (35 campaigns, 5,836 `report.json`). Written on CSD3 on 2026-09-18 with `scripts/check_inputs.py --write-manifest`; a clone verifies whatever it has obtained against it (`scripts/check_inputs.py`) |
 | `spectral_templates_v1.npz` | the data-driven parameter templates t_j(ℓ) = ∂log₁₀D_ℓ/∂u_j per channel, estimated by locally weighted quadratic regression over a train-split subsample, with a half-bandwidth set for the sensitivity check (`scripts/spectral_templates.py`; used by the decoder-effect stage) |
 
-Not here: the 500,000 CLASS spectra themselves (`shards_global_lhs/` for TT
-and `shards_global_lhs_ee_lowl/` for EE, 100 `spectra_*.npz` shards each,
-~3.4 GB per channel). They are needed only for the one-off encoder pass
+Not here, and not published: the 500,000 CLASS spectra themselves
+(`shards_global_lhs/` for TT and `shards_global_lhs_ee_lowl/` for EE, 100
+`spectra_*.npz` shards each, ≈4.5 GB per channel, 9.0 GB in all). They are
+needed only for the one-off encoder pass
 (`scripts/encode_latents.py`) that produces the encoder caches under
 `models/<run>/analysis/`, and for regenerating the spectral templates.
 
@@ -34,8 +35,7 @@ that unlocks most to the one that unlocks least.
 
    `.gitignore` admits exactly these files under `models/*/analysis/`. With
    them in the repository every search, audit and campaign of stages 1–3
-   runs from a plain clone. The full item-by-item list is
-   `docs/inputs_checklist.md`.
+   runs from a plain clone.
 
 2. **The manifest** — on the same machine, with the spectra shards and the
    raw `results/` tree present:
@@ -45,20 +45,24 @@ that unlocks most to the one that unlocks least.
    git add data/inputs_manifest.json && git commit -m "Record the inputs manifest"
    ```
 
-   This hashes every shard (≈7 GB, a few minutes) and every campaign's
+   This hashes every shard (9 GB, a few minutes) and every campaign's
    `report.json` files, so that archives obtained from anywhere can be
    verified with `scripts/check_inputs.py --full`.
 
-3. **The archives** — too large for git; deposit them where they get a
-   persistent identifier (Zenodo accepts up to 50 GB per record; GitHub
-   release assets are limited to 2 GB per file):
+3. **The raw fronts** — distributed as a release asset, not in git
+   (done 2026-09-18: release `v1.0.0`, `cmb-lcdm-sr-results.tar.gz`, 13 MB):
 
    ```bash
-   tar -C /path/to -czf cmb-lcdm-sr-shards.tar.gz shards_global_lhs shards_global_lhs_ee_lowl   # ≈7 GB
-   tar --exclude='*.png' -czf cmb-lcdm-sr-results.tar.gz results/                             # raw fronts
+   tar --exclude='*.png' --exclude='pysr_state' -czf cmb-lcdm-sr-results.tar.gz results/
    ```
 
-   Then record the identifier here and in the top-level README. A user
-   extracts the shards anywhere and passes `--shards-root`, extracts the
-   results archive at the repository root, and runs
-   `python scripts/check_inputs.py --shards-root … --full`.
+   attached to a GitHub release. A user downloads it from
+   <https://github.com/xulucy317-del/cmb-lcdm-sr/releases/download/v1.0.0/cmb-lcdm-sr-results.tar.gz>, extracts it at the repository root and runs
+   `python scripts/check_inputs.py --full`.
+
+4. **The spectra shards are not published** (decision of 2026-09-18): they
+   are the parent project's training set. The manifest still pins every
+   shard's sha256, so a holder of a copy can verify it with
+   `python scripts/check_inputs.py --shards-root <dir> --full`; without one,
+   the encoder pass, the template fit and the stage-4 attribution cannot be
+   re-run, but all three outputs are committed.

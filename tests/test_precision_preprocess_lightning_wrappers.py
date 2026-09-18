@@ -98,7 +98,7 @@ def test_calibrate_confirm_and_render_argv(tmp_path):
     root = _root(RUNS[1], ARMS[2])
     manifest = f"{root}/selection_manifest.json"
     calibration = f"{root}/calibration.json"
-    baseline = "docs/sr_vs_ols_decision_checkpoint.md"
+    baseline = "experiments/ols_mi_sr_mse_sr_t2_comparison.md"
     assert _consolidation_argv(
         tmp_path / "cal", "calibrate", 5, [manifest]) == [
             "scripts/consolidate_precision_preprocess.py", "calibrate",
@@ -126,7 +126,7 @@ def test_calibrate_confirm_and_render_argv(tmp_path):
     assert argv[start:stop] == confirmations
     assert argv[stop:] == [
         "--out-json", "experiments/precision_preprocess_v1_comparison.json",
-        "--out-md", "docs/precision_preprocess_v1_comparison.md",
+        "--out-md", "experiments/precision_preprocess_v1_comparison.md",
     ]
 
 

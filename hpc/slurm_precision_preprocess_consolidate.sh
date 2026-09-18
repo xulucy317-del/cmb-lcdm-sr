@@ -164,14 +164,14 @@ case "${MODE}" in
     confirm)
         require_file "${MANIFEST}"
         require_file "${CALIBRATION}"
-        require_file docs/sr_vs_ols_decision_checkpoint.md
+        require_file experiments/ols_mi_sr_mse_sr_t2_comparison.md
         "${PYTHON}" scripts/consolidate_precision_preprocess.py confirm \
             --manifest "${MANIFEST}" \
             --calibration "${CALIBRATION}" \
             --dataset-dir data \
             --models-root models \
             --experiments-dir experiments \
-            --baseline-report docs/sr_vs_ols_decision_checkpoint.md \
+            --baseline-report experiments/ols_mi_sr_mse_sr_t2_comparison.md \
             --out "${CONFIRMATION}"
         ;;
     render)
@@ -186,6 +186,6 @@ case "${MODE}" in
         "${PYTHON}" scripts/consolidate_precision_preprocess.py render \
             --confirmations "${CONFIRMATIONS[@]}" \
             --out-json experiments/precision_preprocess_v1_comparison.json \
-            --out-md docs/precision_preprocess_v1_comparison.md
+            --out-md experiments/precision_preprocess_v1_comparison.md
         ;;
 esac

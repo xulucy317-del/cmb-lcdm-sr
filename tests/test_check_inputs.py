@@ -90,7 +90,7 @@ def test_mismatch_missing_and_incomplete_are_reported(tmp_path):
     assert "MISMATCH" in out and "encoder_means_test.npy" in out
     assert "missing" in out
     assert "NO — encoder caches missing" in out
-    assert "residual caches [checklist A2]: 22/22 present" in out
+    assert "residual caches: 22/22 present" in out
     assert "CORRUPT" in out and "NO — spectra shards corrupt" in out
     assert "incomplete (1/2 reports)" in out
     assert "3/4 campaigns present" in out
@@ -108,4 +108,4 @@ def test_falls_back_to_the_pinned_state_file_without_a_manifest(tmp_path):
     assert proc.returncode == 0, proc.stdout + proc.stderr
     assert "canonical    " in proc.stdout and "data/theta.npy" in proc.stdout
     assert "canonical hashes from experiments/mse_one_stage_state_csd3.json" in proc.stdout
-    assert "spectra shards [checklist C]: not checked" in proc.stdout
+    assert "spectra shards: not checked" in proc.stdout

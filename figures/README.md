@@ -3,8 +3,8 @@
 One `make_fig_<ID>_<name>.py` per figure ID, all sharing `figstyle.py`
 (palette, checkpoint colours, the `save()` that writes the `.pdf` + `.png`
 pair beside the script). Figure IDs are stable project identifiers:
-`F<section>.<n>` numbered through the sections of the stage-1 report
-(`docs/report_content.md`), with F12–F14 added for `report_conclusive.md`.
+`F<section>.<n>` numbered through the sections of the stage-1 report,
+with F12–F14 added for the final report (`index.html`).
 Gaps in the numbering are figures that were planned and not built, or built
 and withdrawn.
 

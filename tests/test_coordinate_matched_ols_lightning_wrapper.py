@@ -161,7 +161,7 @@ def test_calibrate_confirm_and_render_argv(tmp_path):
     assert rendered[start:stop] == confirmations
     assert rendered[stop:] == [
         "--out-json", "experiments/coordinate_matched_ols_v1.json",
-        "--out-md", "docs/coordinate_matched_ols_v1.md",
+        "--out-md", "experiments/coordinate_matched_ols_v1.md",
     ]
 
 

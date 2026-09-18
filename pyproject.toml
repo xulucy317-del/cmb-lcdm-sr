@@ -33,7 +33,6 @@ dev = ["pytest"]
 
 [project.urls]
 Repository = "https://github.com/xulucy317-del/cmb-lcdm-sr"
-"Write-up of record" = "https://github.com/xulucy317-del/cmb-lcdm-sr/blob/main/report_conclusive.md"
 
 [tool.setuptools.packages.find]
 where = ["src"]

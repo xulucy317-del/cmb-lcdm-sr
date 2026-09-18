@@ -152,7 +152,7 @@ render_all() {
     "${PYTHON}" "${AUDITOR}" render \
         --confirmations "${confirmations[@]}" \
         --out-json experiments/coordinate_matched_ols_v1.json \
-        --out-md docs/coordinate_matched_ols_v1.md
+        --out-md experiments/coordinate_matched_ols_v1.md
 }
 
 USAGE="usage: $0 {fit|calibrate|confirm} <cell 0-5> | render | all"

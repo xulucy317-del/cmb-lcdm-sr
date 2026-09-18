@@ -151,7 +151,8 @@ def check_file(rel: str, pinned: dict, hash_it: bool = True) -> dict:
 
 def check_shards(shards_root: Path | None, pinned: dict, full: bool) -> dict:
     if shards_root is None:
-        return {"status": "not checked", "detail": "pass --shards-root to check"}
+        return {"status": "not checked", "detail": "pass --shards-root to check (the shards are not "
+                                                    "published; the outputs of the steps that read them are committed)"}
     report = {"status": "ok", "channels": {}}
     for d in SHARD_DIRS:
         directory = shards_root / d
@@ -309,7 +310,7 @@ def main() -> int:
     problems += sum(e["status"] in ("missing", "MISMATCH") for e in repo)
 
     caches = [check_file(rel, pinned) for rel in CACHE_FILES]
-    show("encoder caches [checklist A1] (models/<run>/analysis/)", caches)
+    show("encoder caches (models/<run>/analysis/)", caches)
     problems += sum(e["status"] == "MISMATCH" for e in caches)
 
     derived = [check_file(rel, pinned) for rel in derived_files()]
@@ -317,7 +318,7 @@ def main() -> int:
     bad_derived = [e for e in derived if e["status"] == "MISMATCH"]
     n_pinned = sum(rel in pinned for rel in derived_files())
     n_canonical = sum(e["status"] == "canonical" for e in derived)
-    print(f"\nresidual caches [checklist A2]: {n_derived}/{len(derived)} present"
+    print(f"\nresidual caches: {n_derived}/{len(derived)} present"
           + (f", {len(bad_derived)} MISMATCH" if bad_derived else "")
           + (f", {n_canonical}/{n_pinned} canonical" if n_pinned else "")
           + " (residual_z*, f1hat_z*: rebuilt only from the raw fronts)")
@@ -328,7 +329,7 @@ def main() -> int:
     ols = [check_file(rel, pinned) for rel in ols_residual_files()]
     ols_present = [e for e in ols if e["status"] != "missing"]
     bad_ols = [e for e in ols if e["status"] == "MISMATCH"]
-    print(f"OLS residual caches [checklist A2.3]: {len(ols_present)} present"
+    print(f"OLS residual caches: {len(ols_present)} present"
           + (f", {len(bad_ols)} MISMATCH" if bad_ols else "")
           + " (stage-3 targets; built only for the latents that search ran on — EE z0, z4 at least)")
     for e in ols_present:
@@ -336,18 +337,18 @@ def main() -> int:
     problems += len(bad_ols)
 
     shards = check_shards(shards_root, pinned, args.full)
-    print(f"\nspectra shards [checklist C]: {shards['status']}" + (f" — {shards['detail']}" if "detail" in shards else ""))
+    print(f"\nspectra shards: {shards['status']}" + (f" — {shards['detail']}" if "detail" in shards else ""))
     for d, info in shards.get("channels", {}).items():
         print(f"  {info['status']:<10} {info['n_files']:>3} files  {info['dir']}")
     problems += shards["status"] in ("corrupt", "mismatch")
 
     results = check_results(manifest, args.full)
     if results:
-        print("\nraw results [checklist D] (results/<run>/<campaign>):")
+        print("\nraw results (results/<run>/<campaign>):")
         for key, row in results.items():
             print(f"  {row['status']:<48} {row['n_reports']:>5} reports  {key}")
     else:
-        print("\nraw results [checklist D]: none under results/ (only needed to re-consolidate the published campaigns)")
+        print("\nraw results: none under results/ (only needed to re-consolidate the published campaigns)")
     problems += sum(row["status"] == "MISMATCH" for row in results.values())
 
     caches_ok = all(e["status"] in ("canonical", "present") for e in caches)
@@ -369,7 +370,7 @@ def main() -> int:
     print("  re-consolidate published campaigns ............ "
           + (f"{sum(1 for r in results.values() if not r['status'].startswith(('missing', 'incomplete')))}"
              f"/{len(results)} campaigns present" if results else "NO — results/ empty"))
-    print(f"\ncanonical hashes from {source}; the item-by-item checklist is docs/inputs_checklist.md")
+    print(f"\ncanonical hashes from {source}")
     if problems:
         sys.stdout.flush()
         print(f"\n{problems} problem(s): a present file does not match its canonical hash, "

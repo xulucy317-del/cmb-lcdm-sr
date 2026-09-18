@@ -135,7 +135,7 @@ def test_confirm_argv_and_frozen_inputs(tmp_path):
     root = _root(run, arm)
     manifest = f"{root}/selection_manifest.json"
     calibration = f"{root}/calibration.json"
-    baseline = "docs/sr_vs_ols_decision_checkpoint.md"
+    baseline = "experiments/ols_mi_sr_mse_sr_t2_comparison.md"
     argv = _run(
         tmp_path, "confirm", 5,
         required=[manifest, calibration, baseline],
@@ -165,7 +165,7 @@ def test_render_consumes_exactly_all_six_confirmations(tmp_path):
     assert argv[start:stop] == confirmations
     assert argv[stop:] == [
         "--out-json", "experiments/precision_preprocess_v1_comparison.json",
-        "--out-md", "docs/precision_preprocess_v1_comparison.md",
+        "--out-md", "experiments/precision_preprocess_v1_comparison.md",
     ]
     assert not any("mse_one_stage_sr_" in value for value in argv)
 
